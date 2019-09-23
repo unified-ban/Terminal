@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <Version>3.0.0-beta.1</Version>
+    <Authors>SubPixel for linux/hub</Authors>
+    <Product>Unifiedban Terminal</Product>
+    <Copyright>LinuxHub 2019</Copyright>
+    <RepositoryUrl>https://todo/</RepositoryUrl>
+    <RepositoryType>GIT</RepositoryType>
+    <AssemblyVersion>3.0.0</AssemblyVersion>
+    <FileVersion>3.0.0.83</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HangFire" Version="1.7.6" />
+    <PackageReference Include="HangFire.SqlServer" Version="1.7.6" />
+    <PackageReference Include="log4net" Version="2.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
+    <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
+    <PackageReference Include="Telegram.Bot" Version="15.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="log4net.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\businesslogic\Unifiedban.BusinessLogic\Unifiedban.BusinessLogic.csproj" />
+    <ProjectReference Include="..\..\data\Unifiedban.Data\Unifiedban.Data.csproj" />
+    <ProjectReference Include="..\..\models\Unifiedban.Models\Unifiedban.Models.csproj" />
+  </ItemGroup>
+
+</Project>
