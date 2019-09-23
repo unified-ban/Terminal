@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types;
@@ -12,7 +13,7 @@ namespace Unifiedban.Terminal.Bot
     public class Manager
     {
         static string APIKEY;
-        static ITelegramBotClient botClient;
+        public static ITelegramBotClient BotClient { get;  private set; }
 
         public static void Initialize(string apikey)
         {
@@ -32,9 +33,10 @@ namespace Unifiedban.Terminal.Bot
             }
 
             APIKEY = apikey;
+            Commands.Initialize();
 
-            botClient = new TelegramBotClient(APIKEY);
-            var me = botClient.GetMeAsync().Result;
+            BotClient = new TelegramBotClient(APIKEY);
+            var me = BotClient.GetMeAsync().Result;
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
                 LoggerName = CacheData.LoggerName,
@@ -45,14 +47,14 @@ namespace Unifiedban.Terminal.Bot
                 UserId = -1
             });
 
-            botClient.OnMessage += BotClient_OnMessage;
-            botClient.OnCallbackQuery += BotClient_OnCallbackQuery;
-            botClient.StartReceiving();
+            BotClient.OnMessage += BotClient_OnMessage;
+            BotClient.OnCallbackQuery += BotClient_OnCallbackQuery;
+            BotClient.StartReceiving();
         }
 
         public static void Dispose()
         {
-            botClient.StopReceiving();
+            BotClient.StopReceiving();
         }
 
         private static async void BotClient_OnCallbackQuery(object sender, CallbackQueryEventArgs e)
@@ -61,7 +63,11 @@ namespace Unifiedban.Terminal.Bot
         }
         private static async void BotClient_OnMessage(object sender, MessageEventArgs e)
         {
-            return;
+            if(e.Message.Text != null)
+            {
+                if (e.Message.Text.StartsWith('/'))
+                    await Task.Run(() => Command.Parser.Parse(e.Message));
+            }
         }
     }
 }

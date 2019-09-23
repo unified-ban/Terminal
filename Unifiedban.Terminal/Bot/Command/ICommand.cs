@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Telegram.Bot.Types;
 
 namespace Unifiedban.Terminal.Bot.Command
 {
     public interface ICommand
     {
-        Task Execute();
-        Task Execute(string parameter);
+        Task Execute(Message message);
     }
 }
