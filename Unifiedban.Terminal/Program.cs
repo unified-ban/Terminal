@@ -78,7 +78,10 @@ namespace Unifiedban.Terminal
             using (Data.UBContext ubc = new Data.UBContext()) { }
 
             InitializeHangfireServer();
-            Bot.Manager.Initialize(Configuration["APIKEY"]);
+            Bot.Manager.Initialize(CacheData.Configuration["APIKEY"]);
+#if DEBUG
+            TestArea.DoTest();
+#endif
         }
         private static void DisposeAll()
         {
