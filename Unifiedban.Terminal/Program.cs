@@ -13,7 +13,7 @@ namespace Unifiedban.Terminal
 {
     class Program
     {
-        public static IConfigurationRoot Configuration;
+        //public static IConfigurationRoot Configuration;
         static BackgroundJobServer backgroundJobServer;
 
         static void Main(string[] args)
@@ -26,8 +26,8 @@ namespace Unifiedban.Terminal
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Environment.CurrentDirectory)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-            Configuration = builder.Build();
-            CacheData.LoggerName = Configuration["LoggerName"];
+            CacheData.Configuration = builder.Build();
+            CacheData.LoggerName = CacheData.Configuration["LoggerName"];
 
             // Initialize logger
             if (!Directory.Exists(Environment.CurrentDirectory + "\\logs"))
@@ -97,12 +97,12 @@ namespace Unifiedban.Terminal
         {
             var options = new SqlServerStorageOptions
             {
-                PrepareSchemaIfNecessary = Convert.ToBoolean(Configuration["HFPrepareSchema"]),
+                PrepareSchemaIfNecessary = Convert.ToBoolean(CacheData.Configuration["HFPrepareSchema"]),
                 QueuePollInterval = TimeSpan.FromSeconds(
-                        Convert.ToInt32(Configuration["HFPollingInterval"]))
+                        Convert.ToInt32(CacheData.Configuration["HFPollingInterval"]))
             };
 
-            GlobalConfiguration.Configuration.UseSqlServerStorage(Configuration["HFDatabase"], options);
+            GlobalConfiguration.Configuration.UseSqlServerStorage(CacheData.Configuration["HFDatabase"], options);
             GlobalConfiguration.Configuration.UseLogProvider(new HFLogProvider());
 
             backgroundJobServer = new BackgroundJobServer();

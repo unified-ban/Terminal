@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,6 +10,7 @@ namespace Unifiedban.Terminal
         // [[ Program control ]]
         public static string LoggerName = "Unifiedban-Terminal";
         public static bool FatalError = false;
+        public static IConfigurationRoot Configuration;
 
         // [[ Cache ]]
         public static List<Utils.ImageHash> BannedImagesHash =
