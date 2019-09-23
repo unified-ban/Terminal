@@ -30,6 +30,8 @@ namespace Unifiedban.Terminal
             CacheData.LoggerName = Configuration["LoggerName"];
 
             // Initialize logger
+            if (!Directory.Exists(Environment.CurrentDirectory + "\\logs"))
+                Directory.CreateDirectory(Environment.CurrentDirectory + "\\logs");
             Data.Utils.Logging logger = new Data.Utils.Logging();
             logger.Initialize(CacheData.LoggerName, Environment.CurrentDirectory);
 
