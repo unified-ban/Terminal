@@ -54,7 +54,7 @@ namespace Unifiedban.Terminal.Bot
             BotClient.StartReceiving();
 
             BotClient.SendTextMessageAsync(
-                chatId: -1001125553456,
+                chatId: Convert.ToInt64(CacheData.Configuration["ControlChatId"]),
                 text: "I'm here, Master."
             );
         }
