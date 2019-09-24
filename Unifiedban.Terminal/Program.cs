@@ -75,7 +75,9 @@ namespace Unifiedban.Terminal
 
         private static void InitializeAll()
         {
-            using (Data.UBContext ubc = new Data.UBContext()) { }
+            // Initialize database context
+            using (Data.UBContext ubc = new Data.UBContext(
+                CacheData.Configuration["Database"])) { }
 
             InitializeHangfireServer();
             Bot.Manager.Initialize(CacheData.Configuration["APIKEY"]);
