@@ -11,11 +11,19 @@ namespace Unifiedban.Terminal.Bot.Command
         {
             string command = message.Text.Split(" ")[0].Remove(0, 1);
             if (command.Contains("@"))
+            {
+                if (!String.Equals(command.Split("@")[1],
+                    Manager.Username, StringComparison.CurrentCultureIgnoreCase))
+                    return;
                 command = command.Split("@")[0];
+            }
 
             if (!Commands.CommandsList.TryGetValue(command.ToUpper(), out ICommand parsedCommand))
             {
-                //MessageToClient(connectionId, messageId + "¦KO;InvalidCommand");
+                Manager.BotClient.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text: "Invalid command!"
+                );
                 return;
             }
 
