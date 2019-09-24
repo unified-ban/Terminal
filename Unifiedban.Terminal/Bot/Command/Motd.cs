@@ -10,10 +10,13 @@ namespace Unifiedban.Terminal.Bot.Command
     {
         public Task Execute(Message message)
         {
-            return Manager.BotClient.SendTextMessageAsync(
-                chatId: message.Chat.Id,
-                text: CacheData.Configuration["motd"]
-            );
+            return Task.Run(() => MessageQueueManager.EnqueueMessage(
+                new ChatMessage()
+                {
+                    Timestamp = DateTime.UtcNow,
+                    Chat = message.Chat,
+                    Text = CacheData.Configuration["motd"]
+                }));
         }
     }
 }

@@ -11,6 +11,7 @@ namespace Unifiedban.Terminal
         public static string LoggerName = "Unifiedban-Terminal";
         public static bool FatalError = false;
         public static IConfigurationRoot Configuration;
+        public static DateTime StartupDateTimeUtc = DateTime.UtcNow;
 
         // [[ Cache ]]
         public static List<Utils.ImageHash> BannedImagesHash =

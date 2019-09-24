@@ -6,6 +6,7 @@ namespace Unifiedban.Terminal.Bot
     {
         public const string MOTD = "MOTD";
         public const string HELP = "HELP";
+        public const string START = "START";
 
         public static Dictionary<string, Command.ICommand> CommandsList;
         public static void Initialize()
@@ -13,6 +14,7 @@ namespace Unifiedban.Terminal.Bot
             CommandsList = new Dictionary<string, Command.ICommand>();
             CommandsList.Add(MOTD, new Command.Motd());
             CommandsList.Add(HELP, new Command.Help());
+            CommandsList.Add(START, new Command.Start());
         }
     }
 }
