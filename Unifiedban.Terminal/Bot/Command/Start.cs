@@ -14,6 +14,16 @@ namespace Unifiedban.Terminal.Bot.Command
         {
             if (message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Private
                 || message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Channel) {
+
+                if (MessageQueueManager.PrivateChats.ContainsKey(message.Chat.Id))
+                {
+                    Manager.BotClient.SendTextMessageAsync(
+                        chatId: message.Chat.Id,
+                        text: $"Your chat {message.Chat.Title} is already registered!"
+                    );
+                    return;
+                }
+
                 if (MessageQueueManager.AddChatIfNotPresent(message.Chat.Id))
                 {
                     Manager.BotClient.SendTextMessageAsync(
@@ -33,10 +43,21 @@ namespace Unifiedban.Terminal.Bot.Command
             if (message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Group
                 || message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Supergroup)
             {
-                if (MessageQueueManager.AddGroupIfNotPresent(new Models.Group.TelegramGroup()
+                if (MessageQueueManager.GroupChats.ContainsKey(message.Chat.Id))
                 {
-                    TelegramChatId = message.Chat.Id
-                }))
+                    Manager.BotClient.SendTextMessageAsync(
+                        chatId: message.Chat.Id,
+                        text: $"Your group {message.Chat.Title} is already registered!"
+                    );
+                    return;
+                }
+
+                if (MessageQueueManager.AddGroupIfNotPresent(
+                    new Models.Group.TelegramGroup()
+                    {
+                        TelegramChatId = message.Chat.Id
+                    }
+                    ))
                 {
                     Manager.BotClient.SendTextMessageAsync(
                         chatId: message.Chat.Id,
