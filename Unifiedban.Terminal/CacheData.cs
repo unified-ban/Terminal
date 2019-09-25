@@ -12,7 +12,10 @@ namespace Unifiedban.Terminal
         public static bool FatalError = false;
         public static IConfigurationRoot Configuration;
         public static DateTime StartupDateTimeUtc = DateTime.UtcNow;
+
+        // Instance data
         public static List<Models.SysConfig> SysConfigs = new List<Models.SysConfig>();
+        public static List<Models.Operator> Operators = new List<Models.Operator>();
 
         // [[ Cache ]]
         public static List<Utils.ImageHash> BannedImagesHash =

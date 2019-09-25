@@ -12,9 +12,10 @@ namespace Unifiedban.Terminal
         public static void DoTest()
         {
             //Gimmeconf();
+            //RegisterOperators();
         }
 
-        public static void Gimmeconf()
+        static void Gimmeconf()
         {
             InlineKeyboardMarkup conf = new InlineKeyboardMarkup(
                 new List<InlineKeyboardButton>()
@@ -28,6 +29,13 @@ namespace Unifiedban.Terminal
 
             string confString = JsonConvert.SerializeObject(conf);
             Console.WriteLine(confString);
+        }
+
+        static void RegisterOperators()
+        {
+            BusinessLogic.OperatorLogic operatorLogic = new BusinessLogic.OperatorLogic();
+            //operatorLogic.Add(799698579, Models.Operator.Levels.Super, -1);
+            //operatorLogic.Add(339380551, Models.Operator.Levels.Super, -1);
         }
 #endif
     }
