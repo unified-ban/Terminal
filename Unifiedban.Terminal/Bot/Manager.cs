@@ -66,6 +66,7 @@ namespace Unifiedban.Terminal.Bot
                     $"My *instance ID* is _{instanceId}_ " +
                     $"and I'm running on *machine* _{currentHostname}_"
             );
+            Console.Title = $"Unifiedban - Username: {me.Username} - Instance ID: {instanceId}";
         }
 
         public static void Dispose()
@@ -77,8 +78,8 @@ namespace Unifiedban.Terminal.Bot
                             .Value),
                 parseMode: ParseMode.Markdown,
                 text: $"I left, Master.\n" +
-                    $"My *instance ID* is _{instanceId}_\n" +
-                    $"and I was running on *machine* _{currentHostname}_" +
+                    $"My *instance ID* is _{instanceId}_ " +
+                    $"and I was running on *machine* _{currentHostname}_\n" +
                     $"See you soon!"
             );
         }
