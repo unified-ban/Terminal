@@ -18,11 +18,15 @@ namespace Unifiedban.Terminal.Bot.Command
                             .Single(x => x.SysConfigId == "HelpMenu")
                             .Value);
 
-            Manager.BotClient.SendTextMessageAsync(
-                chatId: message.Chat.Id,
-                text: "Help:",
-                replyMarkup: menu
-            );
+            MessageQueueManager.EnqueueMessage(
+                new ChatMessage()
+                {
+                    Timestamp = DateTime.UtcNow,
+                    Chat = message.Chat,
+                    ParseMode = Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                    Text = "*[Help:]*",
+                    ReplyMarkup = menu
+                });
         }
     }
 }
