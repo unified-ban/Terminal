@@ -78,6 +78,8 @@ namespace Unifiedban.Terminal
             // Initialize database context
             using (Data.UBContext ubc = new Data.UBContext(
                 CacheData.Configuration["Database"])) { }
+            BusinessLogic.SysConfigLogic sysConfigLogic = new BusinessLogic.SysConfigLogic();
+            CacheData.SysConfigs = new List<Models.SysConfig>(sysConfigLogic.Get());
 
             InitializeHangfireServer();
             Bot.MessageQueueManager.Initialize();

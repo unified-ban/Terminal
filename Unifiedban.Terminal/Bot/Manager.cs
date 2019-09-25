@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Args;
@@ -54,7 +54,9 @@ namespace Unifiedban.Terminal.Bot
             BotClient.StartReceiving();
 
             BotClient.SendTextMessageAsync(
-                chatId: Convert.ToInt64(CacheData.Configuration["ControlChatId"]),
+                chatId: Convert.ToInt64(CacheData.SysConfigs
+                            .Single(x => x.SysConfigId == "ControlChatId")
+                            .Value),
                 text: "I'm here, Master."
             );
         }

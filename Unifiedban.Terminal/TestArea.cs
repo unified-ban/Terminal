@@ -8,6 +8,7 @@ namespace Unifiedban.Terminal
 {
     public class TestArea
     {
+#if DEBUG
         public static void DoTest()
         {
             //Gimmeconf();
@@ -28,5 +29,6 @@ namespace Unifiedban.Terminal
             string confString = JsonConvert.SerializeObject(conf);
             Console.WriteLine(confString);
         }
+#endif
     }
 }
