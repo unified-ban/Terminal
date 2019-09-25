@@ -29,5 +29,21 @@ namespace Unifiedban.Terminal.Bot.Command
 
             parsedCommand.Execute(message);
         }
+
+        public static void Parse(CallbackQuery callbackQuery)
+        {
+            string command = callbackQuery.Data.Split(" ")[0].Remove(0, 1);
+
+            if (!Commands.CommandsList.TryGetValue(command.ToUpper(), out ICommand parsedCommand))
+            {
+                Manager.BotClient.SendTextMessageAsync(
+                    chatId: callbackQuery.Message.Chat.Id,
+                    text: "Invalid command!"
+                );
+                return;
+            }
+
+            parsedCommand.Execute(callbackQuery);
+        }
     }
 }

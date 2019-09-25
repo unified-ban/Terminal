@@ -28,5 +28,10 @@ namespace Unifiedban.Terminal.Bot.Command
                     ReplyMarkup = menu
                 });
         }
+
+        public void Execute(CallbackQuery callbackQuery)
+        {
+            return;
+        }
     }
 }

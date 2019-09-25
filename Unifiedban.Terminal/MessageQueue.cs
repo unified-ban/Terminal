@@ -53,15 +53,42 @@ namespace Unifiedban.Terminal
 
             // Take next message from the queue and send it
             ChatMessage msgToSend = Queue.Dequeue();
-            Bot.Manager.BotClient.SendTextMessageAsync(
-                    chatId: msgToSend.Chat.Id,
-                    text: msgToSend.Text,
-                    parseMode: msgToSend.ParseMode,
-                    disableWebPagePreview: msgToSend.DisableWebPagePreview,
-                    disableNotification: msgToSend.DisableNotification,
-                    replyToMessageId: msgToSend.ReplyToMessageId,
-                    replyMarkup: msgToSend.ReplyMarkup
-                );
+            if (msgToSend == null)
+                return;
+            try
+            {
+                Telegram.Bot.Types.Message sent = Bot.Manager.BotClient.SendTextMessageAsync(
+                        chatId: msgToSend.Chat.Id,
+                        text: msgToSend.Text,
+                        parseMode: msgToSend.ParseMode,
+                        disableWebPagePreview: msgToSend.DisableWebPagePreview,
+                        disableNotification: msgToSend.DisableNotification,
+                        replyToMessageId: msgToSend.ReplyToMessageId,
+                        replyMarkup: msgToSend.ReplyMarkup
+                    ).Result;
+            }
+            catch (Exception ex)
+            {
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban.Terminal.MessageQueue.QueueTimer_Elapsed.Send",
+                    Level = Models.SystemLog.Levels.Error,
+                    Message = ex.Message,
+                    UserId = -1
+                });
+                if(ex.InnerException != null)
+                    Data.Utils.Logging.AddLog(new Models.SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Unifiedban.Terminal.MessageQueue.QueueTimer_Elapsed.Send",
+                        Level = Models.SystemLog.Levels.Error,
+                        Message = ex.InnerException.Message,
+                        UserId = -1
+                    });
+            }
 
             // Reset counter and time if we waited previously
             if (doResetCount)

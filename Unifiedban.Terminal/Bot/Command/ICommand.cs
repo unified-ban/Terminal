@@ -9,5 +9,6 @@ namespace Unifiedban.Terminal.Bot.Command
     public interface ICommand
     {
         void Execute(Message message);
+        void Execute(CallbackQuery callbackQuery);
     }
 }

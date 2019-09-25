@@ -87,6 +87,7 @@ namespace Unifiedban.Terminal
 
             InitializeHangfireServer();
             Bot.MessageQueueManager.Initialize();
+            Bot.CommandQueueManager.Initialize();
             Bot.Manager.Initialize(CacheData.Configuration["APIKEY"]);
 #if DEBUG
             TestArea.DoTest();
@@ -100,6 +101,7 @@ namespace Unifiedban.Terminal
                 backgroundJobServer.Dispose();
             }
             Bot.MessageQueueManager.Dispose();
+            Bot.CommandQueueManager.Dispose();
             Bot.Manager.Dispose();
         }
 

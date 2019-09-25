@@ -15,6 +15,7 @@ namespace Unifiedban.Terminal.Bot
         static string APIKEY;
         static string instanceId = "";
         static string currentHostname = "";
+        public static int MyId = 0;
         public static string Username { get; private set; }
         public static ITelegramBotClient BotClient { get;  private set; }
 
@@ -43,6 +44,7 @@ namespace Unifiedban.Terminal.Bot
             BotClient = new TelegramBotClient(APIKEY);
             var me = BotClient.GetMeAsync().Result;
             Username = me.Username;
+            MyId = me.Id;
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
                 LoggerName = CacheData.LoggerName,
@@ -95,6 +97,13 @@ namespace Unifiedban.Terminal.Bot
                 Message = "CallbackQuery received",
                 UserId = -1
             });
+
+            if (!String.IsNullOrEmpty(e.CallbackQuery.Data))
+            {
+                if (e.CallbackQuery.Data.StartsWith('/'))
+                    await Task.Run(() => Command.Parser.Parse(e.CallbackQuery));
+            }
+
             return;
         }
         private static async void BotClient_OnMessage(object sender, MessageEventArgs e)
@@ -108,10 +117,21 @@ namespace Unifiedban.Terminal.Bot
                 Message = "Message received",
                 UserId = -1
             });
-            if (e.Message.Text != null)
+            if (!String.IsNullOrEmpty(e.Message.Text))
             {
                 if (e.Message.Text.StartsWith('/'))
+                {
                     await Task.Run(() => Command.Parser.Parse(e.Message));
+                    return;
+                }
+
+                if (e.Message.ReplyToMessage != null)
+                {
+                    if (e.Message.ReplyToMessage.From.Id == MyId)
+                    {
+                        CommandQueueManager.ReplayMessage(e.Message);
+                    }
+                }
             }
         }
     }

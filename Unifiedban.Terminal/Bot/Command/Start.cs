@@ -78,5 +78,10 @@ namespace Unifiedban.Terminal.Bot.Command
                 text: $"Error: chat type not recognized. Please contact our support."
             );
         }
+
+        public void Execute(CallbackQuery callbackQuery)
+        {
+            return;
+        }
     }
 }

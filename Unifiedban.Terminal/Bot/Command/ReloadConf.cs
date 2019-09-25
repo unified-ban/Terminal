@@ -69,5 +69,10 @@ namespace Unifiedban.Terminal.Bot.Command
                 );
             }
         }
+
+        public void Execute(CallbackQuery callbackQuery)
+        {
+            return;
+        }
     }
 }
