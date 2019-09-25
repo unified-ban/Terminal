@@ -13,6 +13,8 @@ namespace Unifiedban.Terminal.Bot
     public class Manager
     {
         static string APIKEY;
+        static string instanceId = "";
+        static string currentHostname = "";
         public static string Username { get; private set; }
         public static ITelegramBotClient BotClient { get;  private set; }
 
@@ -34,6 +36,8 @@ namespace Unifiedban.Terminal.Bot
             }
 
             APIKEY = apikey;
+            instanceId = Guid.NewGuid().ToString();
+            currentHostname = System.Net.Dns.GetHostName();
             Commands.Initialize();
 
             BotClient = new TelegramBotClient(APIKEY);
@@ -57,13 +61,26 @@ namespace Unifiedban.Terminal.Bot
                 chatId: Convert.ToInt64(CacheData.SysConfigs
                             .Single(x => x.SysConfigId == "ControlChatId")
                             .Value),
-                text: "I'm here, Master."
+                parseMode: ParseMode.Markdown,
+                text: $"I'm here, Master.\n" +
+                    $"My *instance ID* is _{instanceId}_ " +
+                    $"and I'm running on *machine* _{currentHostname}_"
             );
         }
 
         public static void Dispose()
         {
             BotClient.StopReceiving();
+            BotClient.SendTextMessageAsync(
+                chatId: Convert.ToInt64(CacheData.SysConfigs
+                            .Single(x => x.SysConfigId == "ControlChatId")
+                            .Value),
+                parseMode: ParseMode.Markdown,
+                text: $"I left, Master.\n" +
+                    $"My *instance ID* is _{instanceId}_\n" +
+                    $"and I was running on *machine* _{currentHostname}_" +
+                    $"See you soon!"
+            );
         }
 
         private static async void BotClient_OnCallbackQuery(object sender, CallbackQueryEventArgs e)
