@@ -10,7 +10,7 @@ namespace Unifiedban.Terminal.Bot.Command
 {
     public class Help : ICommand
     {
-        public Task Execute(Message message)
+        public void Execute(Message message)
         {
             InlineKeyboardMarkup menu = 
                 JsonConvert.DeserializeObject<InlineKeyboardMarkup>(
@@ -18,7 +18,7 @@ namespace Unifiedban.Terminal.Bot.Command
                             .Single(x => x.SysConfigId == "HelpMenu")
                             .Value);
 
-            return Manager.BotClient.SendTextMessageAsync(
+            Manager.BotClient.SendTextMessageAsync(
                 chatId: message.Chat.Id,
                 text: "Help:",
                 replyMarkup: menu

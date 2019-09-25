@@ -9,9 +9,9 @@ namespace Unifiedban.Terminal.Bot.Command
 {
     public class Motd : ICommand
     {
-        public Task Execute(Message message)
+        public void Execute(Message message)
         {
-            return Task.Run(() => MessageQueueManager.EnqueueMessage(
+            MessageQueueManager.EnqueueMessage(
                 new ChatMessage()
                 {
                     Timestamp = DateTime.UtcNow,
@@ -19,7 +19,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     Text = CacheData.SysConfigs
                         .Single(x => x.SysConfigId == "motd")
                         .Value
-                }));
+                });
         }
     }
 }

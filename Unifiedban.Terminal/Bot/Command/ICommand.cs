@@ -8,6 +8,6 @@ namespace Unifiedban.Terminal.Bot.Command
 {
     public interface ICommand
     {
-        Task Execute(Message message);
+        void Execute(Message message);
     }
 }
