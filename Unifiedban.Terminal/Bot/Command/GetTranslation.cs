@@ -132,43 +132,55 @@ namespace Unifiedban.Terminal.Bot.Command
             string dataSource = parameters[1].Split('|')[0];
             string keyId = parameters[1].Split('|')[1].Trim();
 
-            if(dataSource == "InMemory")
+            List<Entry> entries = new List<Entry>();
+
+            if (dataSource == "InMemory")
             {
-                MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
-                   {
-                       Timestamp = DateTime.UtcNow,
-                       Chat = callbackQuery.Message.Chat,
-                       ReplyToMessageId = callbackQuery.Message.MessageId,
-                       Text = "Not implemented yet. I'm sorry!"
-                   });
-                return;
+                foreach (string language in CacheData.Translations.Keys)
+                {
+                    bool isTranslated = CacheData.Translations[language].TryGetValue(keyId, out Entry entry);
+                    if (isTranslated)
+                        entries.Add(entry);
+
+                }
+
+                if (entries.Count == 0)
+                    MessageQueueManager.EnqueueMessage(
+                       new ChatMessage()
+                       {
+                           Timestamp = DateTime.UtcNow,
+                           Chat = callbackQuery.Message.Chat,
+                           ReplyToMessageId = callbackQuery.Message.MessageId,
+                           Text = "Translation key exists but not translation is present."
+                       });
+            }
+            else if (dataSource == "Database")
+            {
+                BusinessLogic.TranslationLogic translationLogic = new BusinessLogic.TranslationLogic();
+                Key translationKey = translationLogic.GetKeyById(keyId);
+                if (translationKey == null)
+                    MessageQueueManager.EnqueueMessage(
+                       new ChatMessage()
+                       {
+                           Timestamp = DateTime.UtcNow,
+                           Chat = callbackQuery.Message.Chat,
+                           ReplyToMessageId = callbackQuery.Message.MessageId,
+                           Text = "This translation key does not exist."
+                       });
+
+                entries = translationLogic.GetEntriesById(keyId);
+                if (entries.Count == 0)
+                    MessageQueueManager.EnqueueMessage(
+                       new ChatMessage()
+                       {
+                           Timestamp = DateTime.UtcNow,
+                           Chat = callbackQuery.Message.Chat,
+                           ReplyToMessageId = callbackQuery.Message.MessageId,
+                           Text = "Translation key exists but not translation is present."
+                       });
             }
 
-            BusinessLogic.TranslationLogic translationLogic = new BusinessLogic.TranslationLogic();
-            Key translationKey = translationLogic.GetKeyById(keyId);
-            if (translationKey == null)
-                MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
-                   {
-                       Timestamp = DateTime.UtcNow,
-                       Chat = callbackQuery.Message.Chat,
-                       ReplyToMessageId = callbackQuery.Message.MessageId,
-                       Text = "This translation key does not exist."
-                   });
-
-            List<Entry> entries = translationLogic.GetEntriesById(keyId);
-            if(entries.Count == 0)
-                MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
-                   {
-                       Timestamp = DateTime.UtcNow,
-                       Chat = callbackQuery.Message.Chat,
-                       ReplyToMessageId = callbackQuery.Message.MessageId,
-                       Text = "Translation key exists but not translation is present."
-                   });
-
-            string answer = "Available translations:";
+            string answer = $"Available {dataSource} translations:";
             foreach(Entry translation in entries)
             {
                 answer += $"\n*{translation.Language.Name}* : {translation.Translation}";

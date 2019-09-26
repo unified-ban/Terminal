@@ -86,6 +86,11 @@ namespace Unifiedban.Terminal
             CacheData.Operators = new List<Models.Operator>(operatorLogic.Get());
 
             InitializeHangfireServer();
+            if (!InitializeTranslations())
+            {
+                CacheData.FatalError = true;
+                return;
+            }
             Bot.MessageQueueManager.Initialize();
             Bot.CommandQueueManager.Initialize();
             Bot.Manager.Initialize(CacheData.Configuration["APIKEY"]);
@@ -158,6 +163,62 @@ namespace Unifiedban.Terminal
                 Message = "Hangifre jobs cleared (forced)",
                 UserId = -1
             });
+        }
+        public static bool InitializeTranslations()
+        {
+            try
+            {
+                CacheData.Translations = new Dictionary<string, Dictionary<string, Models.Translation.Entry>>();
+                BusinessLogic.TranslationLogic translationLogic = new BusinessLogic.TranslationLogic();
+                List<Models.Translation.Language> languages = translationLogic.GetLanguage();
+                foreach(Models.Translation.Language language in languages)
+                {
+                    List<Models.Translation.Entry> entries = translationLogic
+                        .GetEntriesByLanguage(language.LanguageId);
+                    if (entries.Count == 0)
+                        continue;
+
+                    CacheData.Translations.TryAdd(language.LanguageId, new Dictionary<string, Models.Translation.Entry>());
+                    foreach (Models.Translation.Entry entry in entries)
+                        CacheData.Translations[language.LanguageId].TryAdd(entry.KeyId, entry);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban.Terminal.Program.InitializeTranslations",
+                    Level = Models.SystemLog.Levels.Fatal,
+                    Message = "Error loading translations.",
+                    UserId = -1
+                });
+
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban.Terminal.Program.InitializeTranslations",
+                    Level = Models.SystemLog.Levels.Fatal,
+                    Message = ex.Message,
+                    UserId = -1
+                });
+                if(ex.InnerException != null)
+                    Data.Utils.Logging.AddLog(new Models.SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Unifiedban.Terminal.Program.InitializeTranslations",
+                        Level = Models.SystemLog.Levels.Fatal,
+                        Message = ex.InnerException.Message,
+                        UserId = -1
+                    });
+
+                return false;
+            }
         }
 
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
