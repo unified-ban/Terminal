@@ -10,6 +10,8 @@ namespace Unifiedban.Terminal.Bot
         public const string RELOADCONF = "RELOADCONF";
         public const string ADDTRANSLATION = "ADDTRANSLATION";
         public const string GETTRANSLATION = "GETTRANSLATION";
+        public const string RELOADTRANSLATIONS = "RELOADTRANSLATIONS";
+        public const string RELOADTRANSLATION = "RELOADTRANSLATION";
 
         public static Dictionary<string, Command.ICommand> CommandsList;
         public static void Initialize()
@@ -21,6 +23,8 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(RELOADCONF, new Command.ReloadConf());
             CommandsList.Add(ADDTRANSLATION, new Command.AddTranslation());
             CommandsList.Add(GETTRANSLATION, new Command.GetTranslation());
+            CommandsList.Add(RELOADTRANSLATIONS, new Command.GetTranslation());
+            CommandsList.Add(RELOADTRANSLATION, new Command.GetTranslation());
         }
     }
 }
