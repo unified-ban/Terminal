@@ -19,6 +19,26 @@ namespace Unifiedban.Terminal
         public static Dictionary<string, Dictionary<string, Models.Translation.Entry>> Translations = 
             new Dictionary<string, Dictionary<string, Models.Translation.Entry>>();
 
+        public static string GetTranslation(
+            string languageId,
+            string keyId,
+            bool firstCapital = false)
+        {
+            if (!Translations.ContainsKey(languageId))
+                return keyId;
+
+            if (!Translations[languageId].ContainsKey(keyId))
+                if (!Translations["en"].ContainsKey(keyId))
+                    return keyId;
+
+            string value = Translations[languageId][keyId].Translation;
+
+            if (firstCapital)
+                return value.Substring(0, 1).ToUpper() + value.Substring(1, value.Length - 1);
+            
+            return value;
+        }
+
         // [[ Cache ]]
         public static List<Utils.ImageHash> BannedImagesHash =
             new List<Utils.ImageHash>();
