@@ -173,6 +173,7 @@ namespace Unifiedban.Terminal
                 List<Models.Translation.Language> languages = translationLogic.GetLanguage();
                 foreach(Models.Translation.Language language in languages)
                 {
+                    CacheData.Languages.TryAdd(language.LanguageId, language);
                     List<Models.Translation.Entry> entries = translationLogic
                         .GetEntriesByLanguage(language.LanguageId);
                     if (entries.Count == 0)

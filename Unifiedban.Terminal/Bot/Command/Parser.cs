@@ -22,7 +22,7 @@ namespace Unifiedban.Terminal.Bot.Command
             {
                 Manager.BotClient.SendTextMessageAsync(
                     chatId: message.Chat.Id,
-                    text: "Invalid command!"
+                    text: CacheData.GetTranslation("en", "error_invalid_command")
                 );
                 return;
             }
@@ -38,7 +38,7 @@ namespace Unifiedban.Terminal.Bot.Command
             {
                 Manager.BotClient.SendTextMessageAsync(
                     chatId: callbackQuery.Message.Chat.Id,
-                    text: "Invalid command!"
+                    text: CacheData.GetTranslation("en", "error_invalid_command")
                 );
                 return;
             }

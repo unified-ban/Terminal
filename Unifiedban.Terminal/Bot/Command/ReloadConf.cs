@@ -22,7 +22,7 @@ namespace Unifiedban.Terminal.Bot.Command
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
                        ReplyToMessageId = message.MessageId,
-                       Text = "You are not authorized to run this command."
+                       Text = CacheData.GetTranslation("en", "error_not_auth_command")
                    });
                 Manager.BotClient.SendTextMessageAsync(
                     chatId: Convert.ToInt64(CacheData.SysConfigs

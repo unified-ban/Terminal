@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -24,7 +25,7 @@ namespace Unifiedban.Terminal.Bot.Command
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
                        ReplyToMessageId = message.MessageId,
-                       Text = "You are not authorized to run this command."
+                       Text = CacheData.GetTranslation("en", "error_not_auth_command")
                    });
                 Manager.BotClient.SendTextMessageAsync(
                     chatId: Convert.ToInt64(CacheData.SysConfigs
@@ -99,7 +100,7 @@ namespace Unifiedban.Terminal.Bot.Command
                        Timestamp = DateTime.UtcNow,
                        Chat = callbackQuery.Message.Chat,
                        ReplyToMessageId = callbackQuery.Message.MessageId,
-                       Text = "You are not authorized to run this command."
+                       Text = CacheData.GetTranslation("en", "error_not_auth_command")
                    });
                 Manager.BotClient.SendTextMessageAsync(
                     chatId: Convert.ToInt64(CacheData.SysConfigs
@@ -120,6 +121,9 @@ namespace Unifiedban.Terminal.Bot.Command
 
             if(command == "language")
             {
+                Manager.BotClient.DeleteMessageAsync(
+                    callbackQuery.Message.Chat,
+                    callbackQuery.Message.MessageId);
                 CommandMessage commandMessage = new CommandMessage()
                 {
                     Command = "AddTranslationKey",
@@ -134,10 +138,10 @@ namespace Unifiedban.Terminal.Bot.Command
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = callbackQuery.Message.Chat,
-                        ReplyToMessageId = callbackQuery.Message.MessageId,
+                        ReplyToMessageId = callbackQuery.Message.ReplyToMessage.MessageId,
                         ParseMode = ParseMode.Markdown,
                         Text = $"*[ADMIN] [r:{callbackQuery.Message.MessageId}]*\nDeclare KeyId:",
-                        ReplyMarkup = new ForceReplyMarkup()
+                        ReplyMarkup = new ForceReplyMarkup() { Selective = true }
                     });
             }
         }
@@ -157,7 +161,7 @@ namespace Unifiedban.Terminal.Bot.Command
                        Timestamp = DateTime.UtcNow,
                        Chat = replyMessage.Chat,
                        ReplyToMessageId = replyMessage.MessageId,
-                       Text = "You are not authorized to run this command."
+                       Text = CacheData.GetTranslation("en", "error_not_auth_command")
                    });
                 Manager.BotClient.SendTextMessageAsync(
                     chatId: Convert.ToInt64(CacheData.SysConfigs
@@ -173,7 +177,9 @@ namespace Unifiedban.Terminal.Bot.Command
             }
 
             CommandQueueManager.DenqueueMessage(commandMessage);
-            if (replyMessage.Text.Trim().Contains(" "))
+
+            var regexItem = new Regex("^[a-zA-Z0-9]*$");
+            if (!regexItem.IsMatch(replyMessage.Text.Trim()))
             {
                 MessageQueueManager.EnqueueMessage(
                     new ChatMessage()
@@ -219,7 +225,7 @@ namespace Unifiedban.Terminal.Bot.Command
                         Chat = replyMessage.Chat,
                         ReplyToMessageId = replyMessage.MessageId,
                         ParseMode = ParseMode.Markdown,
-                        Text = $"*Error*\n {commandMessage.Value} translation for key {translationKey.KeyId} already exists!"
+                        Text = $"*Error*\n {commandMessage.Value} translation for key `{translationKey.KeyId}` already exists!"
                     });
                 return;
             }
@@ -240,7 +246,8 @@ namespace Unifiedban.Terminal.Bot.Command
                     Chat = replyMessage.Chat,
                     ReplyToMessageId = replyMessage.MessageId,
                     ParseMode = ParseMode.Markdown,
-                    Text = $"*[ADMIN] [r:{replyMessage.MessageId}]*\nType translation for {translationKey.KeyId} in {commandMessage.Value}:",
+                    Text = $"*[ADMIN] [r:{replyMessage.MessageId}]*\nType translation for " +
+                    $"`{translationKey.KeyId}` in `{CacheData.Languages[commandMessage.Value].Name}`:",
                     ReplyMarkup = new ForceReplyMarkup()
                 });
         }
@@ -259,7 +266,7 @@ namespace Unifiedban.Terminal.Bot.Command
                        Timestamp = DateTime.UtcNow,
                        Chat = replyMessage.Chat,
                        ReplyToMessageId = replyMessage.MessageId,
-                       Text = "You are not authorized to run this command."
+                       Text = CacheData.GetTranslation("en", "error_not_auth_command")
                    });
                 Manager.BotClient.SendTextMessageAsync(
                     chatId: Convert.ToInt64(CacheData.SysConfigs
@@ -284,7 +291,7 @@ namespace Unifiedban.Terminal.Bot.Command
                        Timestamp = DateTime.UtcNow,
                        Chat = replyMessage.Chat,
                        ReplyToMessageId = replyMessage.MessageId,
-                       Text = "Invalid parameters."
+                       Text = CacheData.GetTranslation("en", "error_invalid_parameters")
                    });
             }
             string languageId = parameters[0];
