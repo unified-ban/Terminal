@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -26,9 +26,22 @@ namespace Unifiedban.Terminal.Bot.Command
 
                 if (MessageQueueManager.AddChatIfNotPresent(message.Chat.Id))
                 {
+                    
+                    Models.SysConfig startMessage = CacheData.SysConfigs
+                            .SingleOrDefault(x => x.SysConfigId == "StartMessage");
+                    if (startMessage == null)
+                    {
+                        Manager.BotClient.SendTextMessageAsync(
+                            chatId: message.Chat.Id,
+                            text: $"Your chat {message.Chat.Title} has been added successfully!"
+                        );
+                        return;
+                    }
+
                     Manager.BotClient.SendTextMessageAsync(
                         chatId: message.Chat.Id,
-                        text: $"Your chat {message.Chat.Title} has been added successfully!"
+                        parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                        text: Utils.Parsers.VariablesParser(startMessage.Value, message)
                     );
                     return;
                 }
