@@ -133,6 +133,28 @@ namespace Unifiedban.Terminal.Bot
                     }
                 }
             }
+
+            if (e.Message.NewChatMembers != null)
+            {
+                foreach (User newUsr in e.Message.NewChatMembers)
+                {
+                    if (newUsr.Id == MyId &&
+                        (e.Message.Chat.Type == ChatType.Group ||
+                         e.Message.Chat.Type == ChatType.Supergroup))
+                    {
+                        Data.Utils.Logging.AddLog(new Models.SystemLog()
+                        {
+                            LoggerName = CacheData.LoggerName,
+                            Date = DateTime.Now,
+                            Function = "Unifiedban.Bot.Manager.BotClient_OnMessage",
+                            Level = Models.SystemLog.Levels.Info,
+                            Message = $"I have been added to Group {e.Message.Chat.Title} ID {e.Message.Chat.Id}",
+                            UserId = -1
+                        });
+                        break;
+                    }
+                }
+            }
         }
     }
 }
