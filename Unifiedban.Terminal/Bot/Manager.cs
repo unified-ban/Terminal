@@ -21,7 +21,10 @@ namespace Unifiedban.Terminal.Bot
 
         public static void Initialize(string apikey)
         {
-            if(apikey == null)
+            if (CacheData.FatalError)
+                return;
+
+            if (apikey == null)
             {
                 Data.Utils.Logging.AddLog(new Models.SystemLog()
                 {

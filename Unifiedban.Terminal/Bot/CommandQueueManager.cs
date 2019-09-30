@@ -16,6 +16,9 @@ namespace Unifiedban.Terminal.Bot
 
         public static void Initialize()
         {
+            if (CacheData.FatalError)
+                return;
+
             isInitialized = true;
         }
 

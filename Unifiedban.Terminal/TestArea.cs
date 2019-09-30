@@ -11,6 +11,9 @@ namespace Unifiedban.Terminal
 #if DEBUG
         public static void DoTest()
         {
+            if (CacheData.FatalError)
+                return;
+
             //Gimmeconf();
             //RegisterOperators();
         }
