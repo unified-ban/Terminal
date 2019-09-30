@@ -21,6 +21,9 @@ namespace Unifiedban.Terminal
         public static Dictionary<string, Dictionary<string, Models.Translation.Entry>> Translations = 
             new Dictionary<string, Dictionary<string, Models.Translation.Entry>>();
 
+        public static Dictionary<long, Models.Group.TelegramGroup> Groups =
+            new Dictionary<long, Models.Group.TelegramGroup>();
+
         public static string GetTranslation(
             string languageId,
             string keyId,

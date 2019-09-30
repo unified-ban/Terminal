@@ -85,12 +85,8 @@ namespace Unifiedban.Terminal
             BusinessLogic.OperatorLogic operatorLogic = new BusinessLogic.OperatorLogic();
             CacheData.Operators = new List<Models.Operator>(operatorLogic.Get());
 
+            LoadCacheData();
             InitializeHangfireServer();
-            if (!InitializeTranslations())
-            {
-                CacheData.FatalError = true;
-                return;
-            }
             Bot.MessageQueueManager.Initialize();
             Bot.CommandQueueManager.Initialize();
             Bot.Manager.Initialize(CacheData.Configuration["APIKEY"]);
@@ -112,6 +108,9 @@ namespace Unifiedban.Terminal
 
         static void InitializeHangfireServer()
         {
+            if (CacheData.FatalError)
+                return;
+
             var options = new SqlServerStorageOptions
             {
                 PrepareSchemaIfNecessary = Convert.ToBoolean(CacheData.Configuration["HFPrepareSchema"]),
@@ -220,6 +219,19 @@ namespace Unifiedban.Terminal
 
                 return false;
             }
+        }
+        public static void LoadCacheData()
+        {
+            if (!InitializeTranslations())
+            {
+                CacheData.FatalError = true;
+                return;
+            }
+
+            BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
+                new BusinessLogic.Group.TelegramGroupLogic();
+            foreach (Models.Group.TelegramGroup group in telegramGroupLogic.Get())
+                CacheData.Groups.Add(group.TelegramChatId, group);
         }
 
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
