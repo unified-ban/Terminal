@@ -111,6 +111,9 @@ namespace Unifiedban.Terminal.Bot
         }
         private static async void BotClient_OnMessage(object sender, MessageEventArgs e)
         {
+            if (e == null)
+                return;
+
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
                 LoggerName = CacheData.LoggerName,
@@ -120,6 +123,7 @@ namespace Unifiedban.Terminal.Bot
                 Message = "Message received",
                 UserId = -1
             });
+
             if (!String.IsNullOrEmpty(e.Message.Text))
             {
                 if (e.Message.Text.StartsWith('/'))
