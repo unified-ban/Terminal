@@ -14,7 +14,6 @@ namespace Unifiedban.Terminal.Utils
             string parsedText = text;
 
             parsedText = parsedText.Replace("{{from_username}}", message.From.Username);
-            parsedText = parsedText.Replace("{{from_id}}", message.From.Username);
             parsedText = parsedText.Replace("{{from_id}}", message.From.Id.ToString());
             parsedText = parsedText.Replace("{{chat_title}}", message.Chat.Title);
             parsedText = parsedText.Replace("{{chat_id}}", message.Chat.Id.ToString());
