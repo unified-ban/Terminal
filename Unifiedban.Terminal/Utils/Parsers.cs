@@ -17,6 +17,9 @@ namespace Unifiedban.Terminal.Utils
             parsedText = parsedText.Replace("{{from_id}}", message.From.Id.ToString());
             parsedText = parsedText.Replace("{{chat_title}}", message.Chat.Title);
             parsedText = parsedText.Replace("{{chat_id}}", message.Chat.Id.ToString());
+            parsedText = parsedText.Replace("{{chat_id_noMinus}}", message.Chat.Id.ToString().Replace("-",""));
+            parsedText = parsedText.Replace("{{message_id}}", message.MessageId.ToString());
+            parsedText = parsedText.Replace("{{from_isBot}}", message.From.IsBot.ToString());
 
             if (message.ReplyToMessage != null)
             {
