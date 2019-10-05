@@ -23,6 +23,7 @@ namespace Unifiedban.Terminal.Bot
         public const string GETME = "GETME";
         public const string A = "A";
         public const string ANNOUNCE = "ANNOUNCE";
+        public const string LEAVE = "LEAVE";
 
         public static Dictionary<string, Command.ICommand> CommandsList;
         public static void Initialize()
@@ -55,6 +56,8 @@ namespace Unifiedban.Terminal.Bot
 
             CommandsList.Add(A, new Command.Announce());
             CommandsList.Add(ANNOUNCE, new Command.Announce());
+
+            CommandsList.Add(LEAVE, new Command.Leave());
         }
     }
 }
