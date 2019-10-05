@@ -14,6 +14,8 @@ namespace Unifiedban.Terminal.Bot
         public const string RELOADTRANSLATIONS = "RELOADTRANSLATIONS";
         public const string RELOADTRANSLATION = "RELOADTRANSLATION";
         public const string ECHO = "ECHO";
+        public const string CHECK = "CHECK";
+        public const string C = "C";
 
         public static Dictionary<string, Command.ICommand> CommandsList;
         public static void Initialize()
@@ -23,12 +25,18 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(HELP, new Command.Help());
             CommandsList.Add(H, new Command.Help());
             CommandsList.Add(START, new Command.Start());
+
             CommandsList.Add(RELOADCONF, new Command.ReloadConf());
+
             CommandsList.Add(ADDTRANSLATION, new Command.AddTranslation());
             CommandsList.Add(GETTRANSLATION, new Command.GetTranslation());
             CommandsList.Add(RELOADTRANSLATIONS, new Command.GetTranslation());
             CommandsList.Add(RELOADTRANSLATION, new Command.GetTranslation());
+
             CommandsList.Add(ECHO, new Command.Echo());
+
+            CommandsList.Add(CHECK, new Command.Check());
+            CommandsList.Add(C, new Command.Check());
         }
     }
 }
