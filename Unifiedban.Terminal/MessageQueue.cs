@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Threading.Tasks;
 
 namespace Unifiedban.Terminal
 {
@@ -66,6 +67,23 @@ namespace Unifiedban.Terminal
                         replyToMessageId: msgToSend.ReplyToMessageId,
                         replyMarkup: msgToSend.ReplyMarkup
                     ).Result;
+
+                switch (msgToSend.PostSentAction)
+                {
+                    default:
+                    case ChatMessage.PostSentActions.None:
+                        break;
+                    case ChatMessage.PostSentActions.Pin:
+                        Bot.Manager.BotClient.PinChatMessageAsync(msgToSend.Chat.Id, sent.MessageId);
+                        break;
+                    case ChatMessage.PostSentActions.Destroy:
+                        Task.Run(() =>
+                        {
+                            System.Threading.Thread.Sleep(1000 * msgToSend.AutoDestroyTimeInSeconds);
+                            Bot.Manager.BotClient.DeleteMessageAsync(msgToSend.Chat.Id, sent.MessageId);
+                        });
+                        break;
+                }
             }
             catch (Exception ex)
             {
