@@ -16,6 +16,8 @@ namespace Unifiedban.Terminal.Bot
         public const string ECHO = "ECHO";
         public const string CHECK = "CHECK";
         public const string C = "C";
+        public const string PIN = "PIN";
+        public const string P = "P";
 
         public static Dictionary<string, Command.ICommand> CommandsList;
         public static void Initialize()
@@ -37,6 +39,9 @@ namespace Unifiedban.Terminal.Bot
 
             CommandsList.Add(CHECK, new Command.Check());
             CommandsList.Add(C, new Command.Check());
+
+            CommandsList.Add(PIN, new Command.Pin());
+            CommandsList.Add(P, new Command.Pin());
         }
     }
 }
