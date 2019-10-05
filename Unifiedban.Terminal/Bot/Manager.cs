@@ -136,7 +136,7 @@ namespace Unifiedban.Terminal.Bot
                 {
                     if (e.Message.ReplyToMessage.From.Id == MyId)
                     {
-                        CommandQueueManager.ReplayMessage(e.Message);
+                        CommandQueueManager.ReplyMessage(e.Message);
                     }
                 }
             }

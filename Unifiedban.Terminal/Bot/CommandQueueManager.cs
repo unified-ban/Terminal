@@ -52,7 +52,7 @@ namespace Unifiedban.Terminal.Bot
                 out CommandMessage removed);
         }
 
-        public static void ReplayMessage(Message message)
+        public static void ReplyMessage(Message message)
         {
             if (!isInitialized || isDisposing)
                 return;
