@@ -7,7 +7,9 @@ namespace Unifiedban.Terminal.Utils
 {
     public class Parsers
     {
-        public static string VariablesParser(string text, Message message)
+        public static string VariablesParser(
+            string text,
+            Message message)
         {
             string parsedText = text;
 
@@ -23,6 +25,36 @@ namespace Unifiedban.Terminal.Utils
                 parsedText = parsedText.Replace("{{replyToMessage_chat_title}}", message.ReplyToMessage.Chat.Title);
                 parsedText = parsedText.Replace("{{replyToMessage_chat_id}}", message.ReplyToMessage.Chat.Id.ToString());
             }
+
+            return parsedText;
+        }
+
+        public static string VariablesParser(
+            string text,
+            string languageId = "en")
+        {
+            string parsedText = text;
+
+            parsedText = parsedText.Replace("{{command_check_first_row}}",
+                CacheData.GetTranslation(languageId, "command_check_first_row"));
+            parsedText = parsedText.Replace("{{privilege_delete_messages}}",
+                CacheData.GetTranslation(languageId, "privilege_delete_messages"));
+            parsedText = parsedText.Replace("{{privilege_ban_users}}",
+                CacheData.GetTranslation(languageId, "privilege_ban_users"));
+            parsedText = parsedText.Replace("{{privilege_pin_messages}}",
+                CacheData.GetTranslation(languageId, "privilege_pin_messages"));
+            parsedText = parsedText.Replace("{{optional}}",
+                CacheData.GetTranslation(languageId, "optional"));
+            parsedText = parsedText.Replace("{{result}}",
+                CacheData.GetTranslation(languageId, "result"));
+            parsedText = parsedText.Replace("{{privilege_check_ok}}",
+                CacheData.GetTranslation(languageId, "privilege_check_ok"));
+            parsedText = parsedText.Replace("{{privilege_check_ko}}",
+                CacheData.GetTranslation(languageId, "privilege_check_ko"));
+            parsedText = parsedText.Replace("{{true}}",
+                CacheData.GetTranslation(languageId, "true"));
+            parsedText = parsedText.Replace("{{false}}",
+                CacheData.GetTranslation(languageId, "false"));
 
             return parsedText;
         }
