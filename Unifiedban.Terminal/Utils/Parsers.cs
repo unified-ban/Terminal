@@ -21,9 +21,28 @@ namespace Unifiedban.Terminal.Utils
             if (message.ReplyToMessage != null)
             {
                 parsedText = parsedText.Replace("{{replyToMessage_from_username}}", message.ReplyToMessage.From.Username);
-                parsedText = parsedText.Replace("{{replyToMessage_from_id}}", message.ReplyToMessage.From.Username);
+                parsedText = parsedText.Replace("{{replyToMessage_from_id}}", message.ReplyToMessage.From.Id.ToString());
                 parsedText = parsedText.Replace("{{replyToMessage_chat_title}}", message.ReplyToMessage.Chat.Title);
                 parsedText = parsedText.Replace("{{replyToMessage_chat_id}}", message.ReplyToMessage.Chat.Id.ToString());
+
+                if (message.ReplyToMessage.ForwardFrom != null)
+                {
+                    parsedText = parsedText.Replace("{{replyToMessage_forwardFrom_from_username}}", message.ReplyToMessage.ForwardFrom.Username);
+                    parsedText = parsedText.Replace("{{replyToMessage_forwardFrom_from_id}}", message.ReplyToMessage.ForwardFrom.Id.ToString());
+                    if (message.ReplyToMessage.ForwardFromChat != null)
+                    {
+                        parsedText = parsedText.Replace("{{replyToMessage_forwardFrom_chat_title}}", message.ReplyToMessage.ForwardFromChat.Title);
+                        parsedText = parsedText.Replace("{{replyToMessage_forwardFrom_chat_id}}", message.ReplyToMessage.ForwardFromChat.Id.ToString());
+                    }
+                }
+            }
+
+            if (message.ForwardFrom != null)
+            {
+                parsedText = parsedText.Replace("{{forwardFrom_from_username}}", message.ReplyToMessage.From.Username);
+                parsedText = parsedText.Replace("{{forwardFrom_from_id}}", message.ReplyToMessage.From.Id.ToString());
+                parsedText = parsedText.Replace("{{forwardFrom_chat_title}}", message.ReplyToMessage.Chat.Title);
+                parsedText = parsedText.Replace("{{forwardFrom_chat_id}}", message.ReplyToMessage.Chat.Id.ToString());
             }
 
             return parsedText;

@@ -18,6 +18,7 @@ namespace Unifiedban.Terminal.Bot
         public const string C = "C";
         public const string PIN = "PIN";
         public const string P = "P";
+        public const string ID = "ID";
 
         public static Dictionary<string, Command.ICommand> CommandsList;
         public static void Initialize()
@@ -42,6 +43,8 @@ namespace Unifiedban.Terminal.Bot
 
             CommandsList.Add(PIN, new Command.Pin());
             CommandsList.Add(P, new Command.Pin());
+
+            CommandsList.Add(ID, new Command.Id());
         }
     }
 }
