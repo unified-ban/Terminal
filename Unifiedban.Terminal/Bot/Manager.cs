@@ -161,6 +161,8 @@ namespace Unifiedban.Terminal.Bot
                         break;
                     }
                 }
+
+                Functions.UserJoinedAction(e.Message);
             }
         }
     }

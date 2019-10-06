@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.Bot.Types.Enums;
 using Unifiedban.Models;
 using Unifiedban.Models.Group;
 
@@ -8,15 +11,15 @@ namespace Unifiedban.Terminal.Bot
 {
     public class Functions
     {
-        public bool RegisterGroup(long chatId, string title)
+        public bool RegisterGroup(Message message)
         {
-            if (CacheData.Groups.ContainsKey(chatId))
+            if (CacheData.Groups.ContainsKey(message.Chat.Id))
                 return false;
 
             BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
                 new BusinessLogic.Group.TelegramGroupLogic();
             TelegramGroup registered = telegramGroupLogic.Add(
-                chatId, title, TelegramGroup.Status.Inactive,
+                message.Chat.Id, message.Chat.Title, TelegramGroup.Status.Inactive,
                 configuration: "",
                 welcomeText: "",
                 chatLanguage: "",
@@ -29,8 +32,52 @@ namespace Unifiedban.Terminal.Bot
             if (registered == null)
                 return false;
 
-            CacheData.Groups.Add(chatId, registered);
+            CacheData.Groups.Add(message.Chat.Id, registered);
             return true;
+        }
+
+        public static void UserJoinedAction(Message message)
+        {
+            if (!CacheData.Groups.ContainsKey(message.Chat.Id))
+                return;
+
+            // TODO - if group has Captcha option enabled
+            foreach(User member in message.NewChatMembers)
+            {
+                if (member.Id == Manager.MyId)
+                    continue;
+
+                Manager.BotClient.RestrictChatMemberAsync(
+                    message.Chat.Id,
+                    member.Id,
+                    new ChatPermissions()
+                    {
+                        CanSendMessages = false,
+                        CanAddWebPagePreviews = false,
+                        CanChangeInfo = false,
+                        CanInviteUsers = false,
+                        CanPinMessages = false,
+                        CanSendMediaMessages = false,
+                        CanSendOtherMessages = false,
+                        CanSendPolls = false
+                    });
+
+                string name = member.Username != null ? "@" + member.Username : member.FirstName;
+                MessageQueueManager.EnqueueMessage(
+                    new ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        ParseMode = ParseMode.Markdown,
+                        Text = $"Please {name} certify to be a human.\nIf you don't click this button you are not going to be unlocked.",
+                        ReplyMarkup = new InlineKeyboardMarkup(
+                            InlineKeyboardButton.WithCallbackData(
+                                CacheData.GetTranslation("en", "captcha_iamhuman", true),
+                                $"/Captcha " + member.Id
+                                )
+                        )
+                    });
+            }
         }
     }
 }
