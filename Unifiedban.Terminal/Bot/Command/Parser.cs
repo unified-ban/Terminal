@@ -20,10 +20,12 @@ namespace Unifiedban.Terminal.Bot.Command
 
             if (!Commands.CommandsList.TryGetValue(command.ToUpper(), out ICommand parsedCommand))
             {
+#if DEBUG
                 Manager.BotClient.SendTextMessageAsync(
                     chatId: message.Chat.Id,
                     text: CacheData.GetTranslation("en", "error_invalid_command")
                 );
+#endif
                 return;
             }
 
@@ -36,10 +38,12 @@ namespace Unifiedban.Terminal.Bot.Command
 
             if (!Commands.CommandsList.TryGetValue(command.ToUpper(), out ICommand parsedCommand))
             {
+#if DEBUG
                 Manager.BotClient.SendTextMessageAsync(
                     chatId: callbackQuery.Message.Chat.Id,
                     text: CacheData.GetTranslation("en", "error_invalid_command")
                 );
+#endif
                 return;
             }
 

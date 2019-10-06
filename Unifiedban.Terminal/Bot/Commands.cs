@@ -25,6 +25,7 @@ namespace Unifiedban.Terminal.Bot
         public const string ANNOUNCE = "ANNOUNCE";
         public const string LEAVE = "LEAVE";
         public const string CAPTCHA = "CAPTCHA";
+        public const string TEST1 = "TEST1";
 
         public static Dictionary<string, Command.ICommand> CommandsList;
         public static void Initialize()
@@ -61,6 +62,9 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(LEAVE, new Command.Leave());
 
             CommandsList.Add(CAPTCHA, new Command.Captcha());
+#if DEBUG
+            CommandsList.Add(TEST1, new Command.TestCommand());
+#endif
         }
     }
 }
