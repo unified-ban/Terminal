@@ -17,10 +17,10 @@ namespace Unifiedban.Terminal.Bot.Command
 
                 if (MessageQueueManager.PrivateChats.ContainsKey(message.Chat.Id))
                 {
-                    Manager.BotClient.SendTextMessageAsync(
-                        chatId: message.Chat.Id,
-                        text: $"Your chat {message.Chat.Title} is already registered!"
-                    );
+                    //Manager.BotClient.SendTextMessageAsync(
+                    //    chatId: message.Chat.Id,
+                    //    text: $"Your chat {message.Chat.Title} is already registered!"
+                    //);
                     return;
                 }
 
@@ -56,33 +56,34 @@ namespace Unifiedban.Terminal.Bot.Command
             if (message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Group
                 || message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Supergroup)
             {
-                if (MessageQueueManager.GroupChats.ContainsKey(message.Chat.Id))
-                {
-                    Manager.BotClient.SendTextMessageAsync(
-                        chatId: message.Chat.Id,
-                        text: $"Your group {message.Chat.Title} is already registered!"
-                    );
-                    return;
-                }
+                //if (MessageQueueManager.GroupChats.ContainsKey(message.Chat.Id))
+                //{
+                //    Manager.BotClient.SendTextMessageAsync(
+                //        chatId: message.Chat.Id,
+                //        text: $"Your group {message.Chat.Title} is already registered!"
+                //    );
+                //    return;
+                //}
 
-                if (MessageQueueManager.AddGroupIfNotPresent(
-                    new Models.Group.TelegramGroup()
-                    {
-                        TelegramChatId = message.Chat.Id
-                    }
-                    ))
-                {
-                    Manager.BotClient.SendTextMessageAsync(
-                        chatId: message.Chat.Id,
-                        text: $"Your group {message.Chat.Title} has been added successfully!"
-                    );
-                    return;
-                }
+                //if (MessageQueueManager.AddGroupIfNotPresent(
+                //    new Models.Group.TelegramGroup()
+                //    {
+                //        TelegramChatId = message.Chat.Id
+                //    }
+                //    ))
+                //{
+                //    Manager.BotClient.SendTextMessageAsync(
+                //        chatId: message.Chat.Id,
+                //        text: $"Your group {message.Chat.Title} has been added successfully!"
+                //    );
+                //    return;
+                //}
 
-                Manager.BotClient.SendTextMessageAsync(
-                        chatId: message.Chat.Id,
-                        text: $"Error adding group {message.Chat.Title}! Please contact our support"
-                    );
+                //Manager.BotClient.SendTextMessageAsync(
+                //        chatId: message.Chat.Id,
+                //        text: $"Error adding group {message.Chat.Title}! Please contact our support"
+                //    );
+
                 return;
             }
 
