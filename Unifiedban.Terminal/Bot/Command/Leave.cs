@@ -48,17 +48,26 @@ namespace Unifiedban.Terminal.Bot.Command
                         $"/Leave no"
                         ));
 
-            MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
-                    {
-                        Timestamp = DateTime.UtcNow,
-                        Chat = message.Chat,
-                        ParseMode = ParseMode.Markdown,
-                        Text = "*[ADMIN]*\nAre you sure you want to leave?",
-                        ReplyMarkup = new InlineKeyboardMarkup(
+            Manager.BotClient.SendTextMessageAsync(
+                        chatId: message.Chat.Id,
+                        parseMode: ParseMode.Markdown,
+                        text: "*[ADMIN]*\nAre you sure you want to leave?",
+                        replyMarkup: new InlineKeyboardMarkup(
                             confirmationButton
                         )
-                    });
+                    );
+
+            //MessageQueueManager.EnqueueMessage(
+            //        new ChatMessage()
+            //        {
+            //            Timestamp = DateTime.UtcNow,
+            //            Chat = message.Chat,
+            //            ParseMode = ParseMode.Markdown,
+            //            Text = "*[ADMIN]*\nAre you sure you want to leave?",
+            //            ReplyMarkup = new InlineKeyboardMarkup(
+            //                confirmationButton
+            //            )
+            //        });
         }
 
         public void Execute(CallbackQuery callbackQuery)
@@ -85,14 +94,21 @@ namespace Unifiedban.Terminal.Bot.Command
             string data = callbackQuery.Data.Replace("/Leave ", "");
             if(data == "yes")
             {
-                MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
-                    {
-                        Timestamp = DateTime.UtcNow,
-                        Chat = callbackQuery.Message.Chat,
-                        ParseMode = ParseMode.Markdown,
-                        Text = "Well, I hope to see you soon...\n\nGood bye! 👋🏼"
-                    });
+                //MessageQueueManager.EnqueueMessage(
+                //    new ChatMessage()
+                //    {
+                //        Timestamp = DateTime.UtcNow,
+                //        Chat = callbackQuery.Message.Chat,
+                //        ParseMode = ParseMode.Markdown,
+                //        Text = "Well, I hope to see you soon...\n\nGood bye! 👋🏼"
+                //    });
+
+                Manager.BotClient.SendTextMessageAsync(
+                       chatId: callbackQuery.Message.Chat.Id,
+                       parseMode: ParseMode.Markdown,
+                       text: "Well, I hope to see you soon...\n\nGood bye! 👋🏼"
+                   );
+
                 Manager.BotClient.SendTextMessageAsync(
                     chatId: Convert.ToInt64(CacheData.SysConfigs
                             .Single(x => x.SysConfigId == "ControlChatId")
