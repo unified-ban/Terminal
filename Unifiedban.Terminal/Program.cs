@@ -231,7 +231,10 @@ namespace Unifiedban.Terminal
             BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
                 new BusinessLogic.Group.TelegramGroupLogic();
             foreach (Models.Group.TelegramGroup group in telegramGroupLogic.Get())
+            {
                 CacheData.Groups.Add(group.TelegramChatId, group);
+                Bot.MessageQueueManager.AddGroupIfNotPresent(group);
+            }
         }
 
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)

@@ -6,12 +6,13 @@ using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Types.Enums;
 using Unifiedban.Models;
 using Unifiedban.Models.Group;
+using System.Threading.Tasks;
 
 namespace Unifiedban.Terminal.Bot
 {
     public class Functions
     {
-        public bool RegisterGroup(Message message)
+        public static bool RegisterGroup(Message message)
         {
             if (CacheData.Groups.ContainsKey(message.Chat.Id))
                 return false;
@@ -19,25 +20,72 @@ namespace Unifiedban.Terminal.Bot
             BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
                 new BusinessLogic.Group.TelegramGroupLogic();
             TelegramGroup registered = telegramGroupLogic.Add(
-                message.Chat.Id, message.Chat.Title, TelegramGroup.Status.Inactive,
-                configuration: "",
-                welcomeText: "",
-                chatLanguage: "",
-                settingsLanguage: "",
+                message.Chat.Id, message.Chat.Title, TelegramGroup.Status.Active,
+                configuration: "{}",
+                welcomeText: CacheData.GetTranslation("en", "message_welcome_default"),
+                chatLanguage: "en",
+                settingsLanguage: "en",
                 reportChatId: Convert.ToInt64(CacheData.SysConfigs
                             .Single(x => x.SysConfigId == "ControlChatId")
                             .Value),
-                rulesText: "",
+                rulesText: "No rules defined yet by the group admins. Just... be nice!",
                 callerId: -2);
             if (registered == null)
                 return false;
 
             CacheData.Groups.Add(message.Chat.Id, registered);
+            if (MessageQueueManager.AddGroupIfNotPresent(registered))
+            {
+                Manager.BotClient.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text: $"Your group {message.Chat.Title} has been added successfully!"
+                );
+            }
+
             return true;
         }
 
         public static void UserJoinedAction(Message message)
         {
+            if(message.NewChatMembers.SingleOrDefault(x => x.Id == Manager.MyId) != null &&
+                        (message.Chat.Type == ChatType.Group ||
+                         message.Chat.Type == ChatType.Supergroup))
+            {
+                Data.Utils.Logging.AddLog(new SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban.Bot.Manager.BotClient_OnMessage",
+                    Level = SystemLog.Levels.Info,
+                    Message = $"I have been added to Group {message.Chat.Title} ID {message.Chat.Id}",
+                    UserId = -1
+                });
+
+                if (!CacheData.Groups.ContainsKey(message.Chat.Id))
+                    Data.Utils.Logging.AddLog(new SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Unifiedban.Bot.Manager.BotClient_OnMessage",
+                        Level = SystemLog.Levels.Info,
+                        Message = $"Group {message.Chat.Title} ID {message.Chat.Id} is already registered",
+                        UserId = -1
+                    });
+
+                bool registered = RegisterGroup(message);
+                if (!registered)
+                {
+                    Manager.BotClient.SendTextMessageAsync(
+                        chatId: Convert.ToInt64(CacheData.SysConfigs
+                                    .Single(x => x.SysConfigId == "ControlChatId")
+                                    .Value),
+                        parseMode: ParseMode.Markdown,
+                        text: $"Error registering nre group with chat Id {message.Chat.Id}"
+                    );
+                }
+
+            }
+
             if (!CacheData.Groups.ContainsKey(message.Chat.Id))
                 return;
 
