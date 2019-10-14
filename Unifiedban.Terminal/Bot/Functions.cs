@@ -45,22 +45,32 @@ namespace Unifiedban.Terminal.Bot
             foreach(User member in message.NewChatMembers)
             {
                 if (member.Id == Manager.MyId)
+                {
                     continue;
+                }
 
-                Manager.BotClient.RestrictChatMemberAsync(
-                    message.Chat.Id,
-                    member.Id,
-                    new ChatPermissions()
-                    {
-                        CanSendMessages = false,
-                        CanAddWebPagePreviews = false,
-                        CanChangeInfo = false,
-                        CanInviteUsers = false,
-                        CanPinMessages = false,
-                        CanSendMediaMessages = false,
-                        CanSendOtherMessages = false,
-                        CanSendPolls = false
-                    });
+                try
+                {
+                    Manager.BotClient.RestrictChatMemberAsync(
+                            message.Chat.Id,
+                            member.Id,
+                            new ChatPermissions()
+                            {
+                                CanSendMessages = false,
+                                CanAddWebPagePreviews = false,
+                                CanChangeInfo = false,
+                                CanInviteUsers = false,
+                                CanPinMessages = false,
+                                CanSendMediaMessages = false,
+                                CanSendOtherMessages = false,
+                                CanSendPolls = false
+                            }
+                        ).Wait();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
 
                 string name = member.Username != null ? "@" + member.Username : member.FirstName;
                 MessageQueueManager.EnqueueMessage(
