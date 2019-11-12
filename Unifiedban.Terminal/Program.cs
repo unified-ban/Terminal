@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,6 +9,8 @@ using Hangfire;
 using Hangfire.SqlServer;
 using Hangfire.Storage;
 using Hangfire.Logging;
+using System.Linq;
+using Unifiedban.Models.Group;
 
 namespace Unifiedban.Terminal
 {
@@ -222,19 +225,124 @@ namespace Unifiedban.Terminal
         }
         public static void LoadCacheData()
         {
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Loading cache",
+                UserId = -2
+            });
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Get translations",
+                UserId = -2
+            });
+
             if (!InitializeTranslations())
             {
                 CacheData.FatalError = true;
                 return;
             }
 
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Get default group configuration parameters",
+                UserId = -2
+            });
+            BusinessLogic.Group.ConfigurationParameterLogic configurationParameterLogic =
+                new BusinessLogic.Group.ConfigurationParameterLogic();
+            CacheData.GroupDefaultConfigs = 
+                new List<Models.Group.ConfigurationParameter>(configurationParameterLogic.Get());
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Get registered groups",
+                UserId = -2
+            });
             BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
                 new BusinessLogic.Group.TelegramGroupLogic();
             foreach (Models.Group.TelegramGroup group in telegramGroupLogic.Get())
             {
                 CacheData.Groups.Add(group.TelegramChatId, group);
+                try
+                {
+                    CacheData.GroupConfigs.Add(
+                        group.TelegramChatId,
+                        JsonConvert
+                            .DeserializeObject<
+                                List<Models.Group.ConfigurationParameter>
+                                >(group.Configuration));
+
+                    AddMissingConfiguration(group.TelegramChatId);
+                }
+                catch(Exception ex)
+                {
+                    Data.Utils.Logging.AddLog(new Models.SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Unifiedban Terminal Startup",
+                        Level = Models.SystemLog.Levels.Error,
+                        Message = $"Impossible to load group {group.TelegramChatId} " +
+                            $"configuration:\n {ex.Message}",
+                        UserId = -1
+                    });
+                }
                 Bot.MessageQueueManager.AddGroupIfNotPresent(group);
             }
+        }
+
+        public static void AddMissingConfiguration(long telegramGroupId)
+        {
+            var diff = new List<ConfigurationParameter>();
+            foreach(ConfigurationParameter configurationParameter in CacheData
+                .GroupDefaultConfigs)
+            {
+                var exists = CacheData.GroupConfigs[telegramGroupId]
+                    .SingleOrDefault(x => x.ConfigurationParameterId == configurationParameter.ConfigurationParameterId);
+                if (exists == null)
+                    diff.Add(configurationParameter);
+            }
+
+            if (diff.Count == 0)
+                return;
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Warn,
+                Message = $"Adding missing configuration to chat {telegramGroupId}",
+                UserId = -2
+            });
+
+            foreach (ConfigurationParameter parameter in diff)
+            {
+                CacheData.GroupConfigs[telegramGroupId].Add(parameter);
+            }
+
+            BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
+                new BusinessLogic.Group.TelegramGroupLogic();
+            telegramGroupLogic.UpdateConfiguration(
+                telegramGroupId,
+                JsonConvert.SerializeObject(CacheData.GroupConfigs[telegramGroupId]),
+                -2);
         }
 
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)

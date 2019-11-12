@@ -21,7 +21,7 @@ namespace Unifiedban.Terminal.Bot
                 new BusinessLogic.Group.TelegramGroupLogic();
             TelegramGroup registered = telegramGroupLogic.Add(
                 message.Chat.Id, message.Chat.Title, TelegramGroup.Status.Active,
-                configuration: "{}",
+                configuration: Newtonsoft.Json.JsonConvert.SerializeObject(CacheData.GroupDefaultConfigs),
                 welcomeText: CacheData.GetTranslation("en", "message_welcome_default"),
                 chatLanguage: "en",
                 settingsLanguage: "en",
@@ -80,7 +80,7 @@ namespace Unifiedban.Terminal.Bot
                                     .Single(x => x.SysConfigId == "ControlChatId")
                                     .Value),
                         parseMode: ParseMode.Markdown,
-                        text: $"Error registering nre group with chat Id {message.Chat.Id}"
+                        text: $"Error registering the group with chat Id {message.Chat.Id}"
                     );
                 }
 
