@@ -89,8 +89,16 @@ namespace Unifiedban.Terminal.Bot
             if (!CacheData.Groups.ContainsKey(message.Chat.Id))
                 return;
 
+            bool captchaEnabled = false;
+            ConfigurationParameter captchaConfig = CacheData.GroupConfigs[message.Chat.Id]
+                .Where(x => x.ConfigurationParameterId == "Captcha")
+                .FirstOrDefault();
+            if (captchaConfig != null)
+                if (captchaConfig.Value.ToLower() == "true")
+                    captchaEnabled = true;
+
             // TODO - if group has Captcha option enabled
-            foreach(User member in message.NewChatMembers)
+            foreach (User member in message.NewChatMembers)
             {
                 if (member.Id == Manager.MyId)
                 {
@@ -99,42 +107,58 @@ namespace Unifiedban.Terminal.Bot
 
                 try
                 {
-                    Manager.BotClient.RestrictChatMemberAsync(
-                            message.Chat.Id,
-                            member.Id,
-                            new ChatPermissions()
+                    if (captchaEnabled)
+                    {
+                        Manager.BotClient.RestrictChatMemberAsync(
+                                message.Chat.Id,
+                                member.Id,
+                                new ChatPermissions()
+                                {
+                                    CanSendMessages = false,
+                                    CanAddWebPagePreviews = false,
+                                    CanChangeInfo = false,
+                                    CanInviteUsers = false,
+                                    CanPinMessages = false,
+                                    CanSendMediaMessages = false,
+                                    CanSendOtherMessages = false,
+                                    CanSendPolls = false
+                                }
+                            ).Wait();
+
+                        string name = member.Username != null ? "@" + member.Username : member.FirstName;
+                        MessageQueueManager.EnqueueMessage(
+                            new ChatMessage()
                             {
-                                CanSendMessages = false,
-                                CanAddWebPagePreviews = false,
-                                CanChangeInfo = false,
-                                CanInviteUsers = false,
-                                CanPinMessages = false,
-                                CanSendMediaMessages = false,
-                                CanSendOtherMessages = false,
-                                CanSendPolls = false
-                            }
-                        ).Wait();
+                                Timestamp = DateTime.UtcNow,
+                                Chat = message.Chat,
+                                ParseMode = ParseMode.Markdown,
+                                Text = $"Please {name} certify to be a human.\nIf you don't click this button you are not going to be unlocked.",
+                                ReplyMarkup = new InlineKeyboardMarkup(
+                                    InlineKeyboardButton.WithCallbackData(
+                                        CacheData.GetTranslation("en", "captcha_iamhuman", true),
+                                        $"/Captcha " + member.Id
+                                        )
+                                )
+                            });
+
+                        continue;
+                    }
+
+                    MessageQueueManager.EnqueueMessage(
+                       new ChatMessage()
+                       {
+                           Timestamp = DateTime.UtcNow,
+                           Chat = message.Chat,
+                           ParseMode = ParseMode.Html,
+                           Text = Utils.Parsers.VariablesParser(
+                               CacheData.Groups[message.Chat.Id].WelcomeText,
+                               message),
+                       });
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                 }
-
-                string name = member.Username != null ? "@" + member.Username : member.FirstName;
-                MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
-                    {
-                        Timestamp = DateTime.UtcNow,
-                        Chat = message.Chat,
-                        ParseMode = ParseMode.Markdown,
-                        Text = $"Please {name} certify to be a human.\nIf you don't click this button you are not going to be unlocked.",
-                        ReplyMarkup = new InlineKeyboardMarkup(
-                            InlineKeyboardButton.WithCallbackData(
-                                CacheData.GetTranslation("en", "captcha_iamhuman", true),
-                                $"/Captcha " + member.Id
-                                )
-                        )
-                    });
             }
         }
     }

@@ -13,7 +13,8 @@ namespace Unifiedban.Terminal.Utils
         {
             string parsedText = text;
 
-            parsedText = parsedText.Replace("{{from_username}}", message.From.Username);
+            string username = message.From.Username != null ? "@" + message.From.Username : message.From.FirstName;
+            parsedText = parsedText.Replace("{{from_username}}", username);
             parsedText = parsedText.Replace("{{from_id}}", message.From.Id.ToString());
             parsedText = parsedText.Replace("{{chat_title}}", message.Chat.Title);
             parsedText = parsedText.Replace("{{chat_id}}", message.Chat.Id.ToString());
@@ -23,14 +24,16 @@ namespace Unifiedban.Terminal.Utils
 
             if (message.ReplyToMessage != null)
             {
-                parsedText = parsedText.Replace("{{replyToMessage_from_username}}", message.ReplyToMessage.From.Username);
+                string replyToUsername = message.ReplyToMessage.From.Username != null ? "@" + message.ReplyToMessage.From.Username : message.ReplyToMessage.From.FirstName;
+                parsedText = parsedText.Replace("{{replyToMessage_from_username}}", replyToUsername);
                 parsedText = parsedText.Replace("{{replyToMessage_from_id}}", message.ReplyToMessage.From.Id.ToString());
                 parsedText = parsedText.Replace("{{replyToMessage_chat_title}}", message.ReplyToMessage.Chat.Title);
                 parsedText = parsedText.Replace("{{replyToMessage_chat_id}}", message.ReplyToMessage.Chat.Id.ToString());
 
                 if (message.ReplyToMessage.ForwardFrom != null)
                 {
-                    parsedText = parsedText.Replace("{{replyToMessage_forwardFrom_from_username}}", message.ReplyToMessage.ForwardFrom.Username);
+                    string forwardFromUsername = message.ReplyToMessage.ForwardFrom.Username != null ? "@" + message.ReplyToMessage.ForwardFrom.Username : message.ReplyToMessage.ForwardFrom.FirstName;
+                    parsedText = parsedText.Replace("{{replyToMessage_forwardFrom_from_username}}", forwardFromUsername);
                     parsedText = parsedText.Replace("{{replyToMessage_forwardFrom_from_id}}", message.ReplyToMessage.ForwardFrom.Id.ToString());
                     if (message.ReplyToMessage.ForwardFromChat != null)
                     {
@@ -42,11 +45,29 @@ namespace Unifiedban.Terminal.Utils
 
             if (message.ForwardFrom != null)
             {
-                parsedText = parsedText.Replace("{{forwardFrom_from_username}}", message.ReplyToMessage.From.Username);
+                string forwardFromUsername = message.ReplyToMessage.From.Username != null ? "@" + message.ReplyToMessage.From.Username : message.ReplyToMessage.From.FirstName;
+                parsedText = parsedText.Replace("{{forwardFrom_from_username}}", forwardFromUsername);
                 parsedText = parsedText.Replace("{{forwardFrom_from_id}}", message.ReplyToMessage.From.Id.ToString());
                 parsedText = parsedText.Replace("{{forwardFrom_chat_title}}", message.ReplyToMessage.Chat.Title);
                 parsedText = parsedText.Replace("{{forwardFrom_chat_id}}", message.ReplyToMessage.Chat.Id.ToString());
             }
+
+            return parsedText;
+        }
+
+        public static string VariablesParser(
+            string text,
+            CallbackQuery callbackQuery)
+        {
+            string parsedText = text;
+
+            string username = callbackQuery.From.Username != null ? "@" + callbackQuery.From.Username : callbackQuery.From.FirstName;
+            parsedText = parsedText.Replace("{{from_username}}", username);
+            parsedText = parsedText.Replace("{{from_id}}", callbackQuery.From.Id.ToString());
+            parsedText = parsedText.Replace("{{chat_title}}", callbackQuery.Message.Chat.Title);
+            parsedText = parsedText.Replace("{{chat_id}}", callbackQuery.Message.Chat.Id.ToString());
+            parsedText = parsedText.Replace("{{message_id}}", callbackQuery.Id);
+            parsedText = parsedText.Replace("{{from_isBot}}", callbackQuery.From.IsBot.ToString());
 
             return parsedText;
         }
