@@ -58,6 +58,8 @@ namespace Unifiedban.Terminal.Bot
                 UserId = -1
             });
 
+            MessageQueueManager.AddChatIfNotPresent(CacheData.ControlChatId);
+
             BotClient.OnMessage += BotClient_OnMessage;
             BotClient.OnCallbackQuery += BotClient_OnCallbackQuery;
             BotClient.StartReceiving();

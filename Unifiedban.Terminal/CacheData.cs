@@ -28,6 +28,8 @@ namespace Unifiedban.Terminal
         public static Dictionary<long, List<Models.Group.ConfigurationParameter>> GroupConfigs =
             new Dictionary<long, List<Models.Group.ConfigurationParameter>>();
 
+        public static long ControlChatId = 0;
+
         public static string GetTranslation(
             string languageId,
             string keyId,

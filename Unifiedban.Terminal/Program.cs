@@ -245,6 +245,10 @@ namespace Unifiedban.Terminal
                 UserId = -2
             });
 
+            CacheData.ControlChatId = Convert.ToInt64(CacheData.SysConfigs
+                            .Single(x => x.SysConfigId == "ControlChatId")
+                            .Value);
+
             if (!InitializeTranslations())
             {
                 CacheData.FatalError = true;
@@ -289,6 +293,12 @@ namespace Unifiedban.Terminal
                                 >(group.Configuration));
 
                     AddMissingConfiguration(group.TelegramChatId);
+                    /*
+                     * To be used to enable messages to Group's Control Chat/Channel
+                    Bot.MessageQueueManager.AddChatIfNotPresent(
+                        Convert.ToInt64(CacheData.GroupConfigs[group.TelegramChatId]
+                            .SingleOrDefault(x => x.ConfigurationParameterId == "ControlChatId").Value));
+                            */
                 }
                 catch(Exception ex)
                 {

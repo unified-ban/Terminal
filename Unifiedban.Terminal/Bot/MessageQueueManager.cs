@@ -114,5 +114,14 @@ namespace Unifiedban.Terminal.Bot
                     .Enqueue(message);
             }
         }
+        public static void EnqueueLog(ChatMessage message)
+        {
+            if (!isInitialized || isDisposing)
+                return;
+
+            PrivateChats[CacheData.ControlChatId]
+                    .Queue
+                    .Enqueue(message);
+        }
     }
 }

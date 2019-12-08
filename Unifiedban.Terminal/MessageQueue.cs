@@ -59,7 +59,7 @@ namespace Unifiedban.Terminal
             try
             {
                 Telegram.Bot.Types.Message sent = Bot.Manager.BotClient.SendTextMessageAsync(
-                        chatId: msgToSend.Chat.Id,
+                        chatId: TelegramChatId,
                         text: msgToSend.Text,
                         parseMode: msgToSend.ParseMode,
                         disableWebPagePreview: msgToSend.DisableWebPagePreview,
