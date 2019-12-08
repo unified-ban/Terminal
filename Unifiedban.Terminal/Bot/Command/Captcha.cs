@@ -41,14 +41,40 @@ namespace Unifiedban.Terminal.Bot.Command
                     });
 
             string name = callbackQuery.From.Username != null ? "@" + callbackQuery.From.Username : callbackQuery.From.FirstName;
+
+            bool welcomeMessage = false;
+            ConfigurationParameter welcomeMessageConfig = CacheData.GroupConfigs[callbackQuery.Message.Chat.Id]
+                .Where(x => x.ConfigurationParameterId == "WelcomeMessage")
+                .FirstOrDefault();
+            if (welcomeMessageConfig != null)
+                if (welcomeMessageConfig.Value.ToLower() == "true")
+                    welcomeMessage = true;
+
+            if (welcomeMessage)
+            {
+                MessageQueueManager.EnqueueMessage(
+                   new ChatMessage()
+                   {
+                       Timestamp = DateTime.UtcNow,
+                       Chat = callbackQuery.Message.Chat,
+                       ParseMode = ParseMode.Html,
+                       Text = Utils.Parsers.VariablesParser(
+                           CacheData.Groups[callbackQuery.Message.Chat.Id].WelcomeText,
+                           callbackQuery),
+                   });
+
+                return;
+            }
+
             MessageQueueManager.EnqueueMessage(
                     new ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = callbackQuery.Message.Chat,
                         ParseMode = ParseMode.Markdown,
-                        Text = $"Thank you {name}!\nYou are now fully unlocked.\nEnjoy your permanence here!",
+                        Text = $"Thank you {name}!\nYou are now fully unlocked.",
                     });
+
         }
     }
 }
