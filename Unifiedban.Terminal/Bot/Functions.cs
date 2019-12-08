@@ -102,15 +102,11 @@ namespace Unifiedban.Terminal.Bot
                 {
                     continue;
                 }
-                else if (CacheData.Operators
-                    .SingleOrDefault(x => x.TelegramUserId == member.Id) != null)
-                {
-                    continue;
-                }
 
                 try
                 {
-                    if (captchaEnabled)
+                    if (captchaEnabled && CacheData.Operators
+                        .SingleOrDefault(x => x.TelegramUserId == member.Id) == null)
                     {
                         Manager.BotClient.RestrictChatMemberAsync(
                                 message.Chat.Id,
