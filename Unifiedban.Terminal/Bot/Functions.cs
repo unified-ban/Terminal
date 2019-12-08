@@ -96,10 +96,14 @@ namespace Unifiedban.Terminal.Bot
                 if (captchaConfig.Value.ToLower() == "true")
                     captchaEnabled = true;
 
-            // TODO - if group has Captcha option enabled
             foreach (User member in message.NewChatMembers)
             {
                 if (member.Id == Manager.MyId)
+                {
+                    continue;
+                }
+                else if (CacheData.Operators
+                    .SingleOrDefault(x => x.TelegramUserId == member.Id) != null)
                 {
                     continue;
                 }
