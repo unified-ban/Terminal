@@ -3,14 +3,14 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <Version>3.0.0-beta.2</Version>
+    <Version>3.0.0-beta.3</Version>
     <Authors>SubPixel for linux/hub</Authors>
     <Product>Unifiedban Terminal</Product>
     <Copyright>LinuxHub 2019</Copyright>
     <RepositoryUrl>https://todo/</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
     <AssemblyVersion>3.0.0</AssemblyVersion>
-    <FileVersion>3.0.0.274</FileVersion>
+    <FileVersion>3.0.0.279</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -51,6 +51,32 @@ namespace Unifiedban.Terminal.Bot
             return added;
         }
 
+        public static bool RemoveGroupIfNotPresent(TelegramGroup group)
+        {
+            // Do not accept new chat if going to shutdown
+            if (isDisposing)
+                return false;
+
+            if (!GroupChats.ContainsKey(group.TelegramChatId))
+                return false;
+
+            bool removed = GroupChats.TryRemove(group.TelegramChatId, out MessageQueue messageQueue);
+            return removed;
+        }
+
+        public static bool RemoveGroupIfNotPresent(long telegramChatId)
+        {
+            // Do not accept new chat if going to shutdown
+            if (isDisposing)
+                return false;
+
+            if (!GroupChats.ContainsKey(telegramChatId))
+                return false;
+
+            bool removed = GroupChats.TryRemove(telegramChatId, out MessageQueue messageQueue);
+            return removed;
+        }
+
         public static bool AddChatIfNotPresent(long chatId)
         {
             // Do not accept new chat if going to shutdown

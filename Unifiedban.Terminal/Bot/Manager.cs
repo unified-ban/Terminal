@@ -124,6 +124,11 @@ namespace Unifiedban.Terminal.Bot
                 UserId = -1
             });
 
+            if (e.Message.MigrateToChatId != 0)
+            {
+                Functions.MigrateToChatId(e.Message);
+            }
+
             if (!String.IsNullOrEmpty(e.Message.Text))
             {
                 if (e.Message.Text.StartsWith('/'))

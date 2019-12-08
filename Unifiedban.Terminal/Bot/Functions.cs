@@ -83,7 +83,6 @@ namespace Unifiedban.Terminal.Bot
                         text: $"Error registering the group with chat Id {message.Chat.Id}"
                     );
                 }
-
             }
 
             if (!CacheData.Groups.ContainsKey(message.Chat.Id))
@@ -136,6 +135,25 @@ namespace Unifiedban.Terminal.Bot
                         )
                     });
             }
+        }
+
+        public static void MigrateToChatId(Message message)
+        {
+            if (!CacheData.Groups.ContainsKey(message.Chat.Id))
+                return;
+
+            BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
+               new BusinessLogic.Group.TelegramGroupLogic();
+
+            TelegramGroup updated = telegramGroupLogic.UpdateChatId(message.Chat.Id, message.MigrateToChatId, -2); // TODO - log operation
+            if (updated == null)
+                return;
+
+            CacheData.Groups[message.Chat.Id].TelegramChatId = message.MigrateToChatId;
+            CacheData.Groups.Add(message.MigrateToChatId, CacheData.Groups[message.Chat.Id]);
+            CacheData.Groups.Remove(message.Chat.Id);
+            MessageQueueManager.AddGroupIfNotPresent(updated);
+            MessageQueueManager.RemoveGroupIfNotPresent(message.Chat.Id);
         }
     }
 }
