@@ -29,27 +29,38 @@ namespace Unifiedban.Terminal.Utils
                 parsedText = parsedText.Replace("{{replyToMessage_from_id}}", message.ReplyToMessage.From.Id.ToString());
                 parsedText = parsedText.Replace("{{replyToMessage_chat_title}}", message.ReplyToMessage.Chat.Title);
                 parsedText = parsedText.Replace("{{replyToMessage_chat_id}}", message.ReplyToMessage.Chat.Id.ToString());
+                parsedText = parsedText.Replace("{{replyToMessage_message_id}}", message.ReplyToMessage.MessageId.ToString());
+                parsedText = parsedText.Replace("{{replyToMessage_from_isBot}}", message.ReplyToMessage.From.IsBot.ToString());
 
                 if (message.ReplyToMessage.ForwardFrom != null)
                 {
                     string forwardFromUsername = message.ReplyToMessage.ForwardFrom.Username != null ? "@" + message.ReplyToMessage.ForwardFrom.Username : message.ReplyToMessage.ForwardFrom.FirstName;
                     parsedText = parsedText.Replace("{{replyToMessage_forwardFrom_from_username}}", forwardFromUsername);
                     parsedText = parsedText.Replace("{{replyToMessage_forwardFrom_from_id}}", message.ReplyToMessage.ForwardFrom.Id.ToString());
+                    parsedText = parsedText.Replace("{{replyToMessage_forwardFrom_message_id}}", message.ReplyToMessage.ForwardFromMessageId.ToString());
+                    parsedText = parsedText.Replace("{{replyToMessage_forwardFrom_from_isBot}}", message.ReplyToMessage.ForwardFrom.IsBot.ToString());
                     if (message.ReplyToMessage.ForwardFromChat != null)
                     {
                         parsedText = parsedText.Replace("{{replyToMessage_forwardFrom_chat_title}}", message.ReplyToMessage.ForwardFromChat.Title);
                         parsedText = parsedText.Replace("{{replyToMessage_forwardFrom_chat_id}}", message.ReplyToMessage.ForwardFromChat.Id.ToString());
+                    }
+                    else
+                    {
+                        parsedText = parsedText.Replace("{{replyToMessage_forwardFrom_chat_title}}", "Impossible to get chat title");
+                        parsedText = parsedText.Replace("{{replyToMessage_forwardFrom_chat_id}}", "Impossible to get chat id");
                     }
                 }
             }
 
             if (message.ForwardFrom != null)
             {
-                string forwardFromUsername = message.ReplyToMessage.From.Username != null ? "@" + message.ReplyToMessage.From.Username : message.ReplyToMessage.From.FirstName;
+                string forwardFromUsername = message.ForwardFrom.Username != null ? "@" + message.ForwardFrom.Username : message.ForwardFrom.FirstName;
                 parsedText = parsedText.Replace("{{forwardFrom_from_username}}", forwardFromUsername);
-                parsedText = parsedText.Replace("{{forwardFrom_from_id}}", message.ReplyToMessage.From.Id.ToString());
-                parsedText = parsedText.Replace("{{forwardFrom_chat_title}}", message.ReplyToMessage.Chat.Title);
-                parsedText = parsedText.Replace("{{forwardFrom_chat_id}}", message.ReplyToMessage.Chat.Id.ToString());
+                parsedText = parsedText.Replace("{{forwardFrom_from_id}}", message.ForwardFrom.Id.ToString());
+                parsedText = parsedText.Replace("{{forwardFrom_chat_title}}", message.ForwardFromChat.Title);
+                parsedText = parsedText.Replace("{{forwardFrom_chat_id}}", message.ForwardFromChat.Id.ToString());
+                parsedText = parsedText.Replace("{{forwardFrom_message_id}}", message.ForwardFromMessageId.ToString());
+                parsedText = parsedText.Replace("{{forwardFrom_from_isBot}}", message.ForwardFrom.IsBot.ToString());
             }
 
             return parsedText;
