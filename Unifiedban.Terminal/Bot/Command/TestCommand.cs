@@ -20,6 +20,10 @@ namespace Unifiedban.Terminal.Bot.Command
 
             List<InlineKeyboardButton> confirmationButton = new List<InlineKeyboardButton>();
             confirmationButton.Add(InlineKeyboardButton.WithUrl("Start with command", "http://t.me/LinuxPixelHubBot?start=motd"));
+            confirmationButton.Add(InlineKeyboardButton.WithCallbackData(
+                                        CacheData.GetTranslation("en", "captcha_iamhuman", true),
+                                        $"/test " + message.From.Id
+                                        ));
 
             MessageQueueManager.EnqueueMessage(
                     new ChatMessage()
@@ -31,6 +35,14 @@ namespace Unifiedban.Terminal.Bot.Command
                         ReplyMarkup = new InlineKeyboardMarkup(
                             confirmationButton
                         )
+                    });
+
+            MessageQueueManager.EnqueueMessage(
+                    new ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        Text = Newtonsoft.Json.JsonConvert.SerializeObject(confirmationButton)
                     });
         }
 
