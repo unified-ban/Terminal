@@ -10,19 +10,19 @@
     <RepositoryUrl>https://todo/</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
     <AssemblyVersion>3.0.0</AssemblyVersion>
-    <FileVersion>3.0.0.285</FileVersion>
+    <FileVersion>3.0.0.295</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HangFire" Version="1.7.6" />
-    <PackageReference Include="HangFire.SqlServer" Version="1.7.6" />
+    <PackageReference Include="HangFire" Version="1.7.8" />
+    <PackageReference Include="HangFire.SqlServer" Version="1.7.8" />
     <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-    <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
-    <PackageReference Include="Telegram.Bot" Version="15.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
+    <PackageReference Include="Telegram.Bot" Version="15.1.0" />
   </ItemGroup>
 
   <ItemGroup>
