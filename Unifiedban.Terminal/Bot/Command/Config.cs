@@ -17,6 +17,8 @@ namespace Unifiedban.Terminal.Bot.Command
 
         public void Execute(Message message, bool isUpdate = false)
         {
+            Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+
             if (!Utils.BotTools.IsUserOperator(message.From.Id) &&
                 !Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
             {
@@ -123,6 +125,8 @@ namespace Unifiedban.Terminal.Bot.Command
             {
                 case "close":
                     Manager.BotClient.DeleteMessageAsync(callbackQuery.Message.Chat.Id, callbackQuery.Message.MessageId);
+                    if (parameters.Length > 1)
+                        Execute(callbackQuery.Message);
                     break;
                 case "getValue":
                     requestNewValue(callbackQuery.Message, parameters[1]);
@@ -163,8 +167,6 @@ namespace Unifiedban.Terminal.Bot.Command
             if (conf == null)
                 return;
 
-            // *[ADMIN] [r:{callbackQuery.Message.MessageId}]*
-
             switch (conf.Type)
             {
                 case "string":
@@ -194,8 +196,6 @@ namespace Unifiedban.Terminal.Bot.Command
                 default:
                     break;
             }
-
-            
         }
 
         private List<List<InlineKeyboardButton>> buildLanguageSelectionMenu()
@@ -229,7 +229,7 @@ namespace Unifiedban.Terminal.Bot.Command
 
             }
             langMenu.Add(new List<InlineKeyboardButton>());
-            langMenu[depthLevel + 1].Add(InlineKeyboardButton.WithCallbackData("Close menu", $"/config close"));
+            langMenu[depthLevel + 1].Add(InlineKeyboardButton.WithCallbackData("Close menu", $"/config close|true"));
 
             return langMenu;
         }
