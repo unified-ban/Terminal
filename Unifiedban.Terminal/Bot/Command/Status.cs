@@ -35,7 +35,8 @@ namespace Unifiedban.Terminal.Bot.Command
                         $"Used *RAM* is {Math.Round(usedRam, 2)}MB\n" +
                         $"Used *CPU* is {Math.Round(GetCpuUsageForProcess().Result, 2)}%\n" +
                         $"*Database* status is {SQLStatus}\n" +
-                        $"*Environment* is {env}"
+                        $"*Environment* is {env}\n" +
+                        $"*Messages since start:* {CacheData.HandledMessages}"
                 });
         }
 

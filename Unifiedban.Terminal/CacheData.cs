@@ -30,6 +30,9 @@ namespace Unifiedban.Terminal
 
         public static long ControlChatId = 0;
 
+        public static int HandledMessages { get; private set; }
+        private static object lockHandledMessages = new object();
+
         public static string GetTranslation(
             string languageId,
             string keyId,
@@ -48,6 +51,14 @@ namespace Unifiedban.Terminal
                 return value.Substring(0, 1).ToUpper() + value.Substring(1, value.Length - 1);
             
             return value;
+        }
+
+        public static void IncrementHandledMessages()
+        {
+            lock (lockHandledMessages)
+            {
+                HandledMessages++;
+            }
         }
 
         // [[ Cache ]]

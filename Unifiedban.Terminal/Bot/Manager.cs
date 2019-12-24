@@ -125,6 +125,7 @@ namespace Unifiedban.Terminal.Bot
                 Message = "Message received",
                 UserId = -1
             });
+            await Task.Run(() => CacheData.IncrementHandledMessages());
 
             if (e.Message.MigrateToChatId != 0)
             {
