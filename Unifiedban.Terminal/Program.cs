@@ -90,6 +90,7 @@ namespace Unifiedban.Terminal
 
             LoadCacheData();
             InitializeHangfireServer();
+            Controls.Manager.Initialize();
             Bot.MessageQueueManager.Initialize();
             Bot.CommandQueueManager.Initialize();
             Bot.Manager.Initialize(CacheData.Configuration["APIKEY"]);
@@ -256,6 +257,8 @@ namespace Unifiedban.Terminal
                 return;
             }
 
+            LoadFiltersData();
+
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
                 LoggerName = CacheData.LoggerName,
@@ -316,6 +319,21 @@ namespace Unifiedban.Terminal
                 }
                 Bot.MessageQueueManager.AddGroupIfNotPresent(group);
             }
+        }
+        static void LoadFiltersData()
+        {
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Get filters data",
+                UserId = -2
+            });
+
+            BusinessLogic.Filters.BadWordLogic badWordLogic = new BusinessLogic.Filters.BadWordLogic();
+            CacheData.BadWords = badWordLogic.Get();
         }
 
         public static void AddMissingConfiguration(long telegramGroupId)

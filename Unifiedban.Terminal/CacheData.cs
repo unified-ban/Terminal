@@ -64,6 +64,7 @@ namespace Unifiedban.Terminal
         // [[ Cache ]]
         public static List<Utils.ImageHash> BannedImagesHash =
             new List<Utils.ImageHash>();
+        public static List<Models.Filters.BadWord> BadWords = new List<Models.Filters.BadWord>();
 
     }
 }

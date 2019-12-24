@@ -151,6 +151,9 @@ namespace Unifiedban.Terminal.Bot
 
             if (e.Message.NewChatMembers != null)
                 Functions.UserJoinedAction(e.Message);
+
+            if (!String.IsNullOrEmpty(e.Message.Text))
+                Controls.Manager.DoCheck(e.Message);
         }
     }
 }
