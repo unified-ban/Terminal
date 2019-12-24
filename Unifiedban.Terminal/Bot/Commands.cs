@@ -29,6 +29,9 @@ namespace Unifiedban.Terminal.Bot
         public const string R = "R";
         public const string STATUS = "STATUS";
         public const string CONFIG = "CONFIG";
+        public const string SETWELCOME = "SETWELCOME";
+        public const string SETRULES = "SETRULES";
+
         public const string TEST1 = "TEST1";
 
         public static Dictionary<string, Command.ICommand> CommandsList;
@@ -73,6 +76,8 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(STATUS, new Command.Status());
 
             CommandsList.Add(CONFIG, new Command.Config());
+            CommandsList.Add(SETWELCOME, new Command.SetWelcome());
+            CommandsList.Add(SETRULES, new Command.SetRules());
 
 #if DEBUG
             CommandsList.Add(TEST1, new Command.TestCommand());

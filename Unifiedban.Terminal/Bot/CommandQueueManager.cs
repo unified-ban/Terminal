@@ -74,9 +74,13 @@ namespace Unifiedban.Terminal.Bot
                         Command.AddTranslation.AddTranslationEntry(commandMessage, message);
                         break;
                     case "SetWelcomeText":
+                        if (String.IsNullOrEmpty(message.Text))
+                            break;
                         Utils.ConfigTools.UpdateWelcomeText(message.Chat.Id, message.Text);
                         break;
                     case "SetRulesText":
+                        if (String.IsNullOrEmpty(message.Text))
+                            break;
                         Utils.ConfigTools.UpdateRulesText(message.Chat.Id, message.Text);
                         break;
                 }
