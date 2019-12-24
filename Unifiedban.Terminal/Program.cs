@@ -93,6 +93,7 @@ namespace Unifiedban.Terminal
             Bot.MessageQueueManager.Initialize();
             Bot.CommandQueueManager.Initialize();
             Bot.Manager.Initialize(CacheData.Configuration["APIKEY"]);
+            Utils.ConfigTools.Initialize();
 #if DEBUG
             TestArea.DoTest();
 #endif
