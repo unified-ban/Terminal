@@ -178,7 +178,7 @@ namespace Unifiedban.Terminal.Bot.Command
 
             CommandQueueManager.DenqueueMessage(commandMessage);
 
-            var regexItem = new Regex("^[a-zA-Z0-9]*$");
+            var regexItem = new Regex("^[a-zA-Z0-9_]*$");
             if (!regexItem.IsMatch(replyMessage.Text.Trim()))
             {
                 MessageQueueManager.EnqueueMessage(
