@@ -96,6 +96,14 @@ namespace Unifiedban.Terminal.Bot
                 if (captchaConfig.Value.ToLower() == "true")
                     captchaEnabled = true;
 
+            bool welcomeMessageEnabled = false;
+            ConfigurationParameter welcomeMessageConfig = CacheData.GroupConfigs[message.Chat.Id]
+                .Where(x => x.ConfigurationParameterId == "WelcomeMessage")
+                .FirstOrDefault();
+            if (welcomeMessageConfig != null)
+                if (welcomeMessageConfig.Value.ToLower() == "true")
+                    welcomeMessageEnabled = true;
+
             foreach (User member in message.NewChatMembers)
             {
                 if (member.Id == Manager.MyId)
@@ -143,16 +151,19 @@ namespace Unifiedban.Terminal.Bot
                         continue;
                     }
 
-                    MessageQueueManager.EnqueueMessage(
-                       new ChatMessage()
-                       {
-                           Timestamp = DateTime.UtcNow,
-                           Chat = message.Chat,
-                           ParseMode = ParseMode.Html,
-                           Text = Utils.Parsers.VariablesParser(
-                               CacheData.Groups[message.Chat.Id].WelcomeText,
-                               message),
-                       });
+                    if (welcomeMessageEnabled)
+                    {
+                        MessageQueueManager.EnqueueMessage(
+                           new ChatMessage()
+                           {
+                               Timestamp = DateTime.UtcNow,
+                               Chat = message.Chat,
+                               ParseMode = ParseMode.Html,
+                               Text = Utils.Parsers.VariablesParser(
+                                   CacheData.Groups[message.Chat.Id].WelcomeText,
+                                   message),
+                           });
+                    }
                 }
                 catch (Exception ex)
                 {
