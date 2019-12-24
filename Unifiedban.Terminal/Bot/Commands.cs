@@ -44,8 +44,8 @@ namespace Unifiedban.Terminal.Bot
 
             CommandsList.Add(ADDTRANSLATION, new Command.AddTranslation());
             CommandsList.Add(GETTRANSLATION, new Command.GetTranslation());
-            CommandsList.Add(RELOADTRANSLATIONS, new Command.GetTranslation());
-            CommandsList.Add(RELOADTRANSLATION, new Command.GetTranslation());
+            CommandsList.Add(RELOADTRANSLATIONS, new Command.ReloadTranslations());
+            CommandsList.Add(RELOADTRANSLATION, new Command.ReloadTranslations());
 
             CommandsList.Add(ECHO, new Command.Echo());
 
