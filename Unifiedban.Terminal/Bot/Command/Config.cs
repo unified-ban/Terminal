@@ -24,7 +24,7 @@ namespace Unifiedban.Terminal.Bot.Command
             }
 
             List<List<InlineKeyboardButton>> configMenu = new List<List<InlineKeyboardButton>>();
-            int btnCount = 0;
+            int btnCount;
             int depthLevel = 0;
 
             configMenu.Add(new List<InlineKeyboardButton>());
@@ -49,8 +49,17 @@ namespace Unifiedban.Terminal.Bot.Command
                             string newSet = conf.Value == "true" ? "false" : "true";
                             string icon = conf.Value == "true" ? " ✅" : " ❌";
                             configMenu[depthLevel].Add(InlineKeyboardButton.WithCallbackData(
-                                CacheData.GetTranslation("en", conf.ConfigurationParameterId, true) + icon,
+                                CacheData.GetTranslation("en", conf.ConfigurationParameterId, true) + " " + icon,
                                 $"/config { conf.ConfigurationParameterId }|{ newSet }"
+                                ));
+                            break;
+                        case "multiselect":
+                        case "int":
+                        case "string":
+                        case "language":
+                            configMenu[depthLevel].Add(InlineKeyboardButton.WithCallbackData(
+                                CacheData.GetTranslation("en", conf.ConfigurationParameterId, true),
+                                $"/config getValue|{ conf.ConfigurationParameterId }"
                                 ));
                             break;
                     }
@@ -74,7 +83,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 Manager.BotClient.EditMessageTextAsync(
                     chatId: message.Chat.Id,
                     messageId: message.MessageId,
-                    text: "*[Config:]*",
+                    text: "*[ADMIN] [Config:]*",
                     parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                     replyMarkup: new InlineKeyboardMarkup(
                             configMenu
@@ -88,7 +97,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
                     ParseMode = Telegram.Bot.Types.Enums.ParseMode.Markdown,
-                    Text = "*Settings*\nBot configuration for this group.",
+                    Text = "*[ADMIN] Settings*\nBot configuration for this group.",
                     ReplyMarkup = new InlineKeyboardMarkup(
                             configMenu
                         )
@@ -115,6 +124,9 @@ namespace Unifiedban.Terminal.Bot.Command
                 case "close":
                     Manager.BotClient.DeleteMessageAsync(callbackQuery.Message.Chat.Id, callbackQuery.Message.MessageId);
                     break;
+                case "getValue":
+                    requestNewValue(callbackQuery.Message, parameters[1]);
+                    break;
                 default:
                     if (parameters.Length < 2)
                         return;
@@ -139,6 +151,87 @@ namespace Unifiedban.Terminal.Bot.Command
                 .Value = newValue;
 
             Execute(message, true);
+        }
+
+        private void requestNewValue(Message message, string configurationParameterId)
+        {
+            Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+            Models.Group.ConfigurationParameter conf = CacheData.GroupConfigs[message.Chat.Id]
+                .Where(x => x.ConfigurationParameterId == configurationParameterId)
+                .SingleOrDefault();
+
+            if (conf == null)
+                return;
+
+            // *[ADMIN] [r:{callbackQuery.Message.MessageId}]*
+
+            switch (conf.Type)
+            {
+                case "string":
+                    MessageQueueManager.EnqueueMessage(
+                    new ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        ParseMode = Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                        Text = $"*[ADMIN] Settings [r:{message.MessageId}]*\nProvide new value:",
+                        ReplyMarkup = new ForceReplyMarkup() { Selective = true }
+                    });
+                    break;
+                case "language":
+                    MessageQueueManager.EnqueueMessage(
+                    new ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        ParseMode = Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                        Text = $"*[ADMIN] Settings [r:{message.MessageId}]*\nSelect language:",
+                        ReplyMarkup = new InlineKeyboardMarkup(
+                                buildLanguageSelectionMenu()
+                            )
+                    });
+                    break;
+                default:
+                    break;
+            }
+
+            
+        }
+
+        private List<List<InlineKeyboardButton>> buildLanguageSelectionMenu()
+        {
+            List<List<InlineKeyboardButton>> langMenu = new List<List<InlineKeyboardButton>>();
+            int btnCount = 0;
+            int depthLevel = 0;
+            langMenu.Add(new List<InlineKeyboardButton>());
+
+            try
+            {
+                foreach (Models.Translation.Language lang in CacheData.Languages.Values)
+                {
+                    if (btnCount == 2)
+                    {
+                        btnCount = 0;
+                        langMenu.Add(new List<InlineKeyboardButton>());
+                        depthLevel++;
+                    }
+
+                    langMenu[depthLevel].Add(InlineKeyboardButton.WithCallbackData(
+                                lang.Name,
+                                $"/config Language|{ lang.LanguageId }"
+                                ));
+
+                    btnCount++;
+                }
+            }
+            catch
+            {
+
+            }
+            langMenu.Add(new List<InlineKeyboardButton>());
+            langMenu[depthLevel + 1].Add(InlineKeyboardButton.WithCallbackData("Close menu", $"/config close"));
+
+            return langMenu;
         }
     }
 }
