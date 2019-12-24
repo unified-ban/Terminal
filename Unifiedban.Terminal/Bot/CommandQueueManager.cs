@@ -73,6 +73,12 @@ namespace Unifiedban.Terminal.Bot
                     case "AddTranslationEntry":
                         Command.AddTranslation.AddTranslationEntry(commandMessage, message);
                         break;
+                    case "SetWelcomeText":
+                        Utils.ConfigTools.UpdateWelcomeText(message.Chat.Id, message.Text);
+                        break;
+                    case "SetRulesText":
+                        Utils.ConfigTools.UpdateRulesText(message.Chat.Id, message.Text);
+                        break;
                 }
             }
             catch

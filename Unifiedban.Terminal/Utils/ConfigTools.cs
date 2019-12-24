@@ -11,6 +11,7 @@ namespace Unifiedban.Terminal.Utils
         public static void Initialize()
         {
             RecurringJob.AddOrUpdate("ConfigTools_SyncGroupsConfigToDatabase", () => SyncGroupsConfigToDatabase(), "0/30 0 * ? * *");
+            RecurringJob.AddOrUpdate("ConfigTools_SyncWelcomeAndRulesText", () => SyncWelcomeAndRulesText(), "0/30 0 * ? * *");
         }
 
         public static void SyncGroupsConfigToDatabase()
@@ -23,6 +24,48 @@ namespace Unifiedban.Terminal.Utils
                     group,
                     JsonConvert.SerializeObject(CacheData.GroupConfigs[group]),
                     -2);
+        }
+
+        public static void SyncWelcomeAndRulesText()
+        {
+            BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
+                new BusinessLogic.Group.TelegramGroupLogic();
+
+            foreach (long group in CacheData.Groups.Keys)
+            {
+                telegramGroupLogic.UpdateWelcomeText(
+                    group, CacheData.Groups[group].WelcomeText,
+                    -2);
+                telegramGroupLogic.UpdateRulesText(
+                    group, CacheData.Groups[group].RulesText,
+                    -2);
+            }
+        }
+
+        public static bool UpdateWelcomeText(long groupId, string text)
+        {
+            try
+            {
+                CacheData.Groups[groupId].WelcomeText = text;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool UpdateRulesText(long groupId, string text)
+        {
+            try
+            {
+                CacheData.Groups[groupId].RulesText = text;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }
