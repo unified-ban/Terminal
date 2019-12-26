@@ -13,6 +13,7 @@ namespace Unifiedban.Terminal.Controls
         public static void Initialize()
         {
             filters.Add(new Filters.BadWordFilter());
+            Filters.BadWordFilter.BuildDictionary();
         }
 
         public static void DoCheck(Message message)
