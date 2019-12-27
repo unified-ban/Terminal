@@ -14,6 +14,7 @@ namespace Unifiedban.Terminal.Controls
         {
             filters.Add(new Filters.BadWordFilter());
             Filters.BadWordFilter.BuildDictionary();
+            filters.Add(new Filters.NonLatinFilter());
         }
 
         public static void DoCheck(Message message)
