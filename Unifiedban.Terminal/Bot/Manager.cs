@@ -154,6 +154,11 @@ namespace Unifiedban.Terminal.Bot
 
             if (!String.IsNullOrEmpty(e.Message.Text))
                 Controls.Manager.DoCheck(e.Message);
+
+            if (!String.IsNullOrEmpty(e.Message.MediaGroupId) ||
+                e.Message.Photo != null ||
+                e.Message.Document != null)
+                Controls.Manager.DoMediaCheck(e.Message);
         }
     }
 }
