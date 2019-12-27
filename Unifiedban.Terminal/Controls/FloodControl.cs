@@ -37,8 +37,9 @@ namespace Unifiedban.Terminal.Controls
                     CheckName = "AntiFlood",
                     Result = IControl.ControlResultType.skipped
                 };
+
             Models.Group.ConfigurationParameter configValue = CacheData.GroupConfigs[message.Chat.Id]
-                .Where(x => x.Value == "FloodControl")
+                .Where(x => x.ConfigurationParameterId == "FloodControl")
                 .SingleOrDefault();
             if (configValue != null)
                 if (configValue.Value == "false")

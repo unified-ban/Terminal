@@ -13,7 +13,7 @@ namespace Unifiedban.Terminal.Filters
         public FilterResult DoCheck(Message message)
         {
             Models.Group.ConfigurationParameter configValue = CacheData.GroupConfigs[message.Chat.Id]
-                .Where(x => x.Value == "NonLatinFilter")
+                .Where(x => x.ConfigurationParameterId == "NonLatinFilter")
                 .SingleOrDefault();
             if (configValue != null)
                 if (configValue.Value == "false")
