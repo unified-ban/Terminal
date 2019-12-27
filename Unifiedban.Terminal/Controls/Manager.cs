@@ -15,6 +15,7 @@ namespace Unifiedban.Terminal.Controls
         {
             controls.Add(new SpamNameControl());
             controls.Add(new FloodControl());
+            controls.Add(new SafeGroupControl());
 
             filters.Add(new Filters.BadWordFilter());
             Filters.BadWordFilter.BuildDictionary();
