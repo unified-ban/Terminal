@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Unifiedban.Terminal.Controls
 {
@@ -48,6 +49,14 @@ namespace Unifiedban.Terminal.Controls
                         CheckName = "AntiFlood",
                         Result = IControl.ControlResultType.skipped
                     };
+
+            var userLimitations = Bot.Manager.BotClient.GetChatMemberAsync(message.Chat.Id, message.From.Id).Result;
+            if(userLimitations.CanSendMessages == false)
+                return new ControlResult()
+                {
+                    CheckName = "AntiFlood",
+                    Result = IControl.ControlResultType.skipped
+                };
 
             Dictionary<int, Flood> floodCounter = FloodCounter.GetValueOrDefault(message.Chat.Id);
             if (floodCounter == null)
@@ -118,6 +127,22 @@ namespace Unifiedban.Terminal.Controls
                         message.From.Id,
                         message.Chat.Title)
                 );
+
+                Bot.MessageQueueManager.EnqueueMessage(
+                    new ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        ParseMode = Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                        Text = $"User {message.From.Username} has been limited for {minutes} minutes due to flood.\n."
+                        + "An admin can immediately remove this limitation by clicking the button below.",
+                        ReplyMarkup = new InlineKeyboardMarkup(
+                            InlineKeyboardButton.WithCallbackData(
+                                CacheData.GetTranslation("en", "button_removeFlood", true),
+                                $"/RemoveFlood " + message.From.Id
+                                )
+                        )
+                    });
 
                 return new ControlResult()
                 {
