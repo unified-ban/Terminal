@@ -34,6 +34,7 @@ namespace Unifiedban.Terminal.Bot
                 return false;
 
             CacheData.Groups.Add(message.Chat.Id, registered);
+            CacheData.GroupConfigs.Add(message.Chat.Id, CacheData.GroupDefaultConfigs);
             if (MessageQueueManager.AddGroupIfNotPresent(registered))
             {
                 Manager.BotClient.SendTextMessageAsync(
