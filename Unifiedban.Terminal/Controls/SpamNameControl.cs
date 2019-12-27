@@ -70,7 +70,7 @@ namespace Unifiedban.Terminal.Controls
 
         void CheckIfNameIsValid(string name)
         {
-            string regex = @"(http|ftp|https:\/\/)?([\w_-]+\s?(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])?";
+            string regex = @"((http|ftp|https):\/\/)?([\w_-]+\s?(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])?";
             Regex reg = new Regex(regex, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
             MatchCollection matchedWords = reg.Matches(name);
             if (matchedWords.Count == 0)
@@ -78,7 +78,7 @@ namespace Unifiedban.Terminal.Controls
                 isNameSafe[name] = true;
                 return;
             }
-            using (System.Net.WebClient client = new System.Net.WebClient())
+            using (WebClientWithTimeout client = new WebClientWithTimeout())
             {
                 string siteUri = name;
                 if (!name.Contains("http://") && !name.Contains("https://"))

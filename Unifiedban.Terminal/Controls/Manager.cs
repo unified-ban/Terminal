@@ -78,5 +78,33 @@ namespace Unifiedban.Terminal.Controls
                         result.Rule)
                 );
         }
+
+        public static bool IsTelegramLink(string siteUri)
+        {
+            using (System.Net.WebClient client = new System.Net.WebClient())
+            {
+                string htmlCode = "";
+                try
+                {
+                    htmlCode = client.DownloadString(siteUri);
+                }
+                catch { }
+
+                if (htmlCode.Contains("tgme_page_extra"))
+                    return true;
+
+                return false;
+            }
+        }
+    }
+
+    public class WebClientWithTimeout : System.Net.WebClient
+    {
+        protected override System.Net.WebRequest GetWebRequest(Uri address)
+        {
+            System.Net.WebRequest wr = base.GetWebRequest(address);
+            wr.Timeout = 5000; // timeout in milliseconds (ms)
+            return wr;
+        }
     }
 }
