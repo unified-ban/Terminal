@@ -63,26 +63,18 @@ namespace Unifiedban.Terminal.Bot
                 });
 
                 if (!CacheData.Groups.ContainsKey(message.Chat.Id))
-                    Data.Utils.Logging.AddLog(new SystemLog()
-                    {
-                        LoggerName = CacheData.LoggerName,
-                        Date = DateTime.Now,
-                        Function = "Unifiedban.Bot.Manager.BotClient_OnMessage",
-                        Level = SystemLog.Levels.Info,
-                        Message = $"Group {message.Chat.Title} ID {message.Chat.Id} is already registered",
-                        UserId = -1
-                    });
-
-                bool registered = RegisterGroup(message);
-                if (!registered)
                 {
-                    Manager.BotClient.SendTextMessageAsync(
-                        chatId: Convert.ToInt64(CacheData.SysConfigs
-                                    .Single(x => x.SysConfigId == "ControlChatId")
-                                    .Value),
-                        parseMode: ParseMode.Markdown,
-                        text: $"Error registering the group with chat Id {message.Chat.Id}"
-                    );
+                    bool registered = RegisterGroup(message);
+                    if (!registered)
+                    {
+                        Manager.BotClient.SendTextMessageAsync(
+                            chatId: Convert.ToInt64(CacheData.SysConfigs
+                                        .Single(x => x.SysConfigId == "ControlChatId")
+                                        .Value),
+                            parseMode: ParseMode.Markdown,
+                            text: $"Error registering the group with chat Id {message.Chat.Id}"
+                        );
+                    }
                 }
             }
 
