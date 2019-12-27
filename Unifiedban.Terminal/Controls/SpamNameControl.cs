@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace Unifiedban.Terminal.Controls
 {
     public class SpamNameControl : IControl
     {
-        static Dictionary<string, bool> isNameSafe = new Dictionary<string, bool>();
+        static ConcurrentDictionary<string, bool> isNameSafe = new ConcurrentDictionary<string, bool>();
 
         public ControlResult DoCheck(Message message)
         {
