@@ -21,6 +21,22 @@ namespace Unifiedban.Terminal.Controls
 
         public ControlResult DoCheck(Message message)
         {
+            if (Utils.BotTools.IsUserOperator(message.From.Id) ||
+                Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
+            {
+                return new ControlResult()
+                {
+                    CheckName = "AntiFlood",
+                    Result = IControl.ControlResultType.skipped
+                };
+            }
+
+            if(message.Date < DateTime.UtcNow.AddMinutes(-1))
+                return new ControlResult()
+                {
+                    CheckName = "AntiFlood",
+                    Result = IControl.ControlResultType.skipped
+                };
             Models.Group.ConfigurationParameter configValue = CacheData.GroupConfigs[message.Chat.Id]
                 .Where(x => x.Value == "FloodControl")
                 .SingleOrDefault();
