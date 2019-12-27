@@ -17,7 +17,8 @@ namespace Unifiedban.Terminal.Bot.Command
 
         public void Execute(Message message, bool isUpdate = false)
         {
-            Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+            if(!isUpdate)
+                Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
 
             if (!Utils.BotTools.IsUserOperator(message.From.Id) &&
                 !Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
