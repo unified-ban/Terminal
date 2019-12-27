@@ -14,6 +14,10 @@ namespace Unifiedban.Terminal.Filters
 
         public FilterResult DoCheck(Message message)
         {
+            return DoCheck(message, message.Text);
+        }
+        public FilterResult DoCheck(Message message, string text)
+        {
             Models.Group.ConfigurationParameter configValue = CacheData.GroupConfigs[message.Chat.Id]
                 .Where(x => x.ConfigurationParameterId == "BadWordFilter")
                 .SingleOrDefault();
@@ -33,7 +37,7 @@ namespace Unifiedban.Terminal.Filters
             foreach (Models.Filters.BadWord badWord in badWords)
             {
                 Regex reg = new Regex(badWord.Regex, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-                MatchCollection matchedWords = reg.Matches(message.Text);
+                MatchCollection matchedWords = reg.Matches(text);
                 if (matchedWords.Count > 0)
                     return new FilterResult()
                     {

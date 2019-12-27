@@ -13,6 +13,7 @@ namespace Unifiedban.Terminal.Controls
 
         public static void Initialize()
         {
+            controls.Add(new SpamNameControl());
             controls.Add(new FloodControl());
 
             filters.Add(new Filters.BadWordFilter());
