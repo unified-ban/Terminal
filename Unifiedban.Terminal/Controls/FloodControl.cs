@@ -84,6 +84,13 @@ namespace Unifiedban.Terminal.Controls
 
             if (FloodCounter[message.Chat.Id][message.From.Id].Messages >= 3)
             {
+                int minutes = 10;
+
+                Models.SysConfig floodBanMinutes = CacheData.SysConfigs.Where(x => x.SysConfigId == "FloodBanInMinutes")
+                    .SingleOrDefault();
+                if (floodBanMinutes != null)
+                    int.TryParse(floodBanMinutes.Value, out minutes);
+
                 Bot.Manager.BotClient.RestrictChatMemberAsync(
                                 message.Chat.Id,
                                 message.From.Id,
@@ -98,7 +105,7 @@ namespace Unifiedban.Terminal.Controls
                                     CanSendOtherMessages = false,
                                     CanSendPolls = false
                                 },
-                                DateTime.UtcNow.AddMinutes(1)
+                                DateTime.UtcNow.AddMinutes(minutes)
                             ).Wait();
 
                 Bot.Manager.BotClient.SendTextMessageAsync(
