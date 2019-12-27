@@ -9,6 +9,9 @@ namespace Unifiedban.Terminal.Filters
 {
     public class ScamFilter : IFilter
     {
+        static string linksList = "";
+        static DateTime lastUpdate = DateTime.UtcNow.AddDays(-2);
+
         public FilterResult DoCheck(Message message)
         {
             return DoCheck(message, message.Text);
@@ -38,39 +41,67 @@ namespace Unifiedban.Terminal.Filters
                     Result = IFilter.FilterResultType.negative
                 };
             }
-            
-            Models.SysConfig sitesList = CacheData.SysConfigs.Where(x => x.SysConfigId == "PhishingLinks")
-                    .SingleOrDefault();
-            if (sitesList == null)
+
+            if (lastUpdate < DateTime.UtcNow.AddDays(-1))
+                updateLinksList();
+
+            if (String.IsNullOrEmpty(linksList))
                 return new FilterResult()
                 {
                     CheckName = "ScamFilter",
                     Result = IFilter.FilterResultType.skipped
                 };
-
-            using (System.Net.WebClient client = new System.Net.WebClient())
-            {
-
-                string htmlCode = "";
-                try
-                {
-                    htmlCode = client.DownloadString(sitesList.Value);
-                }
-                catch { }
-                foreach(Match match in matchedWords)
-                    if (htmlCode.Contains(match.Value))
-                        return new FilterResult()
-                        {
-                            CheckName = "ScamFilter",
-                            Result = IFilter.FilterResultType.positive
-                        };
-            }
+            
+            foreach (Match match in matchedWords)
+                if (linksList.Contains(match.Value))
+                    return new FilterResult()
+                    {
+                        CheckName = "ScamFilter",
+                        Result = IFilter.FilterResultType.positive
+                    };
 
             return new FilterResult()
             {
                 CheckName = "ScamFilter",
                 Result = IFilter.FilterResultType.negative
             };
+        }
+
+        void updateLinksList()
+        {
+            Models.SysConfig sitesList = CacheData.SysConfigs.Where(x => x.SysConfigId == "PhishingLinks")
+                    .SingleOrDefault();
+            if (sitesList == null)
+                return;
+
+            using (System.Net.WebClient client = new System.Net.WebClient())
+            {
+                try
+                {
+                    linksList = client.DownloadString(sitesList.Value);
+                }
+                catch (Exception ex)
+                {
+                    Data.Utils.Logging.AddLog(new Models.SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Terminal.Filters.ScamFilter.updateLinksList",
+                        Level = Models.SystemLog.Levels.Error,
+                        Message = "Error getting updated phishing links!",
+                        UserId = -1
+                    });
+                    Data.Utils.Logging.AddLog(new Models.SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Terminal.Filters.ScamFilter.updateLinksList",
+                        Level = Models.SystemLog.Levels.Error,
+                        Message = ex.Message,
+                        UserId = -1
+                    });
+                }
+            }
         }
     }
 }
