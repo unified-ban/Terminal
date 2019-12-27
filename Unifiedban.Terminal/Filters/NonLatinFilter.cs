@@ -23,7 +23,7 @@ namespace Unifiedban.Terminal.Filters
                         Result = IFilter.FilterResultType.skipped
                     };
 
-            string regex = @"[^\x00-\x7FÀ-ÖØ-öø-ÿ\p{Sc}\p{Common}]+";
+            string regex = @"[^\x00-\x7FÀ-ÖØ-öø-ÿ\p{Sc}]+";
 
             Regex reg = new Regex(regex, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
             MatchCollection matchedWords = reg.Matches(message.Text);
