@@ -50,11 +50,12 @@ namespace Unifiedban.Terminal.Bot.Command
                         depthLevel++;
                     }
 
+                    string icon = conf.Value == "true" ? " ✅" : " ❌";
+                    string newSet = conf.Value == "true" ? "false" : "true";
+
                     switch (conf.Type)
                     {
                         case "bool":
-                            string newSet = conf.Value == "true" ? "false" : "true";
-                            string icon = conf.Value == "true" ? " ✅" : " ❌";
                             configMenu[depthLevel].Add(InlineKeyboardButton.WithCallbackData(
                                 CacheData.GetTranslation("en", conf.ConfigurationParameterId, true) + " " + icon,
                                 $"/config { conf.ConfigurationParameterId }|{ newSet }"
@@ -67,6 +68,12 @@ namespace Unifiedban.Terminal.Bot.Command
                             configMenu[depthLevel].Add(InlineKeyboardButton.WithCallbackData(
                                 CacheData.GetTranslation("en", conf.ConfigurationParameterId, true),
                                 $"/config getValue|{ conf.ConfigurationParameterId }"
+                                ));
+                            break;
+                        case "boolfunction":
+                            configMenu[depthLevel].Add(InlineKeyboardButton.WithCallbackData(
+                                CacheData.GetTranslation("en", conf.ConfigurationParameterId, true) + " " + icon,
+                                $"/exec { conf.ConfigurationParameterId }|{ newSet }"
                                 ));
                             break;
                     }
@@ -135,6 +142,9 @@ namespace Unifiedban.Terminal.Bot.Command
                     break;
                 case "getValue":
                     requestNewValue(callbackQuery.Message, parameters[1]);
+                    break;
+                case "exec":
+                    execFunction(callbackQuery.Message, parameters[1]);
                     break;
                 default:
                     if (parameters.Length < 2)
@@ -237,6 +247,18 @@ namespace Unifiedban.Terminal.Bot.Command
             langMenu[depthLevel + 1].Add(InlineKeyboardButton.WithCallbackData("Close menu", $"/config close|true"));
 
             return langMenu;
+        }
+
+        private void execFunction(Message message, string configurationParameterId, string newValue)
+        {
+            switch (configurationParameterId)
+            {
+                case "Gate":
+                    Functions.SwitchGateStatus(message, newValue);
+                    break;
+                default:
+                    return;
+            }
         }
     }
 }
