@@ -1,4 +1,4 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
+﻿/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -40,12 +40,12 @@ namespace Unifiedban.Terminal.Filters
                         Result = IFilter.FilterResultType.skipped
                     };
 
-            List<Models.Filters.BadWord> badWords =
+            List<BadWord> badWords =
                 CacheData.BadWords
                 .Where(x => x.GroupId == null || x.GroupId == CacheData.Groups[message.Chat.Id].GroupId)
                 .ToList();
 
-            foreach (Models.Filters.BadWord badWord in badWords)
+            foreach (BadWord badWord in badWords)
             {
                 Regex reg = new Regex(badWord.Regex, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
                 MatchCollection matchedWords = reg.Matches(text);
@@ -73,13 +73,15 @@ namespace Unifiedban.Terminal.Filters
             {
                 if (replacements.ContainsKey(charToReplace))
                     regex += replacements[charToReplace];
+                else
+                    regex += BuildBasicRegexForLetter(charToReplace);
             }
             regex += ")";
 
             return regex;
         }
 
-        public static void BuildDictionary()
+        private static void BuildDictionary()
         {
             replacements.Add('A', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
             replacements.Add('À', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
@@ -140,22 +142,23 @@ namespace Unifiedban.Terminal.Filters
             replacements.Add('€', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
             replacements.Add('3', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
 
-            replacements.Add('I', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*]\\s*");
-            replacements.Add('Ì', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*]\\s*");
-            replacements.Add('Í', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*]\\s*");
-            replacements.Add('Î', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*]\\s*");
-            replacements.Add('Ï', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*]\\s*");
-            replacements.Add('Į', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*]\\s*");
-            replacements.Add('Ī', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*]\\s*");
-            replacements.Add('i', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*]\\s*");
-            replacements.Add('ì', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*]\\s*");
-            replacements.Add('í', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*]\\s*");
-            replacements.Add('î', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*]\\s*");
-            replacements.Add('ï', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*]\\s*");
-            replacements.Add('į', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*]\\s*");
-            replacements.Add('ī', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*]\\s*");
-            replacements.Add('1', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*L*l*]\\s*");
-            replacements.Add('|', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*L*l*]\\s*");
+            replacements.Add('I', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
+            replacements.Add('Ì', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
+            replacements.Add('Í', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
+            replacements.Add('Î', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
+            replacements.Add('Ï', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
+            replacements.Add('Į', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
+            replacements.Add('Ī', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
+            replacements.Add('i', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
+            replacements.Add('ì', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
+            replacements.Add('í', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
+            replacements.Add('î', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
+            replacements.Add('ï', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
+            replacements.Add('į', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
+            replacements.Add('ī', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
+            replacements.Add('1', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*L*l*!*]\\s*");
+            replacements.Add('|', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*L*l*!*]\\s*");
+            replacements.Add('!', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*L*l*!*]\\s*");
 
             replacements.Add('L', "[L*l*1*|*£*]\\s*");
             replacements.Add('l', "[L*l*1*|*£*]\\s*");
@@ -222,23 +225,40 @@ namespace Unifiedban.Terminal.Filters
             replacements.Add('2', "[Z*z*7*2*]\\s*");
         }
 
-        public static bool BanWord(
+        private static string BuildBasicRegexForLetter(char letter)
+        {
+            return "[" + letter.ToString().ToLowerInvariant() + "*"
+                + letter.ToString().ToUpperInvariant() + @"*]\s*";
+        }
+
+        private static bool BanWord(
             string telegramGroup,
             string name,
             string text)
         {
+            List<string> parts = new List<string>();
+
             string[] words = text.Split(" ");
             string regex = "";
             foreach (string word in words)
             {
-                regex += BuildRegex(word);
-                regex += ".*";
+                string part = BuildRegex(word);
+                part += ".*";
+                parts.Add(part);
+
+                regex += part;
             }
+
+            regex += "|";
+            parts.Reverse();
+            foreach (string part in parts)
+            {
+                regex += part;
+            }
+
             regex = regex.Remove(regex.Length - 2, 2); // remove last .*
-            
-            BusinessLogic.Filters.BadWordLogic bwl =
-                new BusinessLogic.Filters.BadWordLogic();
-            BadWord badWord = bwl.Add(telegramGroup, name, regex, Models.Filters.BadWord.State.Active, -2);
+
+            BadWord badWord = bwl.Add(telegramGroup, name, regex, BadWord.State.Active, -2);
 
             return badWord == null ? false : true;
         }
