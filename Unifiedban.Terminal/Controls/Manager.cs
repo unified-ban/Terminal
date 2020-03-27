@@ -24,6 +24,7 @@ namespace Unifiedban.Terminal.Controls
             filters.Add(new Filters.BadWordFilter());
             filters.Add(new Filters.NonLatinFilter());
             filters.Add(new Filters.ScamFilter());
+            filters.Add(new Filters.RTLNameFilter());
 
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
