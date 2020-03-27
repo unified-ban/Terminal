@@ -108,6 +108,9 @@ namespace Unifiedban.Terminal.Bot
 
         private static async void BotClient_OnCallbackQuery(object sender, CallbackQueryEventArgs e)
         {
+            if (e.CallbackQuery.Message.Date < DateTime.Now.AddDays(-1))
+
+                return;
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
                 LoggerName = CacheData.LoggerName,
@@ -129,6 +132,9 @@ namespace Unifiedban.Terminal.Bot
         private static async void BotClient_OnMessage(object sender, MessageEventArgs e)
         {
             if (e == null)
+                return;
+
+            if (e.Message.Date < DateTime.Now.AddDays(-1))
                 return;
 
             Data.Utils.Logging.AddLog(new Models.SystemLog()
