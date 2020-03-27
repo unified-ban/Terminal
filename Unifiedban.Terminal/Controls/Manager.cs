@@ -1,4 +1,4 @@
-﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -25,6 +25,16 @@ namespace Unifiedban.Terminal.Controls
             Filters.BadWordFilter.BuildDictionary();
             filters.Add(new Filters.NonLatinFilter());
             filters.Add(new Filters.ScamFilter());
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Controls and filters initialized",
+                UserId = -2
+            });
         }
 
         public static void DoCheck(Message message)

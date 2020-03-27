@@ -16,6 +16,16 @@ namespace Unifiedban.Terminal.Utils
         {
             RecurringJob.AddOrUpdate("ConfigTools_SyncGroupsConfigToDatabase", () => SyncGroupsConfigToDatabase(), "0/30 * * ? * *");
             RecurringJob.AddOrUpdate("ConfigTools_SyncWelcomeAndRulesText", () => SyncWelcomeAndRulesText(), "0/30 * * ? * *");
+            
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Config Tools initialized",
+                UserId = -2
+            });
         }
 
         public static void SyncGroupsConfigToDatabase()

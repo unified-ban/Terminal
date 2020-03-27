@@ -26,6 +26,17 @@ namespace Unifiedban.Terminal.Bot
                 return;
 
             isInitialized = true;
+
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Message Queue Manager initialized",
+                UserId = -2
+            });
         }
 
         public static void Dispose()

@@ -1,4 +1,4 @@
-﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -102,6 +102,16 @@ namespace Unifiedban.Terminal
 #if DEBUG
             TestArea.DoTest();
 #endif
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Startup completed",
+                UserId = -2
+            });
         }
         private static void DisposeAll()
         {
