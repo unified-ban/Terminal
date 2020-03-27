@@ -16,6 +16,8 @@ namespace Unifiedban.Terminal.Bot
 {
     public class Functions
     {
+        static Filters.RTLNameFilter RTLNameFilter = new Filters.RTLNameFilter();
+
         public static bool RegisterGroup(Message message)
         {
             if (CacheData.Groups.ContainsKey(message.Chat.Id))
@@ -116,7 +118,37 @@ namespace Unifiedban.Terminal.Bot
                     continue;
                 }
 
-                if(blacklistEnabled)
+                Filters.FilterResult rtlCheck = RTLNameFilter.DoCheck(message,
+                    member.FirstName + " " + member.LastName);
+                if(rtlCheck.Result == Filters.IFilter.FilterResultType.positive)
+                {
+                    try
+                    {
+                        Manager.BotClient.RestrictChatMemberAsync(
+                                message.Chat.Id,
+                                member.Id,
+                                new ChatPermissions()
+                                {
+                                    CanSendMessages = false,
+                                    CanAddWebPagePreviews = false,
+                                    CanChangeInfo = false,
+                                    CanInviteUsers = false,
+                                    CanPinMessages = false,
+                                    CanSendMediaMessages = false,
+                                    CanSendOtherMessages = false,
+                                    CanSendPolls = false
+                                }
+                            );
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+
+                    continue;
+                }
+
+                if (blacklistEnabled)
                     if (CacheData.BannedUsers
                         .Where(x => x.TelegramUserId == member.Id).Count() > 0)
                     {
