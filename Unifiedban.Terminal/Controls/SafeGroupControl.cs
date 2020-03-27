@@ -13,6 +13,8 @@ namespace Unifiedban.Terminal.Controls
 {
     public class SafeGroupControl : IControl
     {
+        Filters.SafeGroupFilter safeGroupFilter = new Filters.SafeGroupFilter();
+
         public ControlResult DoCheck(Message message)
         {
             if (Utils.BotTools.IsUserOperator(message.From.Id) ||
@@ -61,7 +63,7 @@ namespace Unifiedban.Terminal.Controls
 
             foreach (Match match in matchedWords)
                 if(Manager.IsTelegramLink(match.Value))
-                    if (Filters.SafeGroupFilter.DoCheck(match.Value).Result == Filters.IFilter.FilterResultType.positive)
+                    if (safeGroupFilter.DoCheck(match.Value).Result == Filters.IFilter.FilterResultType.positive)
                         return new ControlResult()
                         {
                             CheckName = "Safe Group",

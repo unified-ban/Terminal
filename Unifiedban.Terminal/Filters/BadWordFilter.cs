@@ -1,4 +1,4 @@
-﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -14,7 +14,14 @@ namespace Unifiedban.Terminal.Filters
 {
     public class BadWordFilter : IFilter
     {
+        public BadWordFilter()
+        {
+            BuildDictionary();
+        }
+
         static Dictionary<char, string> replacements = new Dictionary<char, string>();
+        static BusinessLogic.Filters.BadWordLogic bwl =
+                new BusinessLogic.Filters.BadWordLogic();
 
         public FilterResult DoCheck(Message message)
         {

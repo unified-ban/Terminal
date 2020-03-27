@@ -13,12 +13,17 @@ namespace Unifiedban.Terminal.Filters
 {
     public class SafeGroupFilter : IFilter
     {
+        public SafeGroupFilter()
+        {
+            LoadCache();
+        }
+
         static List<SafeGroup> safeGroups = new List<SafeGroup>();
         public FilterResult DoCheck(Message message)
         {
             return DoCheck(message.Text);
         }
-        public static FilterResult DoCheck(string text)
+        public FilterResult DoCheck(string text)
         {
             SafeGroup isKnown = safeGroups
                 .Where(x => x.GroupName == text)
@@ -37,7 +42,7 @@ namespace Unifiedban.Terminal.Filters
             };
         }
 
-        public static void LoadCache()
+        private static void LoadCache()
         {
             BusinessLogic.Group.SafeGroupLogic safeGroupLogic =
                 new BusinessLogic.Group.SafeGroupLogic();

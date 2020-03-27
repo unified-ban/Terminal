@@ -1,4 +1,4 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
+﻿/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -12,7 +12,7 @@ namespace Unifiedban.Terminal.Controls
 {
     public class Manager
     {
-        static List<Controls.IControl> controls = new List<Controls.IControl>();
+        static List<IControl> controls = new List<IControl>();
         static List<Filters.IFilter> filters = new List<Filters.IFilter>();
 
         public static void Initialize()
@@ -22,7 +22,6 @@ namespace Unifiedban.Terminal.Controls
             controls.Add(new SafeGroupControl());
 
             filters.Add(new Filters.BadWordFilter());
-            Filters.BadWordFilter.BuildDictionary();
             filters.Add(new Filters.NonLatinFilter());
             filters.Add(new Filters.ScamFilter());
 
