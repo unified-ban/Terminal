@@ -85,6 +85,14 @@ namespace Unifiedban.Terminal.Bot
             if (!CacheData.Groups.ContainsKey(message.Chat.Id))
                 return;
 
+            bool blacklistEnabled = false;
+            ConfigurationParameter blacklistConfig = CacheData.GroupConfigs[message.Chat.Id]
+                .Where(x => x.ConfigurationParameterId == "Blacklist")
+                .FirstOrDefault();
+            if (blacklistConfig != null)
+                if (blacklistConfig.Value.ToLower() == "true")
+                    blacklistEnabled = true;
+
             bool captchaEnabled = false;
             ConfigurationParameter captchaConfig = CacheData.GroupConfigs[message.Chat.Id]
                 .Where(x => x.ConfigurationParameterId == "Captcha")
@@ -107,6 +115,36 @@ namespace Unifiedban.Terminal.Bot
                 {
                     continue;
                 }
+
+                if(blacklistEnabled)
+                    if (CacheData.BannedUsers
+                        .Where(x => x.TelegramUserId == member.Id).Count() > 0)
+                    {
+                        try
+                        {
+                            Manager.BotClient.RestrictChatMemberAsync(
+                                    message.Chat.Id,
+                                    member.Id,
+                                    new ChatPermissions()
+                                    {
+                                        CanSendMessages = false,
+                                        CanAddWebPagePreviews = false,
+                                        CanChangeInfo = false,
+                                        CanInviteUsers = false,
+                                        CanPinMessages = false,
+                                        CanSendMediaMessages = false,
+                                        CanSendOtherMessages = false,
+                                        CanSendPolls = false
+                                    }
+                                );
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
+
+                        continue;
+                    }
 
                 try
                 {

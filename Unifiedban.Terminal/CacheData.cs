@@ -32,6 +32,8 @@ namespace Unifiedban.Terminal
         public static Dictionary<long, List<Models.Group.ConfigurationParameter>> GroupConfigs =
             new Dictionary<long, List<Models.Group.ConfigurationParameter>>();
 
+        public static List<Models.User.Banned> BannedUsers = new List<Models.User.Banned>();
+
         public static long ControlChatId = 0;
 
         public static int HandledMessages { get; private set; }

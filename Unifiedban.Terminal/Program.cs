@@ -1,4 +1,4 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
+﻿/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -333,6 +333,29 @@ namespace Unifiedban.Terminal
                 }
                 Bot.MessageQueueManager.AddGroupIfNotPresent(group);
             }
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Get banned users",
+                UserId = -2
+            });
+            BusinessLogic.User.BannedLogic bannedLogic = new BusinessLogic.User.BannedLogic();
+            CacheData.BannedUsers = new List<Models.User.Banned>(bannedLogic.Get());
+
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Cache loaded",
+                UserId = -2
+            });
         }
         static void LoadFiltersData()
         {
