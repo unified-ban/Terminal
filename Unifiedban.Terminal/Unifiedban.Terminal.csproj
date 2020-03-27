@@ -3,14 +3,14 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>3.0.0-beta.6</Version>
+    <Version>3.0.0-beta.7</Version>
     <Authors>SubPixel for linux/hub</Authors>
     <Product>Unifiedban Terminal</Product>
     <Copyright>LinuxHub 2019</Copyright>
     <RepositoryUrl>https://todo/</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
     <AssemblyVersion>3.0.0</AssemblyVersion>
-    <FileVersion>3.0.0.390</FileVersion>
+    <FileVersion>3.0.0.400</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="appsettings.example.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="log4net.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
