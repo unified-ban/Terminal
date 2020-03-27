@@ -1,4 +1,4 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
+﻿/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -166,15 +166,15 @@ namespace Unifiedban.Terminal.Bot
                     if (e.Message.ReplyToMessage.From.Id == MyId)
                     {
                         CommandQueueManager.ReplyMessage(e.Message);
+                        return;
                     }
                 }
+
+                Controls.Manager.DoCheck(e.Message);
             }
 
             if (e.Message.NewChatMembers != null)
-                Functions.UserJoinedAction(e.Message);
-
-            if (!String.IsNullOrEmpty(e.Message.Text))
-                Controls.Manager.DoCheck(e.Message);
+                Functions.UserJoinedAction(e.Message);                
 
             if (!String.IsNullOrEmpty(e.Message.MediaGroupId) ||
                 e.Message.Photo != null ||
