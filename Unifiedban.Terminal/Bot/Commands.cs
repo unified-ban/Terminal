@@ -36,6 +36,7 @@ namespace Unifiedban.Terminal.Bot
         public const string SETWELCOME = "SETWELCOME";
         public const string SETRULES = "SETRULES";
         public const string REMOVEFLOOD = "REMOVEFLOOD";
+        public const string KICK = "KICK";
 
         public const string TEST1 = "TEST1";
 
@@ -86,6 +87,7 @@ namespace Unifiedban.Terminal.Bot
 
 
             CommandsList.Add(REMOVEFLOOD, new Command.RemoveFlood());
+            CommandsList.Add(KICK, new Command.Kick());
 
 #if DEBUG
             CommandsList.Add(TEST1, new Command.TestCommand());
