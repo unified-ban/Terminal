@@ -10,6 +10,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Unifiedban.Terminal.Bot.Command
 {
@@ -18,6 +19,13 @@ namespace Unifiedban.Terminal.Bot.Command
         public void Execute(Message message)
         {
             Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+
+            if (CacheData.Operators
+                .SingleOrDefault(x => x.TelegramUserId == message.From.Id
+                && x.Level == Models.Operator.Levels.Advanced) == null)
+            {
+                return;
+            }
 
             Process proc = Process.GetCurrentProcess();
             float usedRam = (proc.WorkingSet64 / 1024f) / 1024f;
