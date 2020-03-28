@@ -144,7 +144,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     requestNewValue(callbackQuery.Message, parameters[1]);
                     break;
                 case "exec":
-                    execFunction(callbackQuery.Message, parameters[1]);
+                    execFunction(callbackQuery.Message, parameters[0], parameters[1]);
                     break;
                 default:
                     if (parameters.Length < 2)
