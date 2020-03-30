@@ -257,10 +257,5 @@ namespace Unifiedban.Terminal.Bot
             MessageQueueManager.AddGroupIfNotPresent(updated);
             MessageQueueManager.RemoveGroupIfNotPresent(message.Chat.Id);
         }
-
-        public static void SwitchGateStatus(Message message, string newValue)
-        {
-            
-        }
     }
 }

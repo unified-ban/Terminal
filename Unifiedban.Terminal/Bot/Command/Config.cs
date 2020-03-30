@@ -73,7 +73,7 @@ namespace Unifiedban.Terminal.Bot.Command
                         case "boolfunction":
                             configMenu[depthLevel].Add(InlineKeyboardButton.WithCallbackData(
                                 CacheData.GetTranslation("en", conf.ConfigurationParameterId, true) + " " + icon,
-                                $"/exec { conf.ConfigurationParameterId }|{ newSet }"
+                                $"/config exec|{ conf.ConfigurationParameterId }|{ newSet }"
                                 ));
                             break;
                     }
@@ -89,8 +89,15 @@ namespace Unifiedban.Terminal.Bot.Command
             configMenu.Add(new List<InlineKeyboardButton>());
             configMenu[depthLevel + 1].Add(InlineKeyboardButton.WithUrl("Ask for support", "https://t.me/unifiedban_group"));
             configMenu[depthLevel + 1].Add(InlineKeyboardButton.WithUrl("FAQ", "https://unifiedban.solutions/?p=faq"));
+
             configMenu.Add(new List<InlineKeyboardButton>());
-            configMenu[depthLevel + 2].Add(InlineKeyboardButton.WithCallbackData("Close menu", $"/config close"));
+            configMenu[depthLevel + 2].Add(InlineKeyboardButton.WithCallbackData(
+                                CacheData.GetTranslation("en", "conf_enable_dashboard", true),
+                                $"/config dashboardToggle|true"
+                                ));
+
+            configMenu.Add(new List<InlineKeyboardButton>());
+            configMenu[depthLevel + 3].Add(InlineKeyboardButton.WithCallbackData("Close menu", $"/config close"));
 
             if (isUpdate)
             {
@@ -144,7 +151,11 @@ namespace Unifiedban.Terminal.Bot.Command
                     requestNewValue(callbackQuery.Message, parameters[1]);
                     break;
                 case "exec":
-                    execFunction(callbackQuery.Message, parameters[0], parameters[1]);
+                    if (parameters.Length > 2)
+                        execFunction(callbackQuery.Message, parameters[1], parameters[2]);
+                    break;
+                case "dashboardToggle":
+                    toggleDashboard(callbackQuery.Message, parameters[1]);
                     break;
                 default:
                     if (parameters.Length < 2)
@@ -254,11 +265,17 @@ namespace Unifiedban.Terminal.Bot.Command
             switch (configurationParameterId)
             {
                 case "Gate":
-                    Functions.SwitchGateStatus(message, newValue);
+                    Gate.ToggleGate(message, newValue == "true" ? true : false);
+                    Execute(message, true);
                     break;
                 default:
                     return;
             }
+        }
+
+        private void toggleDashboard(Message message, string newValue)
+        {
+
         }
     }
 }
