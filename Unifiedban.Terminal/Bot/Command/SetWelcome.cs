@@ -21,7 +21,7 @@ namespace Unifiedban.Terminal.Bot.Command
         {
             if (CacheData.Operators
                 .SingleOrDefault(x => x.TelegramUserId == message.From.Id
-                && x.Level == Models.Operator.Levels.Super) == null)
+                && x.Level >= Models.Operator.Levels.Basic) == null)
             {
                 MessageQueueManager.EnqueueMessage(
                    new ChatMessage()

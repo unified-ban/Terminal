@@ -22,7 +22,7 @@ namespace Unifiedban.Terminal.Bot.Command
 
             if (CacheData.Operators
                 .SingleOrDefault(x => x.TelegramUserId == message.From.Id
-                && x.Level == Models.Operator.Levels.Advanced) == null)
+                && x.Level >= Models.Operator.Levels.Advanced) == null)
             {
                 return;
             }
