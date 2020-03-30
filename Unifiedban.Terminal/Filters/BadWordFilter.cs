@@ -16,7 +16,8 @@ namespace Unifiedban.Terminal.Filters
     {
         public BadWordFilter()
         {
-            BuildDictionary();
+            if(replacements.Count == 0)
+                BuildDictionary();
         }
 
         static Dictionary<char, string> replacements = new Dictionary<char, string>();
