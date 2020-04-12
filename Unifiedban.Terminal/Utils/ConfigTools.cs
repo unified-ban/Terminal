@@ -16,7 +16,8 @@ namespace Unifiedban.Terminal.Utils
         {
             RecurringJob.AddOrUpdate("ConfigTools_SyncGroupsConfigToDatabase", () => SyncGroupsConfigToDatabase(), "0/30 * * ? * *");
             RecurringJob.AddOrUpdate("ConfigTools_SyncWelcomeAndRulesText", () => SyncWelcomeAndRulesText(), "0/30 * * ? * *");
-            
+            RecurringJob.AddOrUpdate("ConfigTools_SyncGroupsToDatabase", () => SyncGroupsToDatabase(), "0/30 * * ? * *");
+
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
                 LoggerName = CacheData.LoggerName,
@@ -26,6 +27,18 @@ namespace Unifiedban.Terminal.Utils
                 Message = "Config Tools initialized",
                 UserId = -2
             });
+        }
+
+        public static void SyncGroupsToDatabase()
+        {
+            BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
+                new BusinessLogic.Group.TelegramGroupLogic();
+
+            foreach (long group in CacheData.Groups.Keys)
+                telegramGroupLogic.Update(
+                    group,
+                    JsonConvert.SerializeObject(CacheData.Group[group]),
+                    -2);
         }
 
         public static void SyncGroupsConfigToDatabase()
