@@ -37,7 +37,7 @@ namespace Unifiedban.Terminal.Utils
             foreach (long group in CacheData.Groups.Keys)
                 telegramGroupLogic.Update(
                     group,
-                    JsonConvert.SerializeObject(CacheData.Group[group]),
+                    JsonConvert.SerializeObject(CacheData.Groups[group]),
                     -2);
         }
 
