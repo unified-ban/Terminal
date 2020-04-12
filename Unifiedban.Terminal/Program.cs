@@ -123,6 +123,7 @@ namespace Unifiedban.Terminal
             Bot.MessageQueueManager.Dispose();
             Bot.CommandQueueManager.Dispose();
             Bot.Manager.Dispose();
+            Utils.ConfigTools.Dispose();
         }
 
         static void InitializeHangfireServer()
