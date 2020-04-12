@@ -29,6 +29,13 @@ namespace Unifiedban.Terminal.Utils
             });
         }
 
+        public static void Dispose()
+        {
+            SyncGroupsToDatabase();
+            SyncGroupsConfigToDatabase();
+            SyncWelcomeAndRulesText();
+        }
+
         public static void SyncGroupsToDatabase()
         {
             BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
