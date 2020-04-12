@@ -43,7 +43,8 @@ namespace Unifiedban.Terminal.Bot.Command
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
                     ParseMode = ParseMode.Markdown,
-                    Text = $"Instance *started*: {proc.StartTime}\n" +
+                    Text = $"*Version*: {Utils.BotTools.CurrentVersion()}\n" +
+                        $"Instance *started*: {proc.StartTime}\n" +
                         $"Used *RAM* is {Math.Round(usedRam, 2)}MB\n" +
                         $"Used *CPU* is {Math.Round(GetCpuUsageForProcess().Result, 2)}%\n" +
                         $"*Database* status is {SQLStatus}\n" +
