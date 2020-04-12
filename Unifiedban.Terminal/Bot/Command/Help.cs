@@ -2,13 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Unifiedban.Terminal.Bot.Command
 {
@@ -16,11 +12,7 @@ namespace Unifiedban.Terminal.Bot.Command
     {
         public void Execute(Message message)
         {
-            InlineKeyboardMarkup menu = 
-                JsonConvert.DeserializeObject<InlineKeyboardMarkup>(
-                    CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "HelpMenu")
-                            .Value);
+            Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
 
             MessageQueueManager.EnqueueMessage(
                 new ChatMessage()
@@ -28,14 +20,12 @@ namespace Unifiedban.Terminal.Bot.Command
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
                     ParseMode = Telegram.Bot.Types.Enums.ParseMode.Markdown,
-                    Text = "*[Help:]*",
-                    ReplyMarkup = menu
+                    Text = Utils.Parsers.VariablesParser(CacheData.SysConfigs
+                            .Single(x => x.SysConfigId == "HelpMenu")
+                            .Value)
                 });
         }
 
-        public void Execute(CallbackQuery callbackQuery)
-        {
-            return;
-        }
+        public void Execute(CallbackQuery callbackQuery) { }
     }
 }
