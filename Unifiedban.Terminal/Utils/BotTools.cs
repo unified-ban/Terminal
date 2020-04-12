@@ -22,7 +22,7 @@ namespace Unifiedban.Terminal.Utils
         {
             return CacheData.Operators
                 .SingleOrDefault(x => x.TelegramUserId == userId &&
-                x.Level == level) != null ? true : false;
+                x.Level >= level) != null ? true : false;
         }
     }
 }
