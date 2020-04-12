@@ -40,6 +40,7 @@ namespace Unifiedban.Terminal.Bot
         public const string MUTE = "MUTE";
         public const string UNMUTE = "UNMUTE";
         public const string GATE = "GATE";
+        public const string RM = "RM";
 
         public const string TEST1 = "TEST1";
 
@@ -94,6 +95,7 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(MUTE, new Command.Mute());
             CommandsList.Add(UNMUTE, new Command.Unmute());
             CommandsList.Add(GATE, new Command.Gate());
+            CommandsList.Add(RM, new Command.Rm());
 
 #if DEBUG
             CommandsList.Add(TEST1, new Command.TestCommand());
