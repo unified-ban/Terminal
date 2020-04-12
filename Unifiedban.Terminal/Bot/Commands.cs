@@ -41,6 +41,8 @@ namespace Unifiedban.Terminal.Bot
         public const string UNMUTE = "UNMUTE";
         public const string GATE = "GATE";
         public const string RM = "RM";
+        public const string ENABLE = "ENABLE";
+        public const string DISABLE = "DISABLE";
 
         public const string TEST1 = "TEST1";
 
@@ -61,6 +63,9 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(RELOADTRANSLATION, new Command.ReloadTranslations());
 
             CommandsList.Add(ECHO, new Command.Echo());
+
+            CommandsList.Add(ENABLE, new Command.Enable());
+            CommandsList.Add(DISABLE, new Command.Disable());
 
             CommandsList.Add(CHECK, new Command.Check());
             CommandsList.Add(C, new Command.Check());
