@@ -257,5 +257,11 @@ namespace Unifiedban.Terminal.Bot
             MessageQueueManager.AddGroupIfNotPresent(updated);
             MessageQueueManager.RemoveGroupIfNotPresent(message.Chat.Id);
         }
+
+        public static void CacheUsername(Message message)
+        {
+            if (message.From.Username != null)
+                CacheData.Usernames[message.From.Username] = message.From.Id;
+        }
     }
 }
