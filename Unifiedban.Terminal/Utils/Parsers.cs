@@ -117,5 +117,26 @@ namespace Unifiedban.Terminal.Utils
 
             return parsedText;
         }
+
+        public static string VariablesParser(
+            string text,
+            Message message,
+            User user)
+        {
+            string parsedText = text;
+
+            string username = user.Username != null ? "@" + user.Username : user.FirstName;
+            parsedText = parsedText.Replace("{{username}}", username);
+            parsedText = parsedText.Replace("{{first_name}}", user.FirstName);
+            parsedText = parsedText.Replace("{{last_name}}", user.LastName);
+            parsedText = parsedText.Replace("{{user_id}}", user.Id.ToString());
+            parsedText = parsedText.Replace("{{chat_title}}", message.Chat.Title);
+            parsedText = parsedText.Replace("{{chat_id}}", message.Chat.Id.ToString());
+            parsedText = parsedText.Replace("{{chat_id_noMinus}}", message.Chat.Id.ToString().Replace("-", ""));
+            parsedText = parsedText.Replace("{{message_id}}", message.MessageId.ToString());
+            parsedText = parsedText.Replace("{{isBot}}", user.IsBot.ToString());
+
+            return parsedText;
+        }
     }
 }

@@ -228,7 +228,7 @@ namespace Unifiedban.Terminal.Bot
                                ParseMode = ParseMode.Html,
                                Text = Utils.Parsers.VariablesParser(
                                    CacheData.Groups[message.Chat.Id].WelcomeText,
-                                   message),
+                                   message, member),
                            });
                     }
                 }
