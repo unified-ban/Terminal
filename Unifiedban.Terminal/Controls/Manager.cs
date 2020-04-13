@@ -20,6 +20,7 @@ namespace Unifiedban.Terminal.Controls
             controls.Add(new SpamNameControl());
             controls.Add(new FloodControl());
             controls.Add(new SafeGroupControl());
+            controls.Add(new Notes());
 
             filters.Add(new Filters.BadWordFilter());
             filters.Add(new Filters.NonLatinFilter());

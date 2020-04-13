@@ -37,6 +37,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 }
 
                 Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.ReplyToMessage.MessageId);
+                Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
                 SaveNote(message.ReplyToMessage);
                 return;
             }
