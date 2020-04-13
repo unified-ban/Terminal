@@ -43,6 +43,8 @@ namespace Unifiedban.Terminal.Bot
         public const string RM = "RM";
         public const string ENABLE = "ENABLE";
         public const string DISABLE = "DISABLE";
+        public const string SETNOTE = "SETNOTE";
+        public const string ADDNOTE = "ADDNOTE";
 
         public const string TEST1 = "TEST1";
 
@@ -101,6 +103,8 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(UNMUTE, new Command.Unmute());
             CommandsList.Add(GATE, new Command.Gate());
             CommandsList.Add(RM, new Command.Rm());
+            CommandsList.Add(SETNOTE, new Command.AddNote());
+            CommandsList.Add(ADDNOTE, new Command.AddNote());
 
 #if DEBUG
             CommandsList.Add(TEST1, new Command.TestCommand());
