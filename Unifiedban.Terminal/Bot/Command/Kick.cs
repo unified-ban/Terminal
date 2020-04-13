@@ -37,17 +37,33 @@ namespace Unifiedban.Terminal.Bot.Command
             if(userToKick == 0)
             {
                 MessageQueueManager.EnqueueMessage(
-               new ChatMessage()
-               {
-                   Timestamp = DateTime.UtcNow,
-                   Chat = message.Chat,
-                   ParseMode = ParseMode.Markdown,
-                   Text = CacheData.GetTranslation("en", "command_kick_missingMessage")
-               });
+                   new ChatMessage()
+                   {
+                       Timestamp = DateTime.UtcNow,
+                       Chat = message.Chat,
+                       ParseMode = ParseMode.Markdown,
+                       Text = CacheData.GetTranslation("en", "command_kick_missingMessage")
+                   });
                 return;
             }
 
-            Manager.BotClient.KickChatMemberAsync(message.Chat.Id, userToKick);
+            try
+            {
+                Manager.BotClient.KickChatMemberAsync(message.Chat.Id, userToKick);
+                if (message.Chat.Type == ChatType.Supergroup)
+                    Manager.BotClient.UnbanChatMemberAsync(message.Chat.Id, userToKick);
+            }
+            catch
+            {
+                MessageQueueManager.EnqueueMessage(
+                   new ChatMessage()
+                   {
+                       Timestamp = DateTime.UtcNow,
+                       Chat = message.Chat,
+                       ParseMode = ParseMode.Markdown,
+                       Text = CacheData.GetTranslation("en", "command_kick_error")
+                   });
+            }
         }
 
         public void Execute(CallbackQuery callbackQuery) { }
