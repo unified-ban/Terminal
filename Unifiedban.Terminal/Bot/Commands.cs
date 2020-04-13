@@ -48,6 +48,7 @@ namespace Unifiedban.Terminal.Bot
         public const string REMOVENOTE = "REMOVENOTE";
         public const string DELETENOTE = "DELETENOTE";
         public const string BAN = "BAN";
+        public const string UNBAN = "UNBAN";
 
         public const string TEST1 = "TEST1";
 
@@ -111,6 +112,7 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(REMOVENOTE, new Command.RemoveNote());
             CommandsList.Add(DELETENOTE, new Command.RemoveNote());
             CommandsList.Add(BAN, new Command.Ban());
+            CommandsList.Add(UNBAN, new Command.Unban());
 
 #if DEBUG
             CommandsList.Add(TEST1, new Command.TestCommand());
