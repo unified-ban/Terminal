@@ -205,7 +205,7 @@ namespace Unifiedban.Terminal.Bot
                             {
                                 Timestamp = DateTime.UtcNow,
                                 Chat = message.Chat,
-                                ParseMode = ParseMode.Markdown,
+                                ParseMode = ParseMode.Default,
                                 Text = $"Please {name} certify to be a human.\nIf you don't click this button you are not going to be unlocked.",
                                 ReplyMarkup = new InlineKeyboardMarkup(
                                     InlineKeyboardButton.WithCallbackData(
