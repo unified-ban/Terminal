@@ -5,6 +5,8 @@
 using System.Linq;
 using System.Reflection;
 using System.Diagnostics;
+using System;
+using System.Text.RegularExpressions;
 
 namespace Unifiedban.Terminal.Utils
 {
@@ -28,6 +30,25 @@ namespace Unifiedban.Terminal.Utils
             Assembly assembly = Assembly.GetExecutingAssembly();
             FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
             return fileVersionInfo.ProductVersion;
+        }
+
+        public static bool IsValidUrl(string url)
+        {
+            string regex = @"(((http|ftp|https):\/\/)|(tg:\/\/))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])?|(?![\w_])(@[\w_]+)(?!.)";
+            Regex reg = new Regex(regex, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+            MatchCollection matchedWords = reg.Matches(url);
+
+            return matchedWords.Count == 1;
+        }
+    }
+
+    public class WebClientWithTimeout : System.Net.WebClient
+    {
+        protected override System.Net.WebRequest GetWebRequest(Uri address)
+        {
+            System.Net.WebRequest wr = base.GetWebRequest(address);
+            wr.Timeout = 5000; // timeout in milliseconds (ms)
+            return wr;
         }
     }
 }

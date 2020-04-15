@@ -56,6 +56,16 @@ namespace Unifiedban.Terminal.Bot.Command
 
             if (welcomeMessage)
             {
+                BusinessLogic.ButtonLogic buttonLogic = new BusinessLogic.ButtonLogic();
+                List<List<InlineKeyboardButton>> buttons = new List<List<InlineKeyboardButton>>();
+                foreach (Button btn in buttonLogic
+                    .GetByChat(CacheData.Groups[callbackQuery.Message.Chat.Id]
+                    .GroupId))
+                {
+                    buttons.Add(new List<InlineKeyboardButton>());
+                    buttons[buttons.Count -1].Add(InlineKeyboardButton.WithUrl(btn.Name, btn.Content));
+                }
+
                 MessageQueueManager.EnqueueMessage(
                    new ChatMessage()
                    {
@@ -65,6 +75,9 @@ namespace Unifiedban.Terminal.Bot.Command
                        Text = Utils.Parsers.VariablesParser(
                            CacheData.Groups[callbackQuery.Message.Chat.Id].WelcomeText,
                            callbackQuery),
+                       ReplyMarkup = new InlineKeyboardMarkup(
+                            buttons
+                        )
                    });
 
                 return;
