@@ -16,6 +16,7 @@ namespace Unifiedban.Terminal
         public static bool FatalError = false;
         public static IConfigurationRoot Configuration;
         public static DateTime StartupDateTimeUtc = DateTime.UtcNow;
+        public static bool AnswerInvalidCommand = false; 
 
         // Instance data
         public static List<Models.SysConfig> SysConfigs = new List<Models.SysConfig>();

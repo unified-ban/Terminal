@@ -39,6 +39,10 @@ namespace Unifiedban.Terminal.Bot.Command
                                         "RM",
                                         $"/test1 rm"
                                         ));
+            confirmationButton.Add(InlineKeyboardButton.WithCallbackData(
+                                        "Switch invalid command" + (CacheData.AnswerInvalidCommand ? " ✅" : " ❌"),
+                                        $"/test1 switchinvalidcommand"
+                                        ));
 
             MessageQueueManager.EnqueueMessage(
                     new ChatMessage()
@@ -76,6 +80,9 @@ namespace Unifiedban.Terminal.Bot.Command
                         deleteLastMessages(message, Convert.ToInt32(data[2]));
                     else
                         deleteLastMessages(message);
+                    break;
+                case "switchinvalidcommand":
+                        CacheData.AnswerInvalidCommand = !CacheData.AnswerInvalidCommand;
                     break;
                 default:
                     break;
