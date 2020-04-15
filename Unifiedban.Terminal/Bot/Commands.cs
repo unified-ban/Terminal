@@ -55,6 +55,8 @@ namespace Unifiedban.Terminal.Bot
         public const string AWB = "AWB";
         public const string WELCOMEBUTTONS = "WELCOMEBUTTONS";
         public const string WBL = "WBL";
+        public const string REMOVEWELCOMEBUTTON = "REMOVEWELCOMEBUTTON";
+        public const string RWB = "RWB";
 
         public const string TEST1 = "TEST1";
 
@@ -125,6 +127,8 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(AWB, new Command.AddWelcomeButton());
             CommandsList.Add(WELCOMEBUTTONS, new Command.WelcomeButtonsList());
             CommandsList.Add(WBL, new Command.WelcomeButtonsList());
+            CommandsList.Add(REMOVEWELCOMEBUTTON, new Command.RemoveWelcomeButton());
+            CommandsList.Add(RWB, new Command.RemoveWelcomeButton());
 
 #if DEBUG
             CommandsList.Add(TEST1, new Command.TestCommand());
