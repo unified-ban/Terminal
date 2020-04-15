@@ -139,10 +139,10 @@ namespace Unifiedban.Terminal.Bot
 
             if (e.Message.Date < DateTime.Now.AddDays(-1))
                 return;
-
-            if (CacheData.Groups[e.Message.Chat.Id].State !=
-                Models.Group.TelegramGroup.Status.Active &&
-                e.Message.Text != "/enable") return;
+            if(CacheData.Groups.Keys.Contains(e.Message.Chat.Id))
+                if (CacheData.Groups[e.Message.Chat.Id].State !=
+                    Models.Group.TelegramGroup.Status.Active &&
+                    e.Message.Text != "/enable") return;
 
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
