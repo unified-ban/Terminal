@@ -49,6 +49,8 @@ namespace Unifiedban.Terminal.Bot
         public const string DELETENOTE = "DELETENOTE";
         public const string BAN = "BAN";
         public const string UNBAN = "UNBAN";
+        public const string ADDSAFE = "ADDSAFE";
+        public const string REMSAFE = "REMSAFE";
 
         public const string TEST1 = "TEST1";
 
@@ -113,6 +115,8 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(DELETENOTE, new Command.RemoveNote());
             CommandsList.Add(BAN, new Command.Ban());
             CommandsList.Add(UNBAN, new Command.Unban());
+            CommandsList.Add(ADDSAFE, new Command.AddSafeGroup());
+            CommandsList.Add(REMSAFE, new Command.RemoveSafeGroup());
 
 #if DEBUG
             CommandsList.Add(TEST1, new Command.TestCommand());
