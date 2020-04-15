@@ -2,10 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Telegram.Bot.Types;
 using Unifiedban.Models.Group;
 
@@ -21,12 +19,14 @@ namespace Unifiedban.Terminal.Filters
         static List<SafeGroup> safeGroups = new List<SafeGroup>();
         public FilterResult DoCheck(Message message)
         {
-            return DoCheck(message.Text);
+            return DoCheck(CacheData.Groups[message.Chat.Id].GroupId,
+                message.Text);
         }
-        public FilterResult DoCheck(string text)
+
+        public FilterResult DoCheck(string groupId, string text)
         {
             SafeGroup isKnown = safeGroups
-                .Where(x => x.GroupName == text)
+                .Where(x => x.GroupId == groupId && x.GroupName == text)
                 .FirstOrDefault();
             if (isKnown == null)
                 return new FilterResult()
@@ -42,7 +42,7 @@ namespace Unifiedban.Terminal.Filters
             };
         }
 
-        private static void LoadCache()
+        public static void LoadCache()
         {
             BusinessLogic.Group.SafeGroupLogic safeGroupLogic =
                 new BusinessLogic.Group.SafeGroupLogic();

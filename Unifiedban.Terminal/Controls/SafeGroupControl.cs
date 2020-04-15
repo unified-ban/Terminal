@@ -62,13 +62,21 @@ namespace Unifiedban.Terminal.Controls
             
 
             foreach (Match match in matchedWords)
-                if(Manager.IsTelegramLink(match.Value))
-                    if (safeGroupFilter.DoCheck(match.Value).Result == Filters.IFilter.FilterResultType.positive)
+            {
+                string url = match.Value;
+                if (url.StartsWith("@"))
+                    url = "https://t.me/" + match.Value.Remove(0, 1);
+
+                if (Manager.IsTelegramLink(url))
+                    if (safeGroupFilter.DoCheck(
+                        CacheData.Groups[message.Chat.Id].GroupId, url)
+                            .Result == Filters.IFilter.FilterResultType.positive)
                         return new ControlResult()
                         {
                             CheckName = "Safe Group",
                             Result = IControl.ControlResultType.positive
                         };
+            }
 
             return new ControlResult()
             {
