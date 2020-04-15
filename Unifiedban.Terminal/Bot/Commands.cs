@@ -53,6 +53,8 @@ namespace Unifiedban.Terminal.Bot
         public const string REMSAFE = "REMSAFE";
         public const string ADDWELCOMEBUTTON = "ADDWELCOMEBUTTON";
         public const string AWB = "AWB";
+        public const string WELCOMEBUTTONS = "WELCOMEBUTTONS";
+        public const string WBL = "WBL";
 
         public const string TEST1 = "TEST1";
 
@@ -121,6 +123,8 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(REMSAFE, new Command.RemoveSafeGroup());
             CommandsList.Add(ADDWELCOMEBUTTON, new Command.AddWelcomeButton());
             CommandsList.Add(AWB, new Command.AddWelcomeButton());
+            CommandsList.Add(WELCOMEBUTTONS, new Command.WelcomeButtonsList());
+            CommandsList.Add(WBL, new Command.WelcomeButtonsList());
 
 #if DEBUG
             CommandsList.Add(TEST1, new Command.TestCommand());
