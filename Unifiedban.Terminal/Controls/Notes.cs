@@ -41,7 +41,7 @@ namespace Unifiedban.Terminal.Controls
             List<Models.Group.Note> notes = new List<Models.Group.Note>();
             foreach(Match match in matchedTags)
             {
-                notes.AddRange(noteLogic.GetByTag(match.Value));
+                notes.AddRange(noteLogic.GetByTag(match.Value, CacheData.Groups[message.Chat.Id].GroupId));
             }
 
             List<Models.Group.Note> distNotes = new List<Models.Group.Note>(notes.Distinct());
