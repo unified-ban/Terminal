@@ -77,7 +77,7 @@ namespace Unifiedban.Terminal.Bot.Command
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
-                       Text = successMsg.Replace("{{awbName}}", arguments[1])
+                       Text = successMsg.Replace("{{wbName}}", arguments[1])
                    });
         }
 
