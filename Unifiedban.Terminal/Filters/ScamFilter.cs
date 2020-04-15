@@ -15,6 +15,7 @@ namespace Unifiedban.Terminal.Filters
     {
         static string linksList = "";
         static DateTime lastUpdate = DateTime.UtcNow.AddDays(-2);
+        static List<string> safeSingleLetter;
 
         public FilterResult DoCheck(Message message)
         {
@@ -34,7 +35,7 @@ namespace Unifiedban.Terminal.Filters
                         Result = IFilter.FilterResultType.skipped
                     };
 
-            string regex = @"(http|ftp|https:\/\/)?([\w_-]+\s?(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])?";
+            string regex = @"(http|ftp|https:\/\/)?([\w_-]+\s?(?:(?:\.[\w_-]{2,})+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])?";
             Regex reg = new Regex(regex, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
             MatchCollection matchedWords = reg.Matches(text);
             if (matchedWords.Count == 0)
@@ -57,7 +58,8 @@ namespace Unifiedban.Terminal.Filters
                 };
             
             foreach (Match match in matchedWords)
-                if (linksList.Contains(match.Value))
+                if (linksList.Contains(match.Value) && 
+                    !safeSingleLetter.Contains(match.Value))
                     return new FilterResult()
                     {
                         CheckName = "ScamFilter",
@@ -73,6 +75,29 @@ namespace Unifiedban.Terminal.Filters
 
         void updateLinksList()
         {
+            safeSingleLetter = new List<string>();
+            safeSingleLetter.Add("a.co");
+            safeSingleLetter.Add("a.org");
+            safeSingleLetter.Add("b.org");
+            safeSingleLetter.Add("e.im");
+            safeSingleLetter.Add("g.co");
+            safeSingleLetter.Add("i.net");
+            safeSingleLetter.Add("m.me");
+            safeSingleLetter.Add("n.pr");
+            safeSingleLetter.Add("o.co");
+            safeSingleLetter.Add("q.com");
+            safeSingleLetter.Add("q.net");
+            safeSingleLetter.Add("s.co");
+            safeSingleLetter.Add("s.de");
+            safeSingleLetter.Add("t.com");
+            //safeSingleLetter.Add("t.me");
+            safeSingleLetter.Add("u.ae");
+            safeSingleLetter.Add("w.org");
+            safeSingleLetter.Add("y.org");
+            safeSingleLetter.Add("x.com");
+            safeSingleLetter.Add("x.org");
+            safeSingleLetter.Add("z.com");
+
             Models.SysConfig sitesList = CacheData.SysConfigs.Where(x => x.SysConfigId == "PhishingLinks")
                     .SingleOrDefault();
             if (sitesList == null)
