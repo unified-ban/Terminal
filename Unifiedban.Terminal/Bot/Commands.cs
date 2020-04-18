@@ -59,6 +59,7 @@ namespace Unifiedban.Terminal.Bot
         public const string RWB = "RWB";
         public const string BAD = "BAD";
         public const string UNBAD = "UNBAD";
+        public const string CALL = "CALL";
 
         public const string TEST1 = "TEST1";
 
@@ -133,6 +134,7 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(RWB, new Command.RemoveWelcomeButton());
             CommandsList.Add(BAD, new Command.AddBadWord());
             CommandsList.Add(UNBAD, new Command.RemoveBadWord());
+            CommandsList.Add(CALL, new Command.Call());
 
 #if DEBUG
             CommandsList.Add(TEST1, new Command.TestCommand());
