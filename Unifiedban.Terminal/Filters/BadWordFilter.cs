@@ -232,7 +232,7 @@ namespace Unifiedban.Terminal.Filters
                 + letter.ToString().ToUpperInvariant() + @"*]\s*";
         }
 
-        private static bool BanWord(
+        public static bool BanWord(
             string telegramGroup,
             string name,
             string text)
@@ -260,8 +260,19 @@ namespace Unifiedban.Terminal.Filters
             regex = regex.Remove(regex.Length - 2, 2); // remove last .*
 
             BadWord badWord = bwl.Add(telegramGroup, name, regex, BadWord.State.Active, -2);
+            CacheData.BadWords = bwl.Get();
 
             return badWord == null ? false : true;
+        }
+
+        public static bool RemoveBadWord(
+            string telegramGroup,
+            string name)
+        {
+            Models.SystemLog.ErrorCodes removed = bwl.Remove(telegramGroup, name, -2);
+            CacheData.BadWords = bwl.Get();
+
+            return removed == Models.SystemLog.ErrorCodes.Error ? false : true;
         }
     }
 }
