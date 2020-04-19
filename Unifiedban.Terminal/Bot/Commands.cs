@@ -62,6 +62,8 @@ namespace Unifiedban.Terminal.Bot
         public const string CALL = "CALL";
         public const string REPORT = "REPORT";
         public const string FEEDBACK = "FEEDBACK";
+        public const string STARTSUPPORT = "STARTSUPPORT";
+        public const string ENDSUPPORT = "ENDSUPPORT";
 
         public const string TEST1 = "TEST1";
 
@@ -139,6 +141,8 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(CALL, new Command.Call());
             CommandsList.Add(REPORT, new Command.Report());
             CommandsList.Add(FEEDBACK, new Command.Feedback());
+            CommandsList.Add(STARTSUPPORT, new Command.StartSupport());
+            CommandsList.Add(ENDSUPPORT, new Command.EndSupport());
 
 #if DEBUG
             CommandsList.Add(TEST1, new Command.TestCommand());

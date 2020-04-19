@@ -36,6 +36,9 @@ namespace Unifiedban.Terminal
         public static List<Models.User.Banned> BannedUsers = new List<Models.User.Banned>();
         public static Dictionary<string, int> Usernames = new Dictionary<string, int>();
 
+        public static List<string> ActiveSupport =
+            new List<string>();
+
         public static long ControlChatId = 0;
 
         public static int HandledMessages { get; private set; }
