@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Diagnostics;
 using System;
 using System.Text.RegularExpressions;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace Unifiedban.Terminal.Utils
 {
@@ -39,6 +41,30 @@ namespace Unifiedban.Terminal.Utils
             MatchCollection matchedWords = reg.Matches(url);
 
             return matchedWords.Count == 1;
+        }
+
+        public static void RecordFeedback(Message message)
+        {
+            Bot.Manager.BotClient.SendTextMessageAsync(
+                    chatId: Convert.ToInt64(CacheData.SysConfigs
+                            .Single(x => x.SysConfigId == "ControlChatId")
+                            .Value),
+                    parseMode: ParseMode.Markdown,
+                    text: String.Format(
+                        "User *{0}:{1}* from group *{2}:[{3}]({4})* has sent a feedback:\n\n" +
+                        message.Text,
+                        message.From.Id,
+                        message.From.Username,
+                        message.Chat.Id,
+                        message.Chat.Title,
+                        "https://t.me/" + message.Chat.Username)
+                );
+
+            Bot.Manager.BotClient.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    parseMode: ParseMode.Markdown,
+                    text: String.Format("Thank you for your feedback!\nIt has been recorded.")
+                );
         }
     }
 

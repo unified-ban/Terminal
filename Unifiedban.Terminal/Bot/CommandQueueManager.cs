@@ -97,6 +97,12 @@ namespace Unifiedban.Terminal.Bot
                             break;
                         Utils.ConfigTools.UpdateRulesText(message.Chat.Id, message.Text);
                         break;
+                    case "Feedback":
+                        if (String.IsNullOrEmpty(message.Text))
+                            break;
+                        DenqueueMessage(commandMessage);
+                        Utils.BotTools.RecordFeedback(message);
+                        break;
                 }
             }
             catch

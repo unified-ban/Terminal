@@ -61,6 +61,7 @@ namespace Unifiedban.Terminal.Bot
         public const string UNBAD = "UNBAD";
         public const string CALL = "CALL";
         public const string REPORT = "REPORT";
+        public const string FEEDBACK = "FEEDBACK";
 
         public const string TEST1 = "TEST1";
 
@@ -137,6 +138,7 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(UNBAD, new Command.RemoveBadWord());
             CommandsList.Add(CALL, new Command.Call());
             CommandsList.Add(REPORT, new Command.Report());
+            CommandsList.Add(FEEDBACK, new Command.Feedback());
 
 #if DEBUG
             CommandsList.Add(TEST1, new Command.TestCommand());
