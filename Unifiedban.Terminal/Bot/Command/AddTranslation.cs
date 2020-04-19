@@ -158,7 +158,6 @@ namespace Unifiedban.Terminal.Bot.Command
                     commandMessage.Message.ReplyToMessage.From.Id
                 && x.Level == Models.Operator.Levels.Super) == null)
             {
-                CommandQueueManager.DenqueueMessage(commandMessage);
                 MessageQueueManager.EnqueueMessage(
                    new ChatMessage()
                    {
@@ -263,7 +262,6 @@ namespace Unifiedban.Terminal.Bot.Command
                 commandMessage.Message.From.Id
                 && x.Level == Models.Operator.Levels.Super) == null)
             {
-                CommandQueueManager.DenqueueMessage(commandMessage);
                 MessageQueueManager.EnqueueMessage(
                    new ChatMessage()
                    {
