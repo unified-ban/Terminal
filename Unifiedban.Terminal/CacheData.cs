@@ -39,6 +39,8 @@ namespace Unifiedban.Terminal
 
         public static List<long> ActiveSupport =
             new List<long>();
+        public static Dictionary<long, List<int>> CurrentChatAdmins =
+            new Dictionary<long, List<int>>();
 
         public static long ControlChatId = 0;
 
