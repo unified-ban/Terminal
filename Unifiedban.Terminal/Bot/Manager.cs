@@ -156,6 +156,7 @@ namespace Unifiedban.Terminal.Bot
 
             await Task.Run(() => CacheData.IncrementHandledMessages());
             await Task.Run(() => Functions.CacheUsername(e.Message));
+            await Task.Run(() => Utils.ChatTools.HandleSupportSessionMsg(e.Message));
 
             if (e.Message.MigrateToChatId != 0)
             {

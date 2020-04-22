@@ -27,10 +27,9 @@ namespace Unifiedban.Terminal.Bot.Command
                 return;
             }
 
-            CacheData.Groups.TryGetValue(message.Chat.Id, out Models.Group.TelegramGroup group);
-            if (!CacheData.ActiveSupport.Contains(group.GroupId))
+            if (!CacheData.ActiveSupport.Contains(message.Chat.Id))
             {
-                CacheData.ActiveSupport.Add(group.GroupId);
+                CacheData.ActiveSupport.Add(message.Chat.Id);
 
                 Manager.BotClient.SendTextMessageAsync(
                     chatId: message.Chat.Id,

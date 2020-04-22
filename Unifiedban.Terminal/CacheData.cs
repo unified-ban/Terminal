@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Telegram.Bot.Types;
 
 namespace Unifiedban.Terminal
 {
@@ -36,8 +37,8 @@ namespace Unifiedban.Terminal
         public static List<Models.User.Banned> BannedUsers = new List<Models.User.Banned>();
         public static Dictionary<string, int> Usernames = new Dictionary<string, int>();
 
-        public static List<string> ActiveSupport =
-            new List<string>();
+        public static List<long> ActiveSupport =
+            new List<long>();
 
         public static long ControlChatId = 0;
 

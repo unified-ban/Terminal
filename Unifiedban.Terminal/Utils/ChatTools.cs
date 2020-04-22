@@ -5,6 +5,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Telegram.Bot.Types;
+using Unifiedban.Terminal.Bot;
 
 namespace Unifiedban.Terminal.Utils
 {
@@ -19,6 +21,39 @@ namespace Unifiedban.Terminal.Utils
                     return true;
             }
             return false;
+        }
+
+        public static void HandleSupportSessionMsg(Message message)
+        {
+            if (message.Text != null)
+            if (message.Text.StartsWith("/"))
+                return;
+
+            if (!CacheData.ActiveSupport
+                .Contains(message.Chat.Id))
+                return;
+
+            if (BotTools.IsUserOperator(message.From.Id))
+            {
+                Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+                ChatMessage newMsg = new ChatMessage()
+                {
+                    Timestamp = DateTime.UtcNow,
+                    Chat = message.Chat,
+                    Text = message.Text +
+                        "\n\nMessage from operator: " + message.From.Username
+                };
+                if (message.ReplyToMessage != null)
+                    newMsg.ReplyToMessageId = message.ReplyToMessage.MessageId;
+                MessageQueueManager.EnqueueMessage(newMsg);
+            }
+
+            RecordSupportSessionMessage(message);
+        }
+
+        private static void RecordSupportSessionMessage(Message message)
+        {
+
         }
     }
 }
