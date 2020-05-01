@@ -268,6 +268,10 @@ namespace Unifiedban.Terminal.Bot.Command
                     Gate.ToggleGate(message, newValue == "true" ? true : false);
                     Execute(message, true);
                     break;
+                case "GateSchedule":
+                    Gate.ToggleSchedule(message, newValue == "true" ? true : false);
+                    Execute(message, true);
+                    break;
                 default:
                     return;
             }

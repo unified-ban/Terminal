@@ -12,11 +12,17 @@ namespace Unifiedban.Terminal.Utils
 {
     public class ConfigTools
     {
+        static BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
+            new BusinessLogic.Group.TelegramGroupLogic();
+        static BusinessLogic.Group.NightScheduleLogic nsl =
+            new BusinessLogic.Group.NightScheduleLogic();
+
         public static void Initialize()
         {
             RecurringJob.AddOrUpdate("ConfigTools_SyncGroupsConfigToDatabase", () => SyncGroupsConfigToDatabase(), "0/30 * * ? * *");
             RecurringJob.AddOrUpdate("ConfigTools_SyncWelcomeAndRulesText", () => SyncWelcomeAndRulesText(), "0/30 * * ? * *");
             RecurringJob.AddOrUpdate("ConfigTools_SyncGroupsToDatabase", () => SyncGroupsToDatabase(), "0/30 * * ? * *");
+            RecurringJob.AddOrUpdate("ConfigTools_SyncNightScheduleToDatabase", () => SyncNightScheduleToDatabase(), "0/30 * * ? * *");
 
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
@@ -34,13 +40,11 @@ namespace Unifiedban.Terminal.Utils
             SyncGroupsToDatabase();
             SyncGroupsConfigToDatabase();
             SyncWelcomeAndRulesText();
+            SyncNightScheduleToDatabase();
         }
 
         public static void SyncGroupsToDatabase()
         {
-            BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
-                new BusinessLogic.Group.TelegramGroupLogic();
-
             foreach (long group in CacheData.Groups.Keys)
                 telegramGroupLogic.Update(
                     CacheData.Groups[group],
@@ -49,9 +53,6 @@ namespace Unifiedban.Terminal.Utils
 
         public static void SyncGroupsConfigToDatabase()
         {
-            BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
-                new BusinessLogic.Group.TelegramGroupLogic();
-            
             foreach (long group in CacheData.GroupConfigs.Keys)
                 telegramGroupLogic.UpdateConfiguration(
                     group,
@@ -61,9 +62,6 @@ namespace Unifiedban.Terminal.Utils
 
         public static void SyncWelcomeAndRulesText()
         {
-            BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
-                new BusinessLogic.Group.TelegramGroupLogic();
-
             foreach (long group in CacheData.Groups.Keys)
             {
                 telegramGroupLogic.UpdateWelcomeText(
@@ -99,6 +97,12 @@ namespace Unifiedban.Terminal.Utils
             {
                 return false;
             }
+        }
+
+        public static void SyncNightScheduleToDatabase()
+        {
+            foreach (Models.Group.NightSchedule nightSchedule in CacheData.NightSchedules.Values)
+                nsl.Update(nightSchedule, -2);
         }
     }
 }

@@ -88,5 +88,38 @@ namespace Unifiedban.Terminal.Bot.Command
                     Text = $"The group is now {status}"
                 });
         }
+
+        public static void ToggleSchedule(Message message, bool newStatus)
+        {
+            Models.Group.ConfigurationParameter config = CacheData.GroupConfigs[message.Chat.Id]
+               .Where(x => x.ConfigurationParameterId == "GateSchedule")
+               .SingleOrDefault();
+            if (config == null)
+                return;
+
+            CacheData.GroupConfigs[message.Chat.Id]
+                [CacheData.GroupConfigs[message.Chat.Id]
+                .IndexOf(config)]
+                .Value = newStatus ? "true" : "false";
+
+            Models.Group.NightSchedule nightSchedule = 
+                CacheData.NightSchedules[CacheData.Groups[message.Chat.Id].GroupId];
+
+            if(!nightSchedule.UtcStartDate.HasValue || !nightSchedule.UtcEndDate.HasValue)
+            {
+                MessageQueueManager.EnqueueMessage(
+                    new ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        Text = "Impossible to change schedule status. The schedule time is not set."
+                    });
+                return;
+            }
+
+            CacheData.NightSchedules[CacheData.Groups[message.Chat.Id].GroupId]
+                .State = newStatus ? Models.Group.NightSchedule.Status.Programmed
+                    : Models.Group.NightSchedule.Status.Deactivated;
+        }
     }
 }
