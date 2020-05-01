@@ -174,7 +174,8 @@ namespace Unifiedban.Terminal.Bot.Command
                     text: String.Format(
                         "User *{0}:{1}* tried to use command AddTranslationKey.",
                         replyMessage.From.Id,
-                        replyMessage.From.Username)
+                        replyMessage.From.Username),
+                    replyMarkup: new ReplyKeyboardRemove() { Selective = true }
                 );
                 return;
             }
@@ -192,7 +193,8 @@ namespace Unifiedban.Terminal.Bot.Command
                         ReplyToMessageId = replyMessage.MessageId,
                         ParseMode = ParseMode.Markdown,
                         Text = "Error: translation key cannot contain space and/or special chars.\n"
-                            + "Start again the process."
+                            + "Start again the process.",
+                        ReplyMarkup = new ReplyKeyboardRemove() { Selective = true }
                     });
                 return;
             }
@@ -213,7 +215,8 @@ namespace Unifiedban.Terminal.Bot.Command
                         Chat = replyMessage.Chat,
                         ReplyToMessageId = replyMessage.MessageId,
                         ParseMode = ParseMode.Markdown,
-                        Text = "*Error* adding translation key.\nCheck internal logs."
+                        Text = "*Error* adding translation key.\nCheck internal logs.",
+                        ReplyMarkup = new ReplyKeyboardRemove() { Selective = true }
                     });
                 return;
             }
@@ -228,7 +231,8 @@ namespace Unifiedban.Terminal.Bot.Command
                         Chat = replyMessage.Chat,
                         ReplyToMessageId = replyMessage.MessageId,
                         ParseMode = ParseMode.Markdown,
-                        Text = $"*Error*\n {commandMessage.Value} translation for key `{translationKey.KeyId}` already exists!"
+                        Text = $"*Error*\n {commandMessage.Value} translation for key `{translationKey.KeyId}` already exists!",
+                        ReplyMarkup = new ReplyKeyboardRemove() { Selective = true }
                     });
                 return;
             }
@@ -251,7 +255,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     ParseMode = ParseMode.Markdown,
                     Text = $"*[ADMIN] [r:{replyMessage.MessageId}]*\nType translation for " +
                     $"`{translationKey.KeyId}` in `{CacheData.Languages[commandMessage.Value].Name}`:",
-                    ReplyMarkup = new ForceReplyMarkup()
+                    ReplyMarkup = new ForceReplyMarkup() { Selective = true }
                 });
         }
         public static void AddTranslationEntry(CommandMessage commandMessage,
@@ -293,7 +297,8 @@ namespace Unifiedban.Terminal.Bot.Command
                        Timestamp = DateTime.UtcNow,
                        Chat = replyMessage.Chat,
                        ReplyToMessageId = replyMessage.MessageId,
-                       Text = CacheData.GetTranslation("en", "error_invalid_parameters")
+                       Text = CacheData.GetTranslation("en", "error_invalid_parameters"),
+                       ReplyMarkup = new ReplyKeyboardRemove() { Selective = true }
                    });
             }
             string languageId = parameters[0];
@@ -314,7 +319,8 @@ namespace Unifiedban.Terminal.Bot.Command
                         Chat = replyMessage.Chat,
                         ReplyToMessageId = replyMessage.MessageId,
                         ParseMode = ParseMode.Markdown,
-                        Text = "*Error* adding translation entry.\nCheck internal logs."
+                        Text = "*Error* adding translation entry.\nCheck internal logs.",
+                        ReplyMarkup = new ReplyKeyboardRemove() { Selective = true }
                     });
                 return;
             }
@@ -327,7 +333,8 @@ namespace Unifiedban.Terminal.Bot.Command
                         Chat = replyMessage.Chat,
                         ReplyToMessageId = replyMessage.MessageId,
                         ParseMode = ParseMode.Markdown,
-                        Text = "*OK!*\nTranslation added successfully!\nRemember to reload them manually!"
+                        Text = "*OK!*\nTranslation added successfully!\nRemember to reload them manually!",
+                        ReplyMarkup = new ReplyKeyboardRemove() { Selective = true }
                     });
         }
     }

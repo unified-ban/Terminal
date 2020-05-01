@@ -9,6 +9,7 @@ using System;
 using System.Text.RegularExpressions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Unifiedban.Terminal.Utils
 {
@@ -60,10 +61,12 @@ namespace Unifiedban.Terminal.Utils
                         "https://t.me/" + message.Chat.Username)
                 );
 
+            string replyMessage = "Thank you {{from_username}} for your feedback!\nIt has been recorded.";
             Bot.Manager.BotClient.SendTextMessageAsync(
                     chatId: message.Chat.Id,
                     parseMode: ParseMode.Markdown,
-                    text: String.Format("Thank you for your feedback!\nIt has been recorded.")
+                    text: Parsers.VariablesParser(replyMessage, message),
+                    replyMarkup: new ReplyKeyboardRemove() { Selective = true }
                 );
         }
     }
