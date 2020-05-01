@@ -42,6 +42,10 @@ namespace Unifiedban.Terminal
         public static Dictionary<long, List<int>> CurrentChatAdmins =
             new Dictionary<long, List<int>>();
 
+
+        public static Dictionary<string, Models.Group.NightSchedule> NightSchedules =
+            new Dictionary<string, Models.Group.NightSchedule>();
+
         public static long ControlChatId = 0;
 
         public static int HandledMessages { get; private set; }

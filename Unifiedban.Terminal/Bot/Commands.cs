@@ -64,6 +64,7 @@ namespace Unifiedban.Terminal.Bot
         public const string FEEDBACK = "FEEDBACK";
         public const string STARTSUPPORT = "STARTSUPPORT";
         public const string ENDSUPPORT = "ENDSUPPORT";
+        public const string SETGATE = "SETGATE";
 
         public const string TEST1 = "TEST1";
 
@@ -121,6 +122,7 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(MUTE, new Command.Mute());
             CommandsList.Add(UNMUTE, new Command.Unmute());
             CommandsList.Add(GATE, new Command.Gate());
+            CommandsList.Add(SETGATE, new Command.SetGate());
             CommandsList.Add(RM, new Command.Rm());
             CommandsList.Add(SETNOTE, new Command.AddNote());
             CommandsList.Add(ADDNOTE, new Command.AddNote());

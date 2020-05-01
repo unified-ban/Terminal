@@ -347,6 +347,20 @@ namespace Unifiedban.Terminal
             BusinessLogic.User.BannedLogic bannedLogic = new BusinessLogic.User.BannedLogic();
             CacheData.BannedUsers = new List<Models.User.Banned>(bannedLogic.Get());
 
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Get night schedule",
+                UserId = -2
+            });
+            BusinessLogic.Group.NightScheduleLogic nsl = new BusinessLogic.Group.NightScheduleLogic();
+            foreach(NightSchedule nightSchedule in nsl.Get())
+            {
+                CacheData.NightSchedules.Add(nightSchedule.GroupId, nightSchedule);
+            }
 
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
