@@ -127,8 +127,8 @@ namespace Unifiedban.Terminal.Bot.Command
 
         public void Execute(CallbackQuery callbackQuery)
         {
-            if (!Utils.BotTools.IsUserOperator(callbackQuery.Message.From.Id) &&
-                !Utils.ChatTools.IsUserAdmin(callbackQuery.Message.Chat.Id, callbackQuery.Message.From.Id))
+            if (!Utils.BotTools.IsUserOperator(callbackQuery.From.Id) &&
+                !Utils.ChatTools.IsUserAdmin(callbackQuery.Message.Chat.Id, callbackQuery.From.Id))
             {
                 return;
             }

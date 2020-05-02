@@ -108,7 +108,7 @@ namespace Unifiedban.Terminal.Bot.Command
         {
             if (CacheData.Operators
                 .SingleOrDefault(x => x.TelegramUserId ==
-                    callbackQuery.Message.ReplyToMessage.From.Id
+                    callbackQuery.From.Id
                 && x.Level == Models.Operator.Levels.Super) == null)
             {
                 MessageQueueManager.EnqueueMessage(
