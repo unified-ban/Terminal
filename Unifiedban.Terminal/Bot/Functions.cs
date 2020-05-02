@@ -169,6 +169,7 @@ namespace Unifiedban.Terminal.Bot
                                         CanSendPolls = false
                                     }
                                 );
+                            Manager.BotClient.KickChatMemberAsync(message.Chat.Id, member.Id);
                         }
                         catch (Exception ex)
                         {

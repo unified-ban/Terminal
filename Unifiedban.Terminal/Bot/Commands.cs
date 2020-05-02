@@ -65,6 +65,9 @@ namespace Unifiedban.Terminal.Bot
         public const string STARTSUPPORT = "STARTSUPPORT";
         public const string ENDSUPPORT = "ENDSUPPORT";
         public const string SETGATE = "SETGATE";
+        public const string BB = "BB";
+        public const string ADDTOBLACKLIST = "ADDTOBLACKLIST";
+        public const string WHITE = "WHITE";
 
         public const string TEST1 = "TEST1";
 
@@ -145,6 +148,9 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(FEEDBACK, new Command.Feedback());
             CommandsList.Add(STARTSUPPORT, new Command.StartSupport());
             CommandsList.Add(ENDSUPPORT, new Command.EndSupport());
+            CommandsList.Add(BB, new Command.AddToBlacklist());
+            CommandsList.Add(ADDTOBLACKLIST, new Command.AddToBlacklist());
+            CommandsList.Add(WHITE, new Command.RemoveFromBlacklist());
 
 #if DEBUG
             CommandsList.Add(TEST1, new Command.TestCommand());
