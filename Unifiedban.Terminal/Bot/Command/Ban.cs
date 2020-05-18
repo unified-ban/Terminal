@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Telegram.Bot.Types;
+using Unifiedban.Terminal.Utils;
 
 namespace Unifiedban.Terminal.Bot.Command
 {
@@ -80,7 +81,8 @@ namespace Unifiedban.Terminal.Bot.Command
 
             try
             {
-                Manager.BotClient.KickChatMemberAsync(message.Chat.Id, userToKick);
+                Manager.BotClient.KickChatMemberAsync(message.Chat.Id, userToKick,
+                    DateTime.UtcNow.AddMinutes(-5));
                 MessageQueueManager.EnqueueMessage(
                     new ChatMessage()
                     {
@@ -88,6 +90,8 @@ namespace Unifiedban.Terminal.Bot.Command
                         Chat = message.Chat,
                         Text = CacheData.GetTranslation("en", "ban_command_success")
                     });
+                UserTools.AddPenality(userToKick,
+                    Models.TrustFactorLog.TrustFactorAction.ban, Manager.MyId);
             }
             catch
             {

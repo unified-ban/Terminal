@@ -15,6 +15,7 @@ using Hangfire.Storage;
 using Hangfire.Logging;
 using System.Linq;
 using Unifiedban.Models.Group;
+using Unifiedban.Models.User;
 
 namespace Unifiedban.Terminal
 {
@@ -369,6 +370,21 @@ namespace Unifiedban.Terminal
                 Date = DateTime.Now,
                 Function = "Unifiedban Terminal Startup",
                 Level = Models.SystemLog.Levels.Info,
+                Message = "Get trust points",
+                UserId = -2
+            });
+            BusinessLogic.User.TrustFactorLogic tfl = new BusinessLogic.User.TrustFactorLogic();
+            foreach (TrustFactor trustFactor in tfl.Get())
+            {
+                CacheData.TrustFactors.Add(trustFactor.TelegramUserId, trustFactor);
+            }
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
                 Message = "Cache loaded",
                 UserId = -2
             });
@@ -493,41 +509,6 @@ namespace Unifiedban.Terminal
         //              text: String.Format("New User @{0} spam vote is {1}", e.Message.From.Username, spamValue[e.Message.From.Id])
         //            );
         //        }
-        //    }
-        //}
-        //private static async void compareImage(object sender, MessageEventArgs e)
-        //{
-        //    try
-        //    {
-        //        foreach (PhotoSize photoSize in e.Message.Photo)
-        //        {
-        //            var filePath = botClient.GetFileAsync(photoSize.FileId).Result.FilePath;
-        //            FileStream wFile = new FileStream(@"F:\TEMP\Unifiedban_Asset\temp\" + e.Message.MessageId +
-        //                "_" + photoSize.FileSize + ".jpg", FileMode.CreateNew);
-        //            await botClient.DownloadFileAsync(filePath, wFile);
-        //            wFile.Close();
-        //        }
-        //        Controls.ImageComparator ic = new Controls.ImageComparator();
-        //        ic.AddPicFolderByPath(@"F:\TEMP\Unifiedban_Asset\temp");
-        //        ic.AddPicFolderByPathToCompare(@"F:\TEMP\Unifiedban_Asset\to_compare");
-
-        //        var _comparationResult = ic.FindDuplicatesWithTollerance(70);
-        //        int counter = 1;
-        //        foreach (var hashBlock in _comparationResult)
-        //        {
-        //            Console.WriteLine($"Duplicates {counter++} Group:");
-
-        //            foreach (var singleHash in hashBlock)
-        //            {
-        //                Console.WriteLine(singleHash.FilePath);
-        //            }
-        //        }
-
-        //        //System.IO.File.Delete(@"F:\TEMP\Unifiedban_Asset\temp\toCompare.jpg");
-        //    }
-        //    catch(Exception ex)
-        //    {
-        //        return;
         //    }
         //}
         #endregion

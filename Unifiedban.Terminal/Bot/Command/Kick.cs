@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Unifiedban.Terminal.Utils;
 
 namespace Unifiedban.Terminal.Bot.Command
 {
@@ -71,6 +72,8 @@ namespace Unifiedban.Terminal.Bot.Command
                 Manager.BotClient.KickChatMemberAsync(message.Chat.Id, userToKick);
                 if (message.Chat.Type == ChatType.Supergroup)
                     Manager.BotClient.UnbanChatMemberAsync(message.Chat.Id, userToKick);
+                UserTools.AddPenality(userToKick,
+                    Models.TrustFactorLog.TrustFactorAction.kick, Manager.MyId);
             }
             catch
             {

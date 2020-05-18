@@ -33,6 +33,8 @@ namespace Unifiedban.Terminal
             new Dictionary<long, Models.Group.TelegramGroup>();
         public static Dictionary<long, List<Models.Group.ConfigurationParameter>> GroupConfigs =
             new Dictionary<long, List<Models.Group.ConfigurationParameter>>();
+        public static Dictionary<int, Models.User.TrustFactor> TrustFactors =
+            new Dictionary<int, Models.User.TrustFactor>();
 
         public static List<Models.User.Banned> BannedUsers = new List<Models.User.Banned>();
         public static Dictionary<string, int> Usernames = new Dictionary<string, int>();

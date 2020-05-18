@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using Unifiedban.Terminal.Utils;
 
 namespace Unifiedban.Terminal.Controls
 {
@@ -131,6 +132,9 @@ namespace Unifiedban.Terminal.Controls
                         message.From.Id,
                         message.Chat.Title)
                 );
+
+                UserTools.AddPenality(message.From.Id,
+                    Models.TrustFactorLog.TrustFactorAction.limit, Bot.Manager.MyId);
 
                 Bot.MessageQueueManager.EnqueueMessage(
                     new ChatMessage()
