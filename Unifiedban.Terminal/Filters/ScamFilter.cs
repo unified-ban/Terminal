@@ -35,7 +35,8 @@ namespace Unifiedban.Terminal.Filters
                         Result = IFilter.FilterResultType.skipped
                     };
 
-            string regex = @"(http|ftp|https:\/\/)?([\w_-]+\s?(?:(?:\.[\w_-]{2,})+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])?";
+            //string regex = @"(http|ftp|https:\/\/)?([\w_-]+\s?(?:(?:\.[\w_-]{2,})+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])?";
+            string regex = @"(http:\/\/|ftp:\/\/|https:\/\/)?([\w_-]+\s?(?:(?:\.\s?[\w_-]{2,})+)?)\s?\.\s?([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-]{2,})?";
             Regex reg = new Regex(regex, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
             MatchCollection matchedWords = reg.Matches(text);
             if (matchedWords.Count == 0)
@@ -56,15 +57,22 @@ namespace Unifiedban.Terminal.Filters
                     CheckName = "ScamFilter",
                     Result = IFilter.FilterResultType.skipped
                 };
-            
+
             foreach (Match match in matchedWords)
-                if (linksList.Contains(match.Value) && 
-                    !safeSingleLetter.Contains(match.Value))
+            {
+                string cleanValue = match.Value.Replace(" ", "");
+                // if text does not contain dot and is shorter than 4 chars can't be a link
+                if (!cleanValue.Contains(".") && cleanValue.Length < 4)
+                    continue;
+
+                if (linksList.Contains(cleanValue) &&
+                    !safeSingleLetter.Contains(cleanValue))
                     return new FilterResult()
                     {
                         CheckName = "ScamFilter",
                         Result = IFilter.FilterResultType.positive
                     };
+            }
 
             return new FilterResult()
             {
