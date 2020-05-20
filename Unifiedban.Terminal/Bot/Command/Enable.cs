@@ -25,9 +25,7 @@ namespace Unifiedban.Terminal.Bot.Command
                        Text = CacheData.GetTranslation("en", "error_not_auth_command")
                    });
                 Manager.BotClient.SendTextMessageAsync(
-                    chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                    chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
                         "User *{0}:{1}* tried to use command Enable!",
@@ -67,9 +65,7 @@ namespace Unifiedban.Terminal.Bot.Command
                        Text = CacheData.GetTranslation("en", "command_enable_successful")
                    });
             Manager.BotClient.SendTextMessageAsync(
-                chatId: Convert.ToInt64(CacheData.SysConfigs
-                        .Single(x => x.SysConfigId == "ControlChatId")
-                        .Value),
+                chatId: CacheData.ControlChatId,
                 parseMode: ParseMode.Markdown,
                 text: String.Format(
                     "Operator *{0}* has enabled group {1}:{2}",

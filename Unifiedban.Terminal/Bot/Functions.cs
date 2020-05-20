@@ -31,9 +31,7 @@ namespace Unifiedban.Terminal.Bot
                 welcomeText: CacheData.GetTranslation("en", "message_welcome_default"),
                 chatLanguage: "en",
                 settingsLanguage: "en",
-                reportChatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                reportChatId: CacheData.ControlChatId,
                 rulesText: "No rules defined yet by the group admins. Just... be nice!",
                 callerId: -2);
             if (registered == null)
@@ -74,9 +72,7 @@ namespace Unifiedban.Terminal.Bot
                     if (!registered)
                     {
                         Manager.BotClient.SendTextMessageAsync(
-                            chatId: Convert.ToInt64(CacheData.SysConfigs
-                                        .Single(x => x.SysConfigId == "ControlChatId")
-                                        .Value),
+                            chatId: CacheData.ControlChatId,
                             parseMode: ParseMode.Markdown,
                             text: $"Error registering the group with chat Id {message.Chat.Id}"
                         );

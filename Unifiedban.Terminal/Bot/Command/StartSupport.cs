@@ -41,9 +41,7 @@ namespace Unifiedban.Terminal.Bot.Command
                         message.From.Username)
                 );
                 Manager.BotClient.SendTextMessageAsync(
-                    chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                    chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
                         "Operator *{0}:{1}* started support in *{2}:[{3}]({4})*",

@@ -28,9 +28,7 @@ namespace Unifiedban.Terminal.Bot.Command
             {
 
                 Manager.BotClient.SendTextMessageAsync(
-                    chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                    chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
                         "User *{0}:{1}* from group *{2}:[{3}]({4})* sent a /report\n\n" +
@@ -53,9 +51,7 @@ namespace Unifiedban.Terminal.Bot.Command
             else
             {
                 Manager.BotClient.SendTextMessageAsync(
-                        chatId: Convert.ToInt64(CacheData.SysConfigs
-                                .Single(x => x.SysConfigId == "ControlChatId")
-                                .Value),
+                        chatId: CacheData.ControlChatId,
                         parseMode: ParseMode.Markdown,
                         text: String.Format(
                             "User *{0}:{1}* from group *{2}:{3}* sent a /report.\n" +

@@ -83,9 +83,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 });
 
                 Manager.BotClient.SendTextMessageAsync(
-                    chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                    chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
                         "Error removing User *{0}* from blacklist.", userToBan));
@@ -103,9 +101,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 });
 
                 Manager.BotClient.SendTextMessageAsync(
-                        chatId: Convert.ToInt64(CacheData.SysConfigs
-                                .Single(x => x.SysConfigId == "ControlChatId")
-                                .Value),
+                        chatId: CacheData.ControlChatId,
                         parseMode: ParseMode.Markdown,
                         text: String.Format(
                             "User *{0}* removed from blacklist.", userToBan));

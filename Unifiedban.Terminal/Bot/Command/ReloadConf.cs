@@ -29,9 +29,7 @@ namespace Unifiedban.Terminal.Bot.Command
                        Text = CacheData.GetTranslation("en", "error_not_auth_command")
                    });
                 Manager.BotClient.SendTextMessageAsync(
-                    chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                    chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
                         "User *{0}:{1}* tried to use command ReloadConf.",
@@ -47,9 +45,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 CacheData.SysConfigs = new List<Models.SysConfig>(sysConfigLogic.Get());
 
                 Manager.BotClient.SendTextMessageAsync(
-                    chatId: Convert.ToInt64(CacheData.SysConfigs
-                                .Single(x => x.SysConfigId == "ControlChatId")
-                                .Value),
+                    chatId: CacheData.ControlChatId,
                     text: "Conf reloaded successfully."
                 );
             }
@@ -66,9 +62,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 });
 
                 Manager.BotClient.SendTextMessageAsync(
-                    chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                    chatId: CacheData.ControlChatId,
                     text: "Error reloading conf. Check logs."
                 );
             }

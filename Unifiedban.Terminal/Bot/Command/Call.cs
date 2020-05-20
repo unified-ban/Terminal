@@ -32,9 +32,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (!String.IsNullOrEmpty(message.Chat.Username))
             {
                 Manager.BotClient.SendTextMessageAsync(
-                        chatId: Convert.ToInt64(CacheData.SysConfigs
-                                .Single(x => x.SysConfigId == "ControlChatId")
-                                .Value),
+                        chatId: CacheData.ControlChatId,
                         parseMode: ParseMode.Markdown,
                         text: String.Format(
                             "User *{0}:{1}* from group *{2}:[{3}]({4})* is requesting an Operator.",
@@ -56,9 +54,7 @@ namespace Unifiedban.Terminal.Bot.Command
             else
             {
                 Manager.BotClient.SendTextMessageAsync(
-                        chatId: Convert.ToInt64(CacheData.SysConfigs
-                                .Single(x => x.SysConfigId == "ControlChatId")
-                                .Value),
+                        chatId: CacheData.ControlChatId,
                         parseMode: ParseMode.Markdown,
                         text: String.Format(
                             "User *{0}:{1}* from group *{2}:{3}* is requesting an Operator.\n" +

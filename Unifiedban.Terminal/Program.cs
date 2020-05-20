@@ -265,8 +265,8 @@ namespace Unifiedban.Terminal
             });
 
             CacheData.ControlChatId = Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value);
+                .Single(x => x.SysConfigId == "ControlChatId")
+                .Value);
 
             if (!InitializeTranslations())
             {

@@ -123,9 +123,7 @@ namespace Unifiedban.Terminal.Controls
                             ).Wait();
 
                 Bot.Manager.BotClient.SendTextMessageAsync(
-                    chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                    chatId: CacheData.ControlChatId,
                     parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                     text: String.Format(
                         "User {0} muted due to flood in chat {1}.",

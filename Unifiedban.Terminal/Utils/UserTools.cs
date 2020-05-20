@@ -53,9 +53,7 @@ namespace Unifiedban.Terminal.Utils
                 if(newTrustFactor == null)
                 {
                     Bot.Manager.BotClient.SendTextMessageAsync(
-                    chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                    chatId: CacheData.ControlChatId,
                     parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                     text: String.Format(
                         "ERROR: Impossible to record Trust Factor for user id {0} !!.",
@@ -76,9 +74,7 @@ namespace Unifiedban.Terminal.Utils
             });
 
             Bot.Manager.BotClient.SendTextMessageAsync(
-                    chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                    chatId: CacheData.ControlChatId,
                     parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
                     text: String.Format(
                         "Penality added to user id {0} with reason: {1}\n" +

@@ -31,9 +31,7 @@ namespace Unifiedban.Terminal.Bot.Command
                        Text = CacheData.GetTranslation("en", "error_not_auth_command")
                    });
                 Manager.BotClient.SendTextMessageAsync(
-                    chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                    chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
                         "User *{0}:{1}* tried to use command GetTranslation.",
@@ -95,9 +93,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 });
 
                 Manager.BotClient.SendTextMessageAsync(
-                    chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                    chatId: CacheData.ControlChatId,
                     text: "Error. Check logs."
                 );
             }
@@ -120,9 +116,7 @@ namespace Unifiedban.Terminal.Bot.Command
                        Text = CacheData.GetTranslation("en", "error_not_auth_command")
                    });
                 Manager.BotClient.SendTextMessageAsync(
-                    chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                    chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
                         "User *{0}:{1}* tried to use command GetTranslation.",

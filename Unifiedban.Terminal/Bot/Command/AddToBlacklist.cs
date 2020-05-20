@@ -183,9 +183,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     CacheData.BannedUsers.Add(banned);
 
                     Manager.BotClient.SendTextMessageAsync(
-                        chatId: Convert.ToInt64(CacheData.SysConfigs
-                                .Single(x => x.SysConfigId == "ControlChatId")
-                                .Value),
+                        chatId: CacheData.ControlChatId,
                         parseMode: ParseMode.Markdown,
                         text: String.Format(
                             "User *{0}* black listed for reason {1}:{2}.",

@@ -70,9 +70,7 @@ namespace Unifiedban.Terminal.Controls
         {
             Bot.Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
             Bot.Manager.BotClient.SendTextMessageAsync(
-                    chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                    chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
                         "Message deleted due to control *{0}* provided positive result.",
@@ -84,9 +82,7 @@ namespace Unifiedban.Terminal.Controls
         {
             Bot.Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
             Bot.Manager.BotClient.SendTextMessageAsync(
-                    chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                    chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
                         "Message deleted due to filter *{0}* provided positive result on rule *{1}*.",

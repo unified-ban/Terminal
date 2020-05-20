@@ -68,11 +68,6 @@ namespace Unifiedban.Terminal.Filters
                     Result = IFilter.FilterResultType.skipped
                 };
             }
-
-            return new FilterResult
-            {
-                Result = IFilter.FilterResultType.negative
-            };
         }
     }
 }

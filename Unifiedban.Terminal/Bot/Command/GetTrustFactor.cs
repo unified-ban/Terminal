@@ -72,9 +72,7 @@ namespace Unifiedban.Terminal.Bot.Command
                         Text = String.Format(answerNoUsername, userId, points)
                     });
                 Manager.BotClient.SendTextMessageAsync(
-                    chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                    chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(answerNoUsername, userId, points));
             }
@@ -89,9 +87,7 @@ namespace Unifiedban.Terminal.Bot.Command
                         Text = String.Format(answerWithUsername, userId, points, username)
                     });
                 Manager.BotClient.SendTextMessageAsync(
-                    chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                    chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(answerWithUsername, userId, points, username));
             }

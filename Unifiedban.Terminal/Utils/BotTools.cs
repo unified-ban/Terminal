@@ -47,9 +47,7 @@ namespace Unifiedban.Terminal.Utils
         public static void RecordFeedback(Message message)
         {
             Bot.Manager.BotClient.SendTextMessageAsync(
-                    chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                    chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
                         "User *{0}:{1}* from group *{2}:[{3}]({4})* has sent a feedback:\n\n" +
