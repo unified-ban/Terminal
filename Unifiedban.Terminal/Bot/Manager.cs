@@ -28,7 +28,7 @@ namespace Unifiedban.Terminal.Bot
             if (CacheData.FatalError)
                 return;
 
-            if (apikey == null)
+            if (String.IsNullOrEmpty(apikey))
             {
                 Data.Utils.Logging.AddLog(new Models.SystemLog()
                 {
@@ -36,7 +36,7 @@ namespace Unifiedban.Terminal.Bot
                     Date = DateTime.Now,
                     Function = "Unifiedban Terminal Startup",
                     Level = Models.SystemLog.Levels.Fatal,
-                    Message = "API KEY cannot be null!",
+                    Message = "API KEY must be set!",
                     UserId = -1
                 });
                 CacheData.FatalError = true;
@@ -69,9 +69,7 @@ namespace Unifiedban.Terminal.Bot
             BotClient.StartReceiving();
 
             BotClient.SendTextMessageAsync(
-                chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                chatId: Convert.ToInt64(CacheData.ControlChatId),
                 parseMode: ParseMode.Markdown,
                 text: $"I'm here, Master.\n" +
                     $"My *instance ID* is _{instanceId}_ " +
@@ -95,9 +93,7 @@ namespace Unifiedban.Terminal.Bot
         {
             BotClient.StopReceiving();
             BotClient.SendTextMessageAsync(
-                chatId: Convert.ToInt64(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "ControlChatId")
-                            .Value),
+                chatId: Convert.ToInt64(CacheData.ControlChatId),
                 parseMode: ParseMode.Markdown,
                 text: $"I left, Master.\n" +
                     $"My *instance ID* is _{instanceId}_ " +
