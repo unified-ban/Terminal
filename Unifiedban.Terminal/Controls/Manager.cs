@@ -78,6 +78,7 @@ namespace Unifiedban.Terminal.Controls
                     text: String.Format(
                         "*[Report]*\n" +
                         "Message deleted due to control *{0}*.\n" +
+                        "⚠ do not open links you don't know ⚠\n" +
                         "\nChat: {1}" +
                         "\nAuthor: {3}" +
                         "\nUserId: {4}" +
@@ -105,6 +106,7 @@ namespace Unifiedban.Terminal.Controls
                     text: String.Format(
                         "*[Report]*\n" +
                         "Message deleted due to filter *{0}* provided positive result on rule *{1}*.\n" +
+                        "⚠ do not open links you don't know ⚠\n" +
                         "\nChat: {2}" +
                         "\nAuthor: {4}" +
                         "\nUserId: {5}" +

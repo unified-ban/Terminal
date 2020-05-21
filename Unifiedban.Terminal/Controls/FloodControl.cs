@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using Unifiedban.Terminal.Utils;
 
@@ -121,14 +122,20 @@ namespace Unifiedban.Terminal.Controls
                                 },
                                 DateTime.UtcNow.AddMinutes(minutes)
                             ).Wait();
-
+                
                 Bot.Manager.BotClient.SendTextMessageAsync(
                     chatId: CacheData.ControlChatId,
-                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                    parseMode: ParseMode.Markdown,
                     text: String.Format(
-                        "User {0} muted due to flood in chat {1}.",
+                        "*[Report]*\n" +
+                        "User *{0}* muted for {1} minutes due to flood.\n" +
+                        "\nChat: {2}" +
+                        "\n\n*hash_code:* UB{3}-{4}",
                         message.From.Id,
-                        message.Chat.Title)
+                        minutes,
+                        message.Chat.Title,
+                        message.Chat.Id.ToString().Replace("-",""),
+                        Guid.NewGuid())
                 );
 
                 UserTools.AddPenality(message.From.Id,

@@ -156,10 +156,10 @@ namespace Unifiedban.Terminal.Bot.Command
                     });
             }
             else
-                AddUserToBlacklist(callbackQuery.Message, userToBan, reason, null);
+                AddUserToBlacklist(callbackQuery.From.Id, callbackQuery.Message, userToBan, reason, null);
         }
 
-        public static void AddUserToBlacklist(Message message,
+        public static void AddUserToBlacklist(int operatorId, Message message,
             int userToBan, Models.User.Banned.BanReasons reason,
             string otherReason)
         {
@@ -177,27 +177,36 @@ namespace Unifiedban.Terminal.Bot.Command
                         {
                             Timestamp = DateTime.UtcNow,
                             Chat = message.Chat,
-                            Text = CacheData.GetTranslation("en", "bb_command_success")
+                            Text = CacheData.GetTranslation("en", "bb_command_error")
                         });
 
-                    CacheData.BannedUsers.Add(banned);
-
-                    Manager.BotClient.SendTextMessageAsync(
-                        chatId: CacheData.ControlChatId,
-                        parseMode: ParseMode.Markdown,
-                        text: String.Format(
-                            "User *{0}* black listed for reason {1}:{2}.",
-                            userToBan, reason, otherReason)
-                    );
+                    return;
                 }
-
+                
                 MessageQueueManager.EnqueueMessage(
                     new ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
-                        Text = CacheData.GetTranslation("en", "bb_command_error")
+                        Text = CacheData.GetTranslation("en", "bb_command_success")
                     });
+
+                CacheData.BannedUsers.Add(banned);
+
+                Manager.BotClient.SendTextMessageAsync(
+                    chatId: CacheData.ControlChatId,
+                    parseMode: ParseMode.Markdown,
+                    text: String.Format(
+                        "*[Report]*\n" +
+                        "Operator `{0}` added user `{1}` to blacklist.\n" +
+                        "\nReason:\n{2}" +
+                        "\n\n*hash_code:* UB{3}-{4}",
+                        operatorId,
+                        userToBan,
+                        reason.ToString(),
+                        message.Chat.Id.ToString().Replace("-",""),
+                        Guid.NewGuid())
+                );
             }
             catch
             {

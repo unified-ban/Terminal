@@ -32,16 +32,20 @@ namespace Unifiedban.Terminal.Bot.Command
             if (!String.IsNullOrEmpty(message.Chat.Username))
             {
                 Manager.BotClient.SendTextMessageAsync(
-                        chatId: CacheData.ControlChatId,
-                        parseMode: ParseMode.Markdown,
-                        text: String.Format(
-                            "User *{0}:{1}* from group *{2}:[{3}]({4})* is requesting an Operator.",
-                            message.From.Id,
-                            message.From.Username,
-                            message.Chat.Id,
-                            message.Chat.Title,
-                            "https://t.me/" + message.Chat.Username)
-                    );
+                    chatId: CacheData.ControlChatId,
+                    parseMode: ParseMode.Markdown,
+                    text: String.Format(
+                        "*[Request]*\n" +
+                        "🙋🏼‍♂️User *{0}:{1}* from group *{2}:[{3}]({4})* is requesting an Operator\n" +
+                        "\n\n*hash_code:* UB{5}-{6}",
+                        message.From.Id,
+                        message.From.Username,
+                        message.Chat.Id,
+                        message.Chat.Title,
+                        "https://t.me/" + message.Chat.Username,
+                        message.Chat.Id.ToString().Replace("-",""),
+                        Guid.NewGuid())
+                );
 
                 Manager.BotClient.SendTextMessageAsync(
                         chatId: message.Chat.Id,
@@ -54,16 +58,20 @@ namespace Unifiedban.Terminal.Bot.Command
             else
             {
                 Manager.BotClient.SendTextMessageAsync(
-                        chatId: CacheData.ControlChatId,
-                        parseMode: ParseMode.Markdown,
-                        text: String.Format(
-                            "User *{0}:{1}* from group *{2}:{3}* is requesting an Operator.\n" +
-                            "The group is private. Check for him in our [support group](https://t.me/unifiedban_group).",
-                            message.From.Id,
-                            message.From.Username,
-                            message.Chat.Id,
-                            message.Chat.Title)
-                    );
+                    chatId: CacheData.ControlChatId,
+                    parseMode: ParseMode.Markdown,
+                    text: String.Format(
+                        "*[Request]*\n" +
+                        "🙋🏼‍♂️User *{0}:{1}* from group *{2}:{3}* is requesting an Operator.\n" +
+                        "The group is private. Check for him in our [support group](https://t.me/unifiedban_group)." +
+                        "\n\n*hash_code:* UB{4}-{5}",
+                        message.From.Id,
+                        message.From.Username,
+                        message.Chat.Id,
+                        message.Chat.Title,
+                        message.Chat.Id.ToString().Replace("-",""),
+                        Guid.NewGuid())
+                );
 
                 Manager.BotClient.SendTextMessageAsync(
                         chatId: message.Chat.Id,
