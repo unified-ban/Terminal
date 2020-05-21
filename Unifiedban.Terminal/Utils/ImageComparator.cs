@@ -1,10 +1,15 @@
-﻿using System;
+﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Unifiedban.Terminal.Utils;
 
-namespace Unifiedban.Terminal.Controls
+namespace Unifiedban.Terminal.Utils
 {
     [Serializable]
     public class ImageComparator
@@ -45,7 +50,7 @@ namespace Unifiedban.Terminal.Controls
                 if (alreadyMarkedAsDupl.Contains(hash) == false)
                 {
                     var singleImgDuplicates = FindDuplicatesTo(hash, minSimilarity, ref alreadyMarkedAsDupl);
-                    if(singleImgDuplicates.Count > 0)
+                    if (singleImgDuplicates.Count > 0)
                         duplicatesFound.Add(singleImgDuplicates);
                 }
             }

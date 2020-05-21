@@ -1,4 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,12 +13,15 @@ using Hangfire;
 using Hangfire.SqlServer;
 using Hangfire.Storage;
 using Hangfire.Logging;
+using System.Linq;
+using Unifiedban.Models.Group;
+using Unifiedban.Models.User;
 
 namespace Unifiedban.Terminal
 {
     class Program
     {
-        public static IConfigurationRoot Configuration;
+        //public static IConfigurationRoot Configuration;
         static BackgroundJobServer backgroundJobServer;
 
         static void Main(string[] args)
@@ -26,10 +34,12 @@ namespace Unifiedban.Terminal
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Environment.CurrentDirectory)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-            Configuration = builder.Build();
-            CacheData.LoggerName = Configuration["LoggerName"];
+            CacheData.Configuration = builder.Build();
+            CacheData.LoggerName = CacheData.Configuration["LoggerName"];
 
             // Initialize logger
+            if (!Directory.Exists(Environment.CurrentDirectory + "\\logs"))
+                Directory.CreateDirectory(Environment.CurrentDirectory + "\\logs");
             Data.Utils.Logging logger = new Data.Utils.Logging();
             logger.Initialize(CacheData.LoggerName, Environment.CurrentDirectory);
 
@@ -73,10 +83,37 @@ namespace Unifiedban.Terminal
 
         private static void InitializeAll()
         {
-            using (Data.UBContext ubc = new Data.UBContext()) { }
+            // Initialize database context
+            using (Data.UBContext ubc = new Data.UBContext(
+                CacheData.Configuration["Database"])) { }
 
+            BusinessLogic.SysConfigLogic sysConfigLogic = new BusinessLogic.SysConfigLogic();
+            CacheData.SysConfigs = new List<Models.SysConfig>(sysConfigLogic.Get());
+
+            BusinessLogic.OperatorLogic operatorLogic = new BusinessLogic.OperatorLogic();
+            CacheData.Operators = new List<Models.Operator>(operatorLogic.Get());
+
+            LoadCacheData();
             InitializeHangfireServer();
-            Bot.Manager.Initialize(Configuration["APIKEY"]);
+            Controls.Manager.Initialize();
+            Bot.MessageQueueManager.Initialize();
+            Bot.CommandQueueManager.Initialize();
+            Bot.Manager.Initialize(CacheData.Configuration["APIKEY"]);
+            Utils.ConfigTools.Initialize();
+            Utils.ChatTools.Initialize();
+#if DEBUG
+            TestArea.DoTest();
+#endif
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Startup completed",
+                UserId = -2
+            });
         }
         private static void DisposeAll()
         {
@@ -85,19 +122,25 @@ namespace Unifiedban.Terminal
                 ClearHangfireJobs();
                 backgroundJobServer.Dispose();
             }
+            Bot.MessageQueueManager.Dispose();
+            Bot.CommandQueueManager.Dispose();
             Bot.Manager.Dispose();
+            Utils.ConfigTools.Dispose();
         }
 
         static void InitializeHangfireServer()
         {
+            if (CacheData.FatalError)
+                return;
+
             var options = new SqlServerStorageOptions
             {
-                PrepareSchemaIfNecessary = Convert.ToBoolean(Configuration["HFPrepareSchema"]),
+                PrepareSchemaIfNecessary = Convert.ToBoolean(CacheData.Configuration["HFPrepareSchema"]),
                 QueuePollInterval = TimeSpan.FromSeconds(
-                        Convert.ToInt32(Configuration["HFPollingInterval"]))
+                        Convert.ToInt32(CacheData.Configuration["HFPollingInterval"]))
             };
 
-            GlobalConfiguration.Configuration.UseSqlServerStorage(Configuration["HFDatabase"], options);
+            GlobalConfiguration.Configuration.UseSqlServerStorage(CacheData.Configuration["HFDatabase"], options);
             GlobalConfiguration.Configuration.UseLogProvider(new HFLogProvider());
 
             backgroundJobServer = new BackgroundJobServer();
@@ -141,6 +184,263 @@ namespace Unifiedban.Terminal
                 Message = "Hangifre jobs cleared (forced)",
                 UserId = -1
             });
+        }
+        public static bool InitializeTranslations()
+        {
+            try
+            {
+                CacheData.Translations = new Dictionary<string, Dictionary<string, Models.Translation.Entry>>();
+                BusinessLogic.TranslationLogic translationLogic = new BusinessLogic.TranslationLogic();
+                List<Models.Translation.Language> languages = translationLogic.GetLanguage();
+                foreach(Models.Translation.Language language in languages)
+                {
+                    CacheData.Languages.TryAdd(language.LanguageId, language);
+                    List<Models.Translation.Entry> entries = translationLogic
+                        .GetEntriesByLanguage(language.LanguageId);
+                    if (entries.Count == 0)
+                        continue;
+
+                    CacheData.Translations.TryAdd(language.LanguageId, new Dictionary<string, Models.Translation.Entry>());
+                    foreach (Models.Translation.Entry entry in entries)
+                        CacheData.Translations[language.LanguageId].TryAdd(entry.KeyId, entry);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban.Terminal.Program.InitializeTranslations",
+                    Level = Models.SystemLog.Levels.Fatal,
+                    Message = "Error loading translations.",
+                    UserId = -1
+                });
+
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban.Terminal.Program.InitializeTranslations",
+                    Level = Models.SystemLog.Levels.Fatal,
+                    Message = ex.Message,
+                    UserId = -1
+                });
+                if(ex.InnerException != null)
+                    Data.Utils.Logging.AddLog(new Models.SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Unifiedban.Terminal.Program.InitializeTranslations",
+                        Level = Models.SystemLog.Levels.Fatal,
+                        Message = ex.InnerException.Message,
+                        UserId = -1
+                    });
+
+                return false;
+            }
+        }
+        public static void LoadCacheData()
+        {
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Loading cache",
+                UserId = -2
+            });
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Get translations",
+                UserId = -2
+            });
+
+            CacheData.ControlChatId = Convert.ToInt64(CacheData.SysConfigs
+                .Single(x => x.SysConfigId == "ControlChatId")
+                .Value);
+
+            if (!InitializeTranslations())
+            {
+                CacheData.FatalError = true;
+                return;
+            }
+
+            LoadFiltersData();
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Get default group configuration parameters",
+                UserId = -2
+            });
+            BusinessLogic.Group.ConfigurationParameterLogic configurationParameterLogic =
+                new BusinessLogic.Group.ConfigurationParameterLogic();
+            CacheData.GroupDefaultConfigs = 
+                new List<Models.Group.ConfigurationParameter>(configurationParameterLogic.Get());
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Get registered groups",
+                UserId = -2
+            });
+            BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
+                new BusinessLogic.Group.TelegramGroupLogic();
+            foreach (Models.Group.TelegramGroup group in telegramGroupLogic.Get())
+            {
+                CacheData.Groups.Add(group.TelegramChatId, group);
+                try
+                {
+                    CacheData.GroupConfigs.Add(
+                        group.TelegramChatId,
+                        JsonConvert
+                            .DeserializeObject<
+                                List<Models.Group.ConfigurationParameter>
+                                >(group.Configuration));
+
+                    AddMissingConfiguration(group.TelegramChatId);
+                    /*
+                     * To be used to enable messages to Group's Control Chat/Channel
+                    Bot.MessageQueueManager.AddChatIfNotPresent(
+                        Convert.ToInt64(CacheData.GroupConfigs[group.TelegramChatId]
+                            .SingleOrDefault(x => x.ConfigurationParameterId == "ControlChatId").Value));
+                            */
+                }
+                catch(Exception ex)
+                {
+                    Data.Utils.Logging.AddLog(new Models.SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Unifiedban Terminal Startup",
+                        Level = Models.SystemLog.Levels.Error,
+                        Message = $"Impossible to load group {group.TelegramChatId} " +
+                            $"configuration:\n {ex.Message}",
+                        UserId = -1
+                    });
+                }
+                Bot.MessageQueueManager.AddGroupIfNotPresent(group);
+            }
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Get banned users",
+                UserId = -2
+            });
+            BusinessLogic.User.BannedLogic bannedLogic = new BusinessLogic.User.BannedLogic();
+            CacheData.BannedUsers = new List<Models.User.Banned>(bannedLogic.Get());
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Get night schedule",
+                UserId = -2
+            });
+            BusinessLogic.Group.NightScheduleLogic nsl = new BusinessLogic.Group.NightScheduleLogic();
+            foreach(NightSchedule nightSchedule in nsl.Get())
+            {
+                CacheData.NightSchedules.Add(nightSchedule.GroupId, nightSchedule);
+            }
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Get trust points",
+                UserId = -2
+            });
+            BusinessLogic.User.TrustFactorLogic tfl = new BusinessLogic.User.TrustFactorLogic();
+            foreach (TrustFactor trustFactor in tfl.Get())
+            {
+                CacheData.TrustFactors.Add(trustFactor.TelegramUserId, trustFactor);
+            }
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Cache loaded",
+                UserId = -2
+            });
+        }
+        static void LoadFiltersData()
+        {
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Get filters data",
+                UserId = -2
+            });
+
+            BusinessLogic.Filters.BadWordLogic badWordLogic = new BusinessLogic.Filters.BadWordLogic();
+            CacheData.BadWords = badWordLogic.Get();
+        }
+
+        public static void AddMissingConfiguration(long telegramGroupId)
+        {
+            var diff = new List<ConfigurationParameter>();
+            foreach(ConfigurationParameter configurationParameter in CacheData
+                .GroupDefaultConfigs)
+            {
+                var exists = CacheData.GroupConfigs[telegramGroupId]
+                    .SingleOrDefault(x => x.ConfigurationParameterId == configurationParameter.ConfigurationParameterId);
+                if (exists == null)
+                    diff.Add(configurationParameter);
+            }
+
+            if (diff.Count == 0)
+                return;
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup",
+                Level = Models.SystemLog.Levels.Warn,
+                Message = $"Adding missing configuration to chat {telegramGroupId}",
+                UserId = -2
+            });
+
+            foreach (ConfigurationParameter parameter in diff)
+            {
+                CacheData.GroupConfigs[telegramGroupId].Add(parameter);
+            }
+
+            BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
+                new BusinessLogic.Group.TelegramGroupLogic();
+            telegramGroupLogic.UpdateConfiguration(
+                telegramGroupId,
+                JsonConvert.SerializeObject(CacheData.GroupConfigs[telegramGroupId]),
+                -2);
         }
 
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -209,41 +509,6 @@ namespace Unifiedban.Terminal
         //              text: String.Format("New User @{0} spam vote is {1}", e.Message.From.Username, spamValue[e.Message.From.Id])
         //            );
         //        }
-        //    }
-        //}
-        //private static async void compareImage(object sender, MessageEventArgs e)
-        //{
-        //    try
-        //    {
-        //        foreach (PhotoSize photoSize in e.Message.Photo)
-        //        {
-        //            var filePath = botClient.GetFileAsync(photoSize.FileId).Result.FilePath;
-        //            FileStream wFile = new FileStream(@"F:\TEMP\Unifiedban_Asset\temp\" + e.Message.MessageId +
-        //                "_" + photoSize.FileSize + ".jpg", FileMode.CreateNew);
-        //            await botClient.DownloadFileAsync(filePath, wFile);
-        //            wFile.Close();
-        //        }
-        //        Controls.ImageComparator ic = new Controls.ImageComparator();
-        //        ic.AddPicFolderByPath(@"F:\TEMP\Unifiedban_Asset\temp");
-        //        ic.AddPicFolderByPathToCompare(@"F:\TEMP\Unifiedban_Asset\to_compare");
-
-        //        var _comparationResult = ic.FindDuplicatesWithTollerance(70);
-        //        int counter = 1;
-        //        foreach (var hashBlock in _comparationResult)
-        //        {
-        //            Console.WriteLine($"Duplicates {counter++} Group:");
-
-        //            foreach (var singleHash in hashBlock)
-        //            {
-        //                Console.WriteLine(singleHash.FilePath);
-        //            }
-        //        }
-
-        //        //System.IO.File.Delete(@"F:\TEMP\Unifiedban_Asset\temp\toCompare.jpg");
-        //    }
-        //    catch(Exception ex)
-        //    {
-        //        return;
         //    }
         //}
         #endregion
