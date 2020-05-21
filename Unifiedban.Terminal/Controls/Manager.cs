@@ -73,8 +73,16 @@ namespace Unifiedban.Terminal.Controls
                     chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
-                        "Message deleted due to control *{0}* provided positive result.",
-                        result.CheckName)
+                        "*[Report]*\n" +
+                        "Message deleted due to control *{0}* provided positive result.\n" +
+                        "\nOriginal message:\n{1}\n" +
+                        "\nSender: {2}" +
+                        "\n\n*hash_code:* UB{3}-{4}",
+                        result.CheckName,
+                        message.Text,
+                        message.From.Id,
+                        message.Chat.Id.ToString().Replace("-",""),
+                        Guid.NewGuid())
                 );
         }
 
@@ -85,9 +93,17 @@ namespace Unifiedban.Terminal.Controls
                     chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
-                        "Message deleted due to filter *{0}* provided positive result on rule *{1}*.",
+                        "*[Report]*\n" +
+                        "Message deleted due to filter *{0}* provided positive result on rule *{1}*.\n" +
+                        "\nOriginal message:\n{2}\n" +
+                        "\nSender: {3}" +
+                        "\n\n*hash_code:* UB{4}-{5}",
                         result.CheckName,
-                        result.Rule)
+                        result.Rule,
+                        message.Text,
+                        message.From.Id,
+                        message.Chat.Id.ToString().Replace("-",""),
+                        Guid.NewGuid())
                 );
         }
 
@@ -100,7 +116,18 @@ namespace Unifiedban.Terminal.Controls
                 {
                     htmlCode = client.DownloadString(siteUri);
                 }
-                catch { }
+                catch
+                {
+                    Data.Utils.Logging.AddLog(new Models.SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Unifiedban.Terminal.Controls.IsTelegramLink",
+                        Level = Models.SystemLog.Levels.Error,
+                        Message = "Error loading siteUri: " + siteUri,
+                        UserId = -2
+                    });
+                }
 
                 if (htmlCode.Contains("tgme_page_extra"))
                     return true;

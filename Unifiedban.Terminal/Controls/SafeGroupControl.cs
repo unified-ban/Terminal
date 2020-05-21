@@ -38,7 +38,7 @@ namespace Unifiedban.Terminal.Controls
                         Result = IControl.ControlResultType.skipped
                     };
 
-            string regex = @"(((http|ftp|https):\/\/)|(tg:\/\/))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])?|(?![\w_])(@[\w_]+)(?!.)";
+            string regex = @"(((http|ftp|https):\/\/)|(tg:\/\/)|(t.me\/))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])?|(?![\w_])(@[\w_]+)(?!.)";
             Regex reg = new Regex(regex, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
             MatchCollection matchedWords = reg.Matches(message.Text);
             if (matchedWords.Count == 0)
@@ -66,6 +66,8 @@ namespace Unifiedban.Terminal.Controls
                 string url = match.Value;
                 if (url.StartsWith("@"))
                     url = "https://t.me/" + match.Value.Remove(0, 1);
+                if (url.StartsWith("t.me"))
+                    url = "https://" + match.Value;
 
                 if (Manager.IsTelegramLink(url))
                     if (safeGroupFilter.DoCheck(
