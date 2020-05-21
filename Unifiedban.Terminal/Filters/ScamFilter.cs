@@ -35,8 +35,8 @@ namespace Unifiedban.Terminal.Filters
                         Result = IFilter.FilterResultType.skipped
                     };
 
-            //string regex = @"(http|ftp|https:\/\/)?([\w_-]+\s?(?:(?:\.[\w_-]{2,})+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])?";
-            string regex = @"(http:\/\/|ftp:\/\/|https:\/\/)?([\w_-]+\s?(?:(?:\.\s?[\w_-]{2,})+)?)\s?\.\s?([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-]{2,})?";
+            string regex = @"(http|ftp|https:\/\/)?([\w_-]+\s?(?:(?:\.[\w_-]{2,})+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])?";
+            // string regex = @"(http:\/\/|ftp:\/\/|https:\/\/)?([\w_-]+\s?(?:(?:\.\s?[\w_-]{2,})+)?)\s?\.\s?([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-]{2,})?";
             Regex reg = new Regex(regex, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
             MatchCollection matchedWords = reg.Matches(text);
             if (matchedWords.Count == 0)
