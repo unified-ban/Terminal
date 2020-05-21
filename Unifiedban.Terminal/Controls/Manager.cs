@@ -69,17 +69,24 @@ namespace Unifiedban.Terminal.Controls
         private static void RemoveMessageForPositiveControl(Message message, Controls.ControlResult result)
         {
             Bot.Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+            string author = message.From.Username == null
+                ? message.From.FirstName + " " + message.From.LastName
+                : message.From.Username;
             Bot.Manager.BotClient.SendTextMessageAsync(
                     chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
                         "*[Report]*\n" +
-                        "Message deleted due to control *{0}* provided positive result.\n" +
-                        "\nOriginal message:\n{1}\n" +
-                        "\nSender: {2}" +
-                        "\n\n*hash_code:* UB{3}-{4}",
+                        "Message deleted due to control *{0}*.\n" +
+                        "\nChat: {1}" +
+                        "\nAuthor: {3}" +
+                        "\nUserId: {4}" +
+                        "\nOriginal message:\n{2}" +
+                        "\n\n*hash_code:* UB{5}-{6}",
                         result.CheckName,
+                        message.Chat.Title,
                         message.Text,
+                        author,
                         message.From.Id,
                         message.Chat.Id.ToString().Replace("-",""),
                         Guid.NewGuid())
@@ -89,18 +96,25 @@ namespace Unifiedban.Terminal.Controls
         private static void RemoveMessageForPositiveFilter(Message message, Filters.FilterResult result)
         {
             Bot.Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+            string author = message.From.Username == null
+                ? message.From.FirstName + " " + message.From.LastName
+                : message.From.Username;
             Bot.Manager.BotClient.SendTextMessageAsync(
                     chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
                         "*[Report]*\n" +
                         "Message deleted due to filter *{0}* provided positive result on rule *{1}*.\n" +
-                        "\nOriginal message:\n{2}\n" +
-                        "\nSender: {3}" +
-                        "\n\n*hash_code:* UB{4}-{5}",
+                        "\nChat: {2}" +
+                        "\nAuthor: {4}" +
+                        "\nUserId: {5}" +
+                        "\nOriginal message:\n{3}" +
+                        "\n\n*hash_code:* UB{6}-{7}",
                         result.CheckName,
                         result.Rule,
+                        message.Chat.Title,
                         message.Text,
+                        author,
                         message.From.Id,
                         message.Chat.Id.ToString().Replace("-",""),
                         Guid.NewGuid())
