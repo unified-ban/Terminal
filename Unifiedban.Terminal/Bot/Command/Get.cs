@@ -21,9 +21,8 @@ namespace Unifiedban.Terminal.Bot.Command
 
             if (message.ReplyToMessage == null && message.ForwardFromMessageId == 0)
             {
-                dataMessage += "*Message Id:* {{message_id}}\n";
-                dataMessage += "*From chat Id:* {{chat_id}}\n";
-                dataMessage += "*From user Id:* {{from_id}}\n";
+                dataMessage += "*Chat Id:* {{chat_id}}\n";
+                dataMessage += "*User Id:* {{from_id}}\n";
                 dataMessage += "*Username:* {{from_username}}\n";
                 dataMessage += "*Is bot:* {{from_isBot}}\n";
             }
@@ -31,26 +30,23 @@ namespace Unifiedban.Terminal.Bot.Command
             {
                 if (message.ReplyToMessage.ForwardFrom != null)
                 {
-                    dataMessage += "*➡️↩️ Message Id:* {{replyToMessage_forwardFrom_message_id}}\n";
-                    dataMessage += "*From chat Id:* {{replyToMessage_forwardFrom_chat_id}}\n";
-                    dataMessage += "*From user Id:* {{replyToMessage_forwardFrom_from_id}}\n";
+                    dataMessage += "*Chat Id:* {{replyToMessage_forwardFrom_chat_id}}\n";
+                    dataMessage += "*User Id:* {{replyToMessage_forwardFrom_from_id}}\n";
                     dataMessage += "*Username:* {{replyToMessage_forwardFrom_from_username}}\n";
                     dataMessage += "*Is bot:* {{replyToMessage_forwardFrom_from_isBot}}\n";
                 }
                 else
                 {
-                    dataMessage += "*↩️ Message Id:* {{replyToMessage_message_id}}\n";
-                    dataMessage += "*From chat Id:* {{replyToMessage_chat_id}}\n";
-                    dataMessage += "*From user Id:* {{replyToMessage_from_id}}\n";
+                    dataMessage += "*Chat Id:* {{replyToMessage_chat_id}}\n";
+                    dataMessage += "*User Id:* {{replyToMessage_from_id}}\n";
                     dataMessage += "*Username:* {{replyToMessage_from_username}}\n";
                     dataMessage += "*Is bot:* {{replyToMessage_from_isBot}}\n";
                 }
             }
             else if (message.ForwardFrom != null)
             {
-                dataMessage += "*➡️ Message Id:* {{forwardFrom_message_id}}\n";
-                dataMessage += "*From chat Id:* {{forwardFrom_chat_id}}\n";
-                dataMessage += "*From user Id:* {{forwardFrom_from_id}}\n";
+                dataMessage += "*Chat Id:* {{forwardFrom_chat_id}}\n";
+                dataMessage += "*User Id:* {{forwardFrom_from_id}}\n";
                 dataMessage += "*Username:* {{forwardFrom_from_username}}\n";
                 dataMessage += "*Is bot:* {{forwardFrom_from_isBot}}\n";
             }

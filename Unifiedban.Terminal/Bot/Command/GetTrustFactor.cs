@@ -1,4 +1,4 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
+﻿/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -79,6 +79,27 @@ namespace Unifiedban.Terminal.Bot.Command
                     chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(answerNoUsername, userId, points));
+
+                Manager.BotClient.SendTextMessageAsync(
+                    chatId: CacheData.ControlChatId,
+                    parseMode: ParseMode.Markdown,
+                    text: String.Format(
+                        "*[Report]*\n" +
+                        "ℹ️Requested trust factor of user.\n" +
+                        "\n*Chat:* {0}" +
+                        "\n*ChatId:* {1}" +
+                        "\n*UserId:* {2}" +
+                        "\n*Username:* {3}" +
+                        "\n*Trust factor:* {4}/100" + (points < 71 ? " ⚠️" : "") +
+                        "\n\n*hash_code:* UB{5}-{6}",
+                        message.Chat.Title,
+                        message.Chat.Id,
+                        userId,
+                        username,
+                        points,
+                        message.Chat.Id.ToString().Replace("-",""),
+                        Guid.NewGuid())
+                );
             }
             else
             {
@@ -93,7 +114,22 @@ namespace Unifiedban.Terminal.Bot.Command
                 Manager.BotClient.SendTextMessageAsync(
                     chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
-                    text: String.Format(answerWithUsername, userId, points, username));
+                    text: String.Format(
+                        "*[Report]*\n" +
+                        "ℹ️ Requested trust factor of user.\n" +
+                        "\n*Chat:* {0}" +
+                        "\n*ChatId:* {1}" +
+                        "\n*UserId:* {2}" +
+                        "\n*Trust factor:* {4}/100" + (points < 71 ? " ⚠️" : "") +
+                        "\n\n*hash_code:* UB{5}-{6}",
+                        message.Chat.Title,
+                        message.Chat.Id,
+                        userId,
+                        username,
+                        points,
+                        message.Chat.Id.ToString().Replace("-",""),
+                        Guid.NewGuid())
+                );
             }
         }
 
