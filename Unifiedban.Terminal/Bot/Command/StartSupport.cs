@@ -24,6 +24,22 @@ namespace Unifiedban.Terminal.Bot.Command
                         Chat = message.Chat,
                         Text = CacheData.GetTranslation("en", "feedback_command_error_notoperator")
                     });
+                Manager.BotClient.SendTextMessageAsync(
+                    chatId: CacheData.ControlChatId,
+                    parseMode: ParseMode.Markdown,
+                    text: String.Format(
+                        "*[Report]*\n" +
+                        "⚠️ Non operator tried to use /startsupport\n" +
+                        "\n*Chat:* {0}" +
+                        "\n*ChatId:* {1}" +
+                        "\n*UserId:* {2}" +
+                        "\n\n*hash_code:* #UB{3}-{4}",
+                        message.Chat.Title,
+                        message.Chat.Id,
+                        message.From.Id,
+                        message.Chat.Id.ToString().Replace("-",""),
+                        Guid.NewGuid())
+                );
                 return;
             }
 

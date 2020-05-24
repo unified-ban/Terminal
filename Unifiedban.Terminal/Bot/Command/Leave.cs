@@ -50,18 +50,6 @@ namespace Unifiedban.Terminal.Bot.Command
                             confirmationButton
                         )
                     );
-
-            //MessageQueueManager.EnqueueMessage(
-            //        new ChatMessage()
-            //        {
-            //            Timestamp = DateTime.UtcNow,
-            //            Chat = message.Chat,
-            //            ParseMode = ParseMode.Markdown,
-            //            Text = "*[ADMIN]*\nAre you sure you want to leave?",
-            //            ReplyMarkup = new InlineKeyboardMarkup(
-            //                confirmationButton
-            //            )
-            //        });
         }
 
         public void Execute(CallbackQuery callbackQuery)
@@ -86,25 +74,28 @@ namespace Unifiedban.Terminal.Bot.Command
             string data = callbackQuery.Data.Replace("/Leave ", "");
             if(data == "yes")
             {
-                //MessageQueueManager.EnqueueMessage(
-                //    new ChatMessage()
-                //    {
-                //        Timestamp = DateTime.UtcNow,
-                //        Chat = callbackQuery.Message.Chat,
-                //        ParseMode = ParseMode.Markdown,
-                //        Text = "Well, I hope to see you soon...\n\nGood bye! 👋🏼"
-                //    });
-
                 Manager.BotClient.SendTextMessageAsync(
                        chatId: callbackQuery.Message.Chat.Id,
                        parseMode: ParseMode.Markdown,
                        text: "Well, I hope to see you soon...\n\nGood bye! 👋🏼"
                    );
-
+                
                 Manager.BotClient.SendTextMessageAsync(
                     chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
-                    text: $"Chat Id {callbackQuery.Message.Chat.Id} left due to command /leave");
+                    text: String.Format(
+                        "*[Log]*\n" +
+                        "😢 Group left due to command /leave\n" +
+                        "\n*Chat:* {0}" +
+                        "\n*ChatId:* {1}" +
+                        "\n*UserId:* {2}" +
+                        "\n\n*hash_code:* #UB{3}-{4}",
+                        callbackQuery.Message.Chat.Title,
+                        callbackQuery.Message.Chat.Id,
+                        callbackQuery.From.Id,
+                        callbackQuery.Message.Chat.Id.ToString().Replace("-",""),
+                        Guid.NewGuid())
+                );
 
                 System.Threading.Thread.Sleep(1000); // Wait that the goodbye message is sent
                 Manager.BotClient.LeaveChatAsync(callbackQuery.Message.Chat.Id);
