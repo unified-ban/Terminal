@@ -1,4 +1,4 @@
-﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -114,6 +114,14 @@ namespace Unifiedban.Terminal.Bot
             if (blacklistConfig != null)
                 if (blacklistConfig.Value.ToLower() == "true")
                     blacklistEnabled = true;
+            
+            bool rtlNameCheckEnabled = false;
+            ConfigurationParameter rtlNameCheckConfig = CacheData.GroupConfigs[message.Chat.Id]
+                .Where(x => x.ConfigurationParameterId == "RTLNameFilter")
+                .FirstOrDefault();
+            if (rtlNameCheckConfig != null)
+                if (rtlNameCheckConfig.Value.ToLower() == "true")
+                    rtlNameCheckEnabled = true;
 
             bool captchaEnabled = false;
             ConfigurationParameter captchaConfig = CacheData.GroupConfigs[message.Chat.Id]
@@ -208,36 +216,39 @@ namespace Unifiedban.Terminal.Bot
                         continue;
                     }
 
-                Filters.FilterResult rtlCheck = RTLNameFilter.DoCheck(message,
-                    member.FirstName + " " + member.LastName);
-                if(rtlCheck.Result == Filters.IFilter.FilterResultType.positive)
+                if (rtlNameCheckEnabled)
                 {
-                    try
+                    Filters.FilterResult rtlCheck = RTLNameFilter.DoCheck(message,
+                        member.FirstName + " " + member.LastName);
+                    if (rtlCheck.Result == Filters.IFilter.FilterResultType.positive)
                     {
-                        Manager.BotClient.RestrictChatMemberAsync(
-                            message.Chat.Id,
-                            member.Id,
-                            new ChatPermissions()
-                            {
-                                CanSendMessages = false,
-                                CanAddWebPagePreviews = false,
-                                CanChangeInfo = false,
-                                CanInviteUsers = false,
-                                CanPinMessages = false,
-                                CanSendMediaMessages = false,
-                                CanSendOtherMessages = false,
-                                CanSendPolls = false
-                            }
-                        );
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
+                        try
+                        {
+                            Manager.BotClient.RestrictChatMemberAsync(
+                                message.Chat.Id,
+                                member.Id,
+                                new ChatPermissions()
+                                {
+                                    CanSendMessages = false,
+                                    CanAddWebPagePreviews = false,
+                                    CanChangeInfo = false,
+                                    CanInviteUsers = false,
+                                    CanPinMessages = false,
+                                    CanSendMediaMessages = false,
+                                    CanSendOtherMessages = false,
+                                    CanSendPolls = false
+                                }
+                            );
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
 
-                    continue;
+                        continue;
+                    }
                 }
-                
+
                 try
                 {
                     if (captchaEnabled && CacheData.Operators
