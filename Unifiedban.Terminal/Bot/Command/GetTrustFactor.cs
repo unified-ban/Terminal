@@ -91,7 +91,7 @@ namespace Unifiedban.Terminal.Bot.Command
                         "\n*UserId:* {2}" +
                         "\n*Username:* {3}" +
                         "\n*Trust factor:* {4}/100" + (points < 71 ? " ⚠️" : "") +
-                        "\n\n*hash_code:* UB{5}-{6}",
+                        "\n\n*hash_code:* #UB{5}-{6}",
                         message.Chat.Title,
                         message.Chat.Id,
                         userId,
@@ -121,7 +121,7 @@ namespace Unifiedban.Terminal.Bot.Command
                         "\n*ChatId:* {1}" +
                         "\n*UserId:* {2}" +
                         "\n*Trust factor:* {4}/100" + (points < 71 ? " ⚠️" : "") +
-                        "\n\n*hash_code:* UB{5}-{6}",
+                        "\n\n*hash_code:* #UB{5}-{6}",
                         message.Chat.Title,
                         message.Chat.Id,
                         userId,

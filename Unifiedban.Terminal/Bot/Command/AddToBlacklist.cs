@@ -200,7 +200,7 @@ namespace Unifiedban.Terminal.Bot.Command
                         "*[Report]*\n" +
                         "Operator `{0}` added user `{1}` to blacklist.\n" +
                         "\nReason:\n{2}" +
-                        "\n\n*hash_code:* UB{3}-{4}",
+                        "\n\n*hash_code:* #UB{3}-{4}",
                         operatorId,
                         userToBan,
                         reason.ToString(),

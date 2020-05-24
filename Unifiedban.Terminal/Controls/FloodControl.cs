@@ -130,7 +130,7 @@ namespace Unifiedban.Terminal.Controls
                         "*[Report]*\n" +
                         "User *{0}* muted for {1} minutes due to flood.\n" +
                         "\nChat: {2}" +
-                        "\n\n*hash_code:* UB{3}-{4}",
+                        "\n\n*hash_code:* #UB{3}-{4}",
                         message.From.Id,
                         minutes,
                         message.Chat.Title,

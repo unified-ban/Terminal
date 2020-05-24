@@ -89,7 +89,7 @@ namespace Unifiedban.Terminal.Bot.Command
                         "*[Report]*\n" +
                         "Error removing user `{1}` from blacklist.\n" +
                         "Operator: {0}" +
-                        "\n\n*hash_code:* UB{2}-{3}",
+                        "\n\n*hash_code:* #UB{2}-{3}",
                         message.From.Id,
                         userToBan,
                         message.Chat.Id.ToString().Replace("-", ""),
@@ -114,7 +114,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     text: String.Format(
                         "*[Report]*\n" +
                         "Operator `{0}` removed user `{1}` from blacklist.\n" +
-                        "\n\n*hash_code:* UB{2}-{3}",
+                        "\n\n*hash_code:* #UB{2}-{3}",
                         message.From.Id,
                         userToBan,
                         message.Chat.Id.ToString().Replace("-",""),

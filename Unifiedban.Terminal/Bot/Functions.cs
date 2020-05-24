@@ -54,7 +54,7 @@ namespace Unifiedban.Terminal.Bot
                         "New group has chosen unified/ban ❗️\n" +
                         "\nChat: {0}" +
                         "\nChatId: {1}" +
-                        "\n\n*hash_code:* UB{2}-{3}",
+                        "\n\n*hash_code:* #UB{2}-{3}",
                         message.Chat.Title,
                         message.Chat.Id,
                         message.Chat.Id.ToString().Replace("-",""),
@@ -94,7 +94,7 @@ namespace Unifiedban.Terminal.Bot
                                 "⚠️Error registering new group.\n" +
                                 "\nChat: {0}" +
                                 "\nChatId: {1}" +
-                                "\n\n*hash_code:* UB{2}-{3}",
+                                "\n\n*hash_code:* #UB{2}-{3}",
                                 message.Chat.Title,
                                 message.Chat.Id,
                                 message.Chat.Id.ToString().Replace("-",""),
@@ -182,7 +182,7 @@ namespace Unifiedban.Terminal.Bot
                                     "\nUserId: {0}" +
                                     "\nUsername/Name: {1}" +
                                     "\nChat: {2}" +
-                                    "\n\n*hash_code:* UB{3}-{4}",
+                                    "\n\n*hash_code:* #UB{3}-{4}",
                                     member.Id,
                                     author,
                                     message.Chat.Title,
@@ -203,7 +203,7 @@ namespace Unifiedban.Terminal.Bot
                                     "\nUsername/Name: {1}" +
                                     "\nChat: {2}" +
                                     "\nChatId: {3}" +
-                                    "\n\n*hash_code:* UB{4}-{5}",
+                                    "\n\n*hash_code:* #UB{4}-{5}",
                                     member.Id,
                                     author,
                                     message.Chat.Title,

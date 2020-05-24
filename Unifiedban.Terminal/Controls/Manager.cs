@@ -83,7 +83,7 @@ namespace Unifiedban.Terminal.Controls
                         "\nAuthor: {3}" +
                         "\nUserId: {4}" +
                         "\nOriginal message:\n{2}" +
-                        "\n\n*hash_code:* UB{5}-{6}",
+                        "\n\n*hash_code:* #UB{5}-{6}",
                         result.CheckName,
                         message.Chat.Title,
                         message.Text,
@@ -111,7 +111,7 @@ namespace Unifiedban.Terminal.Controls
                         "\nAuthor: {4}" +
                         "\nUserId: {5}" +
                         "\nOriginal message:\n{3}" +
-                        "\n\n*hash_code:* UB{6}-{7}",
+                        "\n\n*hash_code:* #UB{6}-{7}",
                         result.CheckName,
                         result.Rule,
                         message.Chat.Title,
