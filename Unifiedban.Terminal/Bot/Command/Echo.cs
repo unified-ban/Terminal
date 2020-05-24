@@ -31,12 +31,6 @@ namespace Unifiedban.Terminal.Bot.Command
                        ReplyToMessageId = message.MessageId,
                        Text = CacheData.GetTranslation("en", "error_not_auth_command")
                    });
-                MessageQueueManager.EnqueueLog(
-                   new ChatMessage()
-                   {
-                       Timestamp = DateTime.UtcNow,
-                       Text = CacheData.GetTranslation("en", "error_not_auth_command")
-                   });
                 return;
             }
 

@@ -29,14 +29,6 @@ namespace Unifiedban.Terminal.Bot.Command
                        ReplyToMessageId = message.MessageId,
                        Text = CacheData.GetTranslation("en", "error_not_auth_command")
                    });
-                Manager.BotClient.SendTextMessageAsync(
-                    chatId: CacheData.ControlChatId,
-                    parseMode: ParseMode.Markdown,
-                    text: String.Format(
-                        "User *{0}:{1}* tried to use command Leave.",
-                        message.From.Id,
-                        message.From.Username)
-                );
                 return;
             }
 
