@@ -1,4 +1,4 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
+﻿/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -251,6 +251,24 @@ namespace Unifiedban.Terminal.Bot
 
                 try
                 {
+                    if (CacheData.TrustFactors.ContainsKey(member.Id))
+                    {
+                        int points = CacheData.TrustFactors[member.Id].Points;
+                        if (points < 71)
+                        {
+                            Manager.BotClient.SendTextMessageAsync(
+                                chatId: message.Chat,
+                                parseMode: ParseMode.Markdown,
+                                text: String.Format(
+                                    "*[Alert]*\n" +
+                                    "⚠️ Trust factor of user {0}:{1} is below security threshold\n" +
+                                    "\n*Trust factor:* {2}/100",
+                                    member.Id,
+                                    member.Username,
+                                    points)
+                            );
+                        }
+                    }
                     if (captchaEnabled && CacheData.Operators
                         .SingleOrDefault(x => x.TelegramUserId == member.Id) == null)
                     {
