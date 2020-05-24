@@ -37,7 +37,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     text: String.Format(
                         "*[Request]*\n" +
                         "🙋🏼‍♂️User *{0}:{1}* from group *{2}:[{3}]({4})* is requesting an Operator\n" +
-                        "\n\n*hash_code:* UB{5}-{6}",
+                        "\n\n*hash_code:* #UB{5}-{6}",
                         message.From.Id,
                         message.From.Username,
                         message.Chat.Id,
@@ -64,7 +64,7 @@ namespace Unifiedban.Terminal.Bot.Command
                         "*[Request]*\n" +
                         "🙋🏼‍♂️User *{0}:{1}* from group *{2}:{3}* is requesting an Operator.\n" +
                         "The group is private. Check for him in our [support group](https://t.me/unifiedban_group)." +
-                        "\n\n*hash_code:* UB{4}-{5}",
+                        "\n\n*hash_code:* #UB{4}-{5}",
                         message.From.Id,
                         message.From.Username,
                         message.Chat.Id,
