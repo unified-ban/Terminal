@@ -17,57 +17,61 @@ namespace Unifiedban.Terminal.Bot.Command
         {
             Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
 
-            string operationGuid = Guid.NewGuid().ToString().Replace('-', '_');
-            string dataMessage = "<b>[Report]</b>\nRequested information:\n";
+            string dataMessage = "*[Report]*\nRequested information:\n\n";
 
             if (message.ReplyToMessage == null && message.ForwardFromMessageId == 0)
             {
-                dataMessage += "<b>Message Id:</b> {{message_id}}\n";
-                dataMessage += "<b>From chat Id:</b> {{chat_id}}\n";
-                dataMessage += "<b>From user Id:</b> {{from_id}}\n";
-                dataMessage += "<b>Username:</b> {{from_username}}\n";
-                dataMessage += "<b>Is bot:</b> {{from_isBot}}\n\n";
-                dataMessage += "<b>Chat hash code:</b> #UB{{chat_id_noMinus}}_" + operationGuid;
+                dataMessage += "*Message Id:* {{message_id}}\n";
+                dataMessage += "*From chat Id:* {{chat_id}}\n";
+                dataMessage += "*From user Id:* {{from_id}}\n";
+                dataMessage += "*Username:* {{from_username}}\n";
+                dataMessage += "*Is bot:* {{from_isBot}}\n";
             }
             else if (message.ReplyToMessage != null)
             {
                 if (message.ReplyToMessage.ForwardFrom != null)
                 {
-                    dataMessage += "<b>➡️↩️ Message Id:</b> {{replyToMessage_forwardFrom_message_id}}\n";
-                    dataMessage += "<b>From chat Id:</b> {{replyToMessage_forwardFrom_chat_id}}\n";
-                    dataMessage += "<b>From user Id:</b> {{replyToMessage_forwardFrom_from_id}}\n";
-                    dataMessage += "<b>Username:</b> {{replyToMessage_forwardFrom_from_username}}\n";
-                    dataMessage += "<b>Is bot:</b> {{replyToMessage_forwardFrom_from_isBot}}\n\n";
-                    dataMessage += "<b>Chat hash code:</b> #UB{{chat_id_noMinus}}_" + operationGuid;
+                    dataMessage += "*➡️↩️ Message Id:* {{replyToMessage_forwardFrom_message_id}}\n";
+                    dataMessage += "*From chat Id:* {{replyToMessage_forwardFrom_chat_id}}\n";
+                    dataMessage += "*From user Id:* {{replyToMessage_forwardFrom_from_id}}\n";
+                    dataMessage += "*Username:* {{replyToMessage_forwardFrom_from_username}}\n";
+                    dataMessage += "*Is bot:* {{replyToMessage_forwardFrom_from_isBot}}\n";
                 }
                 else
                 {
-                    dataMessage += "<b>↩️ Message Id:</b> {{replyToMessage_message_id}}\n";
-                    dataMessage += "<b>From chat Id:</b> {{replyToMessage_chat_id}}\n";
-                    dataMessage += "<b>From user Id:</b> {{replyToMessage_from_id}}\n";
-                    dataMessage += "<b>Username:</b> {{replyToMessage_from_username}}\n";
-                    dataMessage += "<b>Is bot:</b> {{replyToMessage_from_isBot}}\n\n";
-                    dataMessage += "<b>Chat hash code:</b> #UB{{chat_id_noMinus}}_" + operationGuid;
+                    dataMessage += "*↩️ Message Id:* {{replyToMessage_message_id}}\n";
+                    dataMessage += "*From chat Id:* {{replyToMessage_chat_id}}\n";
+                    dataMessage += "*From user Id:* {{replyToMessage_from_id}}\n";
+                    dataMessage += "*Username:* {{replyToMessage_from_username}}\n";
+                    dataMessage += "*Is bot:* {{replyToMessage_from_isBot}}\n";
                 }
             }
             else if (message.ForwardFrom != null)
             {
-                dataMessage += "<b>➡️ Message Id:</b> {{forwardFrom_message_id}}\n";
-                dataMessage += "<b>From chat Id:</b> {{forwardFrom_chat_id}}\n";
-                dataMessage += "<b>From user Id:</b> {{forwardFrom_from_id}}\n";
-                dataMessage += "<b>Username:</b> {{forwardFrom_from_username}}\n";
-                dataMessage += "<b>Is bot:</b> {{forwardFrom_from_isBot}}\n\n";
-                dataMessage += "<b>Chat hash code:</b> #UB{{chat_id_noMinus}}_" + operationGuid;
+                dataMessage += "*➡️ Message Id:* {{forwardFrom_message_id}}\n";
+                dataMessage += "*From chat Id:* {{forwardFrom_chat_id}}\n";
+                dataMessage += "*From user Id:* {{forwardFrom_from_id}}\n";
+                dataMessage += "*Username:* {{forwardFrom_from_username}}\n";
+                dataMessage += "*Is bot:* {{forwardFrom_from_isBot}}\n";
             }
-
+            
+            string parsedText = Utils.Parsers.VariablesParser(dataMessage, message);
             MessageQueueManager.EnqueueMessage(
                 new ChatMessage()
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
-                    ParseMode = ParseMode.Html,
-                    Text = Utils.Parsers.VariablesParser(dataMessage, message)
+                    ParseMode = ParseMode.Markdown,
+                    Text = parsedText
                 });
+            Manager.BotClient.SendTextMessageAsync(
+                chatId: CacheData.ControlChatId,
+                parseMode: ParseMode.Markdown,
+                text: parsedText + String.Format(
+                    "\n*hash_code:* #UB{0}-{1}",
+                    message.Chat.Id.ToString().Replace("-",""),
+                    Guid.NewGuid())
+            );
         }
 
         public void Execute(CallbackQuery callbackQuery) { }
