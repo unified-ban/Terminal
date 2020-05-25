@@ -251,6 +251,21 @@ namespace Unifiedban.Terminal.Bot
 
                 try
                 {
+                    bool pluginCheckOk = true;
+                    foreach (var plugin in CacheData.PreCaptchaAndWelcomePlugins)
+                    {
+                        if (!plugin.Execute())
+                        {
+                            pluginCheckOk = false;
+                            break;
+                        }
+                    }
+
+                    if (!pluginCheckOk)
+                    {
+                        continue;
+                    }
+                    
                     if (CacheData.TrustFactors.ContainsKey(member.Id))
                     {
                         int points = CacheData.TrustFactors[member.Id].Points;
@@ -332,6 +347,14 @@ namespace Unifiedban.Terminal.Bot
                                         buttons
                                     )
                            });
+                    }
+                    
+                    foreach (var plugin in CacheData.PostCaptchaAndWelcomePlugins)
+                    {
+                        if (!plugin.Execute())
+                        {
+                            break;
+                        }
                     }
                 }
                 catch (Exception ex)

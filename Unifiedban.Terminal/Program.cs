@@ -274,6 +274,8 @@ namespace Unifiedban.Terminal
                 return;
             }
 
+            LoadPlugins();
+
             LoadFiltersData();
 
             Data.Utils.Logging.AddLog(new Models.SystemLog()
@@ -403,6 +405,12 @@ namespace Unifiedban.Terminal
 
             BusinessLogic.Filters.BadWordLogic badWordLogic = new BusinessLogic.Filters.BadWordLogic();
             CacheData.BadWords = badWordLogic.Get();
+        }
+
+        static void LoadPlugins()
+        {
+            // To be implemented
+            // CacheData.PreCaptchaAndWelcomePlugins = ...GetPlugins(type: X);
         }
 
         public static void AddMissingConfiguration(long telegramGroupId)

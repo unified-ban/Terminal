@@ -40,12 +40,36 @@ namespace Unifiedban.Terminal.Controls
 
         public static void DoCheck(Message message)
         {
-            foreach (Controls.IControl control in controls)
+            foreach (var plugin in CacheData.PreControlsPlugins)
             {
-                Controls.ControlResult result = control.DoCheck(message);
-                if (result.Result == Controls.IControl.ControlResultType.positive)
+                if (!plugin.Execute())
+                {
+                    return;
+                }
+            }
+            
+            foreach (IControl control in controls)
+            {
+                ControlResult result = control.DoCheck(message);
+                if (result.Result == IControl.ControlResultType.positive)
                 {
                     RemoveMessageForPositiveControl(message, result);
+                    return;
+                }
+            }
+            
+            foreach (var plugin in CacheData.PostControlsPlugins)
+            {
+                if (!plugin.Execute())
+                {
+                    return;
+                }
+            }
+            
+            foreach (var plugin in CacheData.PreFiltersPlugins)
+            {
+                if (!plugin.Execute())
+                {
                     return;
                 }
             }
@@ -56,6 +80,14 @@ namespace Unifiedban.Terminal.Controls
                 if(result.Result == Filters.IFilter.FilterResultType.positive)
                 {
                     RemoveMessageForPositiveFilter(message, result);
+                    return;
+                }
+            }
+            
+            foreach (var plugin in CacheData.PostFiltersPlugins)
+            {
+                if (!plugin.Execute())
+                {
                     return;
                 }
             }

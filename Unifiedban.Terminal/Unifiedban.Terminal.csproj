@@ -38,6 +38,7 @@
     <ProjectReference Include="..\..\businesslogic\Unifiedban.BusinessLogic\Unifiedban.BusinessLogic.csproj" />
     <ProjectReference Include="..\..\data\Unifiedban.Data\Unifiedban.Data.csproj" />
     <ProjectReference Include="..\..\models\Unifiedban.Models\Unifiedban.Models.csproj" />
+    <ProjectReference Include="..\..\Unifiedban.Plugin.Common\Unifiedban.Plugin.Common.csproj" />
   </ItemGroup>
 
 </Project>
