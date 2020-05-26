@@ -411,47 +411,51 @@ namespace Unifiedban.Terminal
 
         static void LoadPlugins()
         {
-            Assembly assembly = null;
-            try
-            { 
-                assembly = Assembly.LoadFrom(Environment.CurrentDirectory + @"\Plugins\MyPlugin.dll");
-            }
-            catch
+            Directory.CreateDirectory(Environment.CurrentDirectory + @"\Plugins");
+            string[] assemblies = Directory
+                .GetFiles(Environment.CurrentDirectory + @"\Plugins", "Unifiedban.Plugin.*.dll");
+            foreach (var file in assemblies)
             {
-                return;
-            }
-
-            foreach (Type type in assembly.GetTypes())
-            {
-                if (type.BaseType == typeof(UBPlugin))
+                try
+                { 
+                    Assembly assembly = Assembly.LoadFrom(file);
+                    foreach (Type type in assembly.GetTypes())
+                    {
+                        if (type.BaseType == typeof(UBPlugin))
+                        {
+                            Object o = Activator.CreateInstance(type);
+                            UBPlugin plugin = (o as UBPlugin);
+                            if (plugin == null)
+                            {
+                                continue;
+                            }
+                            switch (plugin.ExecutionPhase)
+                            {
+                                case IPlugin.Phase.PreCaptchaAndWelcome:
+                                    CacheData.PreCaptchaAndWelcomePlugins.Add(plugin);
+                                    break;
+                                case IPlugin.Phase.PostCaptchaAndWelcome:
+                                    CacheData.PostCaptchaAndWelcomePlugins.Add(plugin);
+                                    break;
+                                case IPlugin.Phase.PreControls:
+                                    CacheData.PreControlsPlugins.Add(plugin);
+                                    break;
+                                case IPlugin.Phase.PostControls:
+                                    CacheData.PostControlsPlugins.Add(plugin);
+                                    break;
+                                case IPlugin.Phase.PreFilters:
+                                    CacheData.PreFiltersPlugins.Add(plugin);
+                                    break;
+                                case IPlugin.Phase.PostFilters:
+                                    CacheData.PostFiltersPlugins.Add(plugin);
+                                    break;
+                            }
+                        }
+                    }
+                }
+                catch
                 {
-                    Object o = Activator.CreateInstance(type);
-                    UBPlugin plugin = (o as UBPlugin);
-                    if (plugin == null)
-                    {
-                        continue;
-                    }
-                    switch (plugin.ExecutionPhase)
-                    {
-                        case IPlugin.Phase.PreCaptchaAndWelcome:
-                            CacheData.PreCaptchaAndWelcomePlugins.Add(plugin);
-                            break;
-                        case IPlugin.Phase.PostCaptchaAndWelcome:
-                            CacheData.PostCaptchaAndWelcomePlugins.Add(plugin);
-                            break;
-                        case IPlugin.Phase.PreControls:
-                            CacheData.PreControlsPlugins.Add(plugin);
-                            break;
-                        case IPlugin.Phase.PostControls:
-                            CacheData.PostControlsPlugins.Add(plugin);
-                            break;
-                        case IPlugin.Phase.PreFilters:
-                            CacheData.PreFiltersPlugins.Add(plugin);
-                            break;
-                        case IPlugin.Phase.PostFilters:
-                            CacheData.PostFiltersPlugins.Add(plugin);
-                            break;
-                    }
+                    return;
                 }
             }
         }
