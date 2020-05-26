@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Unifiedban.Terminal.Bot;
 
 namespace Unifiedban.Terminal.Controls
 {
@@ -42,7 +43,7 @@ namespace Unifiedban.Terminal.Controls
         {
             foreach (var plugin in CacheData.PreControlsPlugins)
             {
-                if (!plugin.Execute())
+                if (!plugin.Execute(message, MessageQueueManager.EnqueueMessage))
                 {
                     return;
                 }
@@ -60,7 +61,7 @@ namespace Unifiedban.Terminal.Controls
             
             foreach (var plugin in CacheData.PostControlsPlugins)
             {
-                if (!plugin.Execute())
+                if (!plugin.Execute(message, MessageQueueManager.EnqueueMessage))
                 {
                     return;
                 }
@@ -68,7 +69,7 @@ namespace Unifiedban.Terminal.Controls
             
             foreach (var plugin in CacheData.PreFiltersPlugins)
             {
-                if (!plugin.Execute())
+                if (!plugin.Execute(message, MessageQueueManager.EnqueueMessage))
                 {
                     return;
                 }
@@ -86,7 +87,7 @@ namespace Unifiedban.Terminal.Controls
             
             foreach (var plugin in CacheData.PostFiltersPlugins)
             {
-                if (!plugin.Execute())
+                if (!plugin.Execute(message, MessageQueueManager.EnqueueMessage))
                 {
                     return;
                 }

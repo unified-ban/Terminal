@@ -14,8 +14,10 @@ using Hangfire.SqlServer;
 using Hangfire.Storage;
 using Hangfire.Logging;
 using System.Linq;
+using System.Reflection;
 using Unifiedban.Models.Group;
 using Unifiedban.Models.User;
+using Unifiedban.Plugin.Common;
 
 namespace Unifiedban.Terminal
 {
@@ -409,8 +411,49 @@ namespace Unifiedban.Terminal
 
         static void LoadPlugins()
         {
-            // To be implemented
-            // CacheData.PreCaptchaAndWelcomePlugins = ...GetPlugins(type: X);
+            Assembly assembly = null;
+            try
+            { 
+                assembly = Assembly.LoadFrom(Environment.CurrentDirectory + @"\Plugins\MyPlugin.dll");
+            }
+            catch
+            {
+                return;
+            }
+
+            foreach (Type type in assembly.GetTypes())
+            {
+                if (type.BaseType == typeof(UBPlugin))
+                {
+                    Object o = Activator.CreateInstance(type);
+                    UBPlugin plugin = (o as UBPlugin);
+                    if (plugin == null)
+                    {
+                        continue;
+                    }
+                    switch (plugin.ExecutionPhase)
+                    {
+                        case IPlugin.Phase.PreCaptchaAndWelcome:
+                            CacheData.PreCaptchaAndWelcomePlugins.Add(plugin);
+                            break;
+                        case IPlugin.Phase.PostCaptchaAndWelcome:
+                            CacheData.PostCaptchaAndWelcomePlugins.Add(plugin);
+                            break;
+                        case IPlugin.Phase.PreControls:
+                            CacheData.PreControlsPlugins.Add(plugin);
+                            break;
+                        case IPlugin.Phase.PostControls:
+                            CacheData.PostControlsPlugins.Add(plugin);
+                            break;
+                        case IPlugin.Phase.PreFilters:
+                            CacheData.PreFiltersPlugins.Add(plugin);
+                            break;
+                        case IPlugin.Phase.PostFilters:
+                            CacheData.PostFiltersPlugins.Add(plugin);
+                            break;
+                    }
+                }
+            }
         }
 
         public static void AddMissingConfiguration(long telegramGroupId)
