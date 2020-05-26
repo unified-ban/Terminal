@@ -59,6 +59,7 @@ namespace Unifiedban.Terminal.Filters
 
             text = Regex.Replace(text, @"\uFE0F+", string.Empty); // remove all Control and non-printable chars
             text = Regex.Replace(text, @"(¯\\_\(ツ\)_\/¯)|ツ", string.Empty); // remove commonly used smiles
+            text = Regex.Replace(text, @"º|µ|¶|«|»|´|¿|¡|µ|¾|½|¼|¤|¹|²|³|¤|×|¨|°|÷|£|¢", string.Empty); // whitelisted chars
             return text;
         }
     }
