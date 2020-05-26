@@ -16,8 +16,6 @@ namespace Unifiedban.Terminal.Utils
 {
     public class ChatTools
     {
-        static BusinessLogic.SupportSessionLogLogic logLogic = new BusinessLogic.SupportSessionLogLogic();
-
         public static void Initialize()
         {
             RecurringJob.AddOrUpdate("ChatTools_CheckNightSchedule", () => CheckNightSchedule(), "0 * * ? * *");
@@ -93,15 +91,14 @@ namespace Unifiedban.Terminal.Utils
                     .Contains(message.From.Id))
                 senderType = Models.SupportSessionLog.SenderType.Admin;
 
-            Models.SupportSessionLog log = new Models.SupportSessionLog()
+            LogTools.AddSupportSessionLog(new Models.SupportSessionLog()
             {
                 GroupId = CacheData.Groups[message.Chat.Id].GroupId,
                 SenderId = message.From.Id,
                 Text = message.Text,
                 Timestamp = DateTime.UtcNow,
                 Type = senderType
-            };
-            logLogic.Add(log, -2);
+            });
         }
 
         public static void CheckNightSchedule()
