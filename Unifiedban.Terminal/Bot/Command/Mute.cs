@@ -14,7 +14,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 !Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
@@ -37,7 +37,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (userId == 0)
             {
                 MessageQueueManager.EnqueueMessage(
-               new ChatMessage()
+               new Models.ChatMessage()
                {
                    Timestamp = DateTime.UtcNow,
                    Chat = message.Chat,

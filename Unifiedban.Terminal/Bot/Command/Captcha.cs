@@ -67,7 +67,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 }
 
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = callbackQuery.Message.Chat,
@@ -84,7 +84,7 @@ namespace Unifiedban.Terminal.Bot.Command
             }
 
             MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = callbackQuery.Message.Chat,

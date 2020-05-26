@@ -19,7 +19,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 !Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
@@ -42,13 +42,13 @@ namespace Unifiedban.Terminal.Bot.Command
             string messageHeader = CacheData.GetTranslation("en", "command_announce_header");
             string parsedMessage = messageHeader + "\n" + message.Text;
             MessageQueueManager.EnqueueMessage(
-                new ChatMessage()
+                new Models.ChatMessage()
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
                     ParseMode = ParseMode.Html,
                     Text = parsedMessage,
-                    PostSentAction = ChatMessage.PostSentActions.Pin
+                    PostSentAction = Models.ChatMessage.PostSentActions.Pin
                 });
         }
 

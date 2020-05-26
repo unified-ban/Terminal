@@ -18,7 +18,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (!Utils.BotTools.IsUserOperator(message.From.Id, Models.Operator.Levels.Advanced))
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
@@ -58,7 +58,7 @@ namespace Unifiedban.Terminal.Bot.Command
             CacheData.Groups[message.Chat.Id].State = Models.Group.TelegramGroup.Status.Inactive;
 
             MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,

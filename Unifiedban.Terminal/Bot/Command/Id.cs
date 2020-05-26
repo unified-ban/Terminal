@@ -88,7 +88,7 @@ namespace Unifiedban.Terminal.Bot.Command
 
             doReply:
             MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,

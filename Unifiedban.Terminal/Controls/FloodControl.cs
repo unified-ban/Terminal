@@ -142,7 +142,7 @@ namespace Unifiedban.Terminal.Controls
                     Models.TrustFactorLog.TrustFactorAction.limit, Bot.Manager.MyId);
 
                 Bot.MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,

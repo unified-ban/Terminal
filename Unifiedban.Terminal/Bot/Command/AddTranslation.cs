@@ -24,7 +24,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 && x.Level == Models.Operator.Levels.Super) == null)
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
@@ -64,7 +64,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 }
 
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -102,7 +102,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     && x.Level == Models.Operator.Levels.Super) == null)
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = callbackQuery.Message.Chat,
@@ -147,7 +147,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 CommandQueueManager.EnqueueMessage(commandMessage);
 
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = callbackQuery.Message.Chat,
@@ -168,7 +168,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 && x.Level == Models.Operator.Levels.Super) == null)
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = replyMessage.Chat,
@@ -193,7 +193,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (!regexItem.IsMatch(replyMessage.Text.Trim()))
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = replyMessage.Chat,
@@ -216,7 +216,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (translationKey == null)
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = replyMessage.Chat,
@@ -232,7 +232,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if(entryExists != null)
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = replyMessage.Chat,
@@ -254,7 +254,7 @@ namespace Unifiedban.Terminal.Bot.Command
             CommandQueueManager.EnqueueMessage(newCommandMessage);
 
             MessageQueueManager.EnqueueMessage(
-                new ChatMessage()
+                new Models.ChatMessage()
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = replyMessage.Chat,
@@ -274,7 +274,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 && x.Level == Models.Operator.Levels.Super) == null)
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = replyMessage.Chat,
@@ -297,7 +297,7 @@ namespace Unifiedban.Terminal.Bot.Command
             {
                 CommandQueueManager.DenqueueMessage(commandMessage);
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = replyMessage.Chat,
@@ -318,7 +318,7 @@ namespace Unifiedban.Terminal.Bot.Command
             {
                 CommandQueueManager.DenqueueMessage(commandMessage);
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = replyMessage.Chat,
@@ -332,7 +332,7 @@ namespace Unifiedban.Terminal.Bot.Command
 
             CommandQueueManager.DenqueueMessage(commandMessage);
             MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = replyMessage.Chat,

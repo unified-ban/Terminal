@@ -18,7 +18,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (!Utils.BotTools.IsUserOperator(message.From.Id, Models.Operator.Levels.Basic))
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,

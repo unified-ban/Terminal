@@ -254,9 +254,12 @@ namespace Unifiedban.Terminal.Bot
                     bool pluginCheckOk = true;
                     foreach (var plugin in CacheData.PreCaptchaAndWelcomePlugins)
                     {
-                        if (!plugin.Execute())
+                        if (!plugin.Execute(message, member, MessageQueueManager.EnqueueMessage))
                         {
                             pluginCheckOk = false;
+                            Manager.BotClient.KickChatMemberAsync(message.Chat.Id, member.Id);
+                            if (message.Chat.Type == ChatType.Supergroup)
+                                Manager.BotClient.UnbanChatMemberAsync(message.Chat.Id, member.Id);
                             break;
                         }
                     }
@@ -305,7 +308,7 @@ namespace Unifiedban.Terminal.Bot
 
                         string name = member.Username != null ? "@" + member.Username : member.FirstName;
                         MessageQueueManager.EnqueueMessage(
-                            new ChatMessage()
+                            new Models.ChatMessage()
                             {
                                 Timestamp = DateTime.UtcNow,
                                 Chat = message.Chat,
@@ -335,7 +338,7 @@ namespace Unifiedban.Terminal.Bot
                         }
 
                         MessageQueueManager.EnqueueMessage(
-                           new ChatMessage()
+                           new Models.ChatMessage()
                            {
                                Timestamp = DateTime.UtcNow,
                                Chat = message.Chat,
@@ -351,8 +354,11 @@ namespace Unifiedban.Terminal.Bot
                     
                     foreach (var plugin in CacheData.PostCaptchaAndWelcomePlugins)
                     {
-                        if (!plugin.Execute())
+                        if (!plugin.Execute(message, member, MessageQueueManager.EnqueueMessage))
                         {
+                            Manager.BotClient.KickChatMemberAsync(message.Chat.Id, member.Id);
+                            if (message.Chat.Type == ChatType.Supergroup)
+                                Manager.BotClient.UnbanChatMemberAsync(message.Chat.Id, member.Id);
                             break;
                         }
                     }

@@ -69,7 +69,7 @@ namespace Unifiedban.Terminal.Utils
             if (BotTools.IsUserOperator(message.From.Id))
             {
                 Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
-                ChatMessage newMsg = new ChatMessage()
+                Models.ChatMessage newMsg = new Models.ChatMessage()
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,

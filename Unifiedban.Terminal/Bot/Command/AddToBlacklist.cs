@@ -20,7 +20,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (!Utils.BotTools.IsUserOperator(message.From.Id, Models.Operator.Levels.Advanced))
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -38,7 +38,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     if (!CacheData.Usernames.Keys.Contains(message.Text.Split(" ")[1].Remove(0, 1)))
                     {
                         MessageQueueManager.EnqueueMessage(
-                            new ChatMessage()
+                            new Models.ChatMessage()
                             {
                                 Timestamp = DateTime.UtcNow,
                                 Chat = message.Chat,
@@ -54,7 +54,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     if (!isValid)
                     {
                         MessageQueueManager.EnqueueMessage(
-                            new ChatMessage()
+                            new Models.ChatMessage()
                             {
                                 Timestamp = DateTime.UtcNow,
                                 Chat = message.Chat,
@@ -94,7 +94,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 });
 
             MessageQueueManager.EnqueueMessage(
-                new ChatMessage()
+                new Models.ChatMessage()
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
@@ -145,7 +145,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 CommandQueueManager.EnqueueMessage(commandMessage);
 
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = callbackQuery.Message.Chat,
@@ -173,7 +173,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 if(banned == null)
                 {
                     MessageQueueManager.EnqueueMessage(
-                        new ChatMessage()
+                        new Models.ChatMessage()
                         {
                             Timestamp = DateTime.UtcNow,
                             Chat = message.Chat,
@@ -184,7 +184,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 }
                 
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -211,7 +211,7 @@ namespace Unifiedban.Terminal.Bot.Command
             catch
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,

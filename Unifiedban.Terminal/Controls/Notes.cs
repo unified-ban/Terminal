@@ -51,7 +51,7 @@ namespace Unifiedban.Terminal.Controls
                 note.Message += "NoteId: " + note.NoteId;
 
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,

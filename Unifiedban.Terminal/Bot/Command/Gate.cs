@@ -21,7 +21,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 !Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
@@ -40,7 +40,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     ToggleGate(message, true);
                 else
                     MessageQueueManager.EnqueueMessage(
-                       new ChatMessage()
+                       new Models.ChatMessage()
                        {
                            Timestamp = DateTime.UtcNow,
                            Chat = message.Chat,
@@ -81,7 +81,7 @@ namespace Unifiedban.Terminal.Bot.Command
 
             string status = newStatus ? "open" : "closed";
             MessageQueueManager.EnqueueMessage(
-                new ChatMessage()
+                new Models.ChatMessage()
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
@@ -108,7 +108,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if(!nightSchedule.UtcStartDate.HasValue || !nightSchedule.UtcEndDate.HasValue)
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
