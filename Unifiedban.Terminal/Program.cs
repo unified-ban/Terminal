@@ -453,9 +453,29 @@ namespace Unifiedban.Terminal
                         }
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
-                    return;
+                    Data.Utils.Logging.AddLog(new Models.SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Unifiedban Terminal Startup - LoadPlugins",
+                        Level = Models.SystemLog.Levels.Error,
+                        Message = ex.Message,
+                        UserId = -1
+                    });
+                    if (ex.InnerException != null)
+                    {
+                        Data.Utils.Logging.AddLog(new Models.SystemLog()
+                        {
+                            LoggerName = CacheData.LoggerName,
+                            Date = DateTime.Now,
+                            Function = "Unifiedban Terminal Startup - LoadPlugins",
+                            Level = Models.SystemLog.Levels.Error,
+                            Message = ex.InnerException.Message,
+                            UserId = -1
+                        });
+                    }
                 }
             }
         }
