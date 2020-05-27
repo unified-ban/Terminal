@@ -16,8 +16,8 @@ namespace Unifiedban.Terminal.Bot.Command
         {
             Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
 
-            if (!Utils.BotTools.IsUserOperator(message.From.Id) &&
-                !Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
+            if (!BotTools.IsUserOperator(message.From.Id) &&
+                !ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
             {
                 MessageQueueManager.EnqueueMessage(
                    new Models.ChatMessage()
@@ -67,6 +67,17 @@ namespace Unifiedban.Terminal.Bot.Command
             else
                 userToKick = message.ReplyToMessage.From.Id;
 
+            if (BotTools.IsUserOperator(userToKick))
+            {
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        Text = CacheData.GetTranslation("en", "command_to_operator_not_allowed")
+                    });
+            }
+            
             try
             {
                 Manager.BotClient.KickChatMemberAsync(message.Chat.Id, userToKick);
