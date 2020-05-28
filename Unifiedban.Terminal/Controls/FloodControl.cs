@@ -28,12 +28,11 @@ namespace Unifiedban.Terminal.Controls
 
         public ControlResult DoCheck(Message message)
         {
-            if (Utils.BotTools.IsUserOperator(message.From.Id) ||
-                Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
+            if (ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
             {
                 return new ControlResult()
                 {
-                    CheckName = "AntiFlood",
+                    CheckName = "Anti Flood",
                     Result = IControl.ControlResultType.skipped
                 };
             }
@@ -41,7 +40,7 @@ namespace Unifiedban.Terminal.Controls
             if(message.Date < DateTime.UtcNow.AddMinutes(-1))
                 return new ControlResult()
                 {
-                    CheckName = "AntiFlood",
+                    CheckName = "Anti Flood",
                     Result = IControl.ControlResultType.skipped
                 };
 
@@ -52,7 +51,7 @@ namespace Unifiedban.Terminal.Controls
                 if (configValue.Value == "false")
                     return new ControlResult()
                     {
-                        CheckName = "AntiFlood",
+                        CheckName = "Anti Flood",
                         Result = IControl.ControlResultType.skipped
                     };
 
@@ -60,7 +59,7 @@ namespace Unifiedban.Terminal.Controls
             if(userLimitations.CanSendMessages == false)
                 return new ControlResult()
                 {
-                    CheckName = "AntiFlood",
+                    CheckName = "Anti Flood",
                     Result = IControl.ControlResultType.skipped
                 };
 
@@ -87,7 +86,7 @@ namespace Unifiedban.Terminal.Controls
                     };
                     return new ControlResult()
                     {
-                        CheckName = "AntiFlood",
+                        CheckName = "Anti Flood",
                         Result = IControl.ControlResultType.negative
                     };
                 }
@@ -159,13 +158,13 @@ namespace Unifiedban.Terminal.Controls
 
                 return new ControlResult()
                 {
-                    CheckName = "AntiFlood",
+                    CheckName = "Anti Flood",
                     Result = IControl.ControlResultType.positive
                 };
             }
             return new ControlResult()
             {
-                CheckName = "AntiFlood",
+                CheckName = "Anti Flood",
                 Result = IControl.ControlResultType.negative
             };
         }

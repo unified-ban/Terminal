@@ -18,6 +18,15 @@ namespace Unifiedban.Terminal.Controls
 
         public ControlResult DoCheck(Message message)
         {
+            if (Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
+            {
+                return new ControlResult()
+                {
+                    CheckName = "Spam Names",
+                    Result = IControl.ControlResultType.skipped
+                };
+            }
+            
             Models.Group.ConfigurationParameter configValue = CacheData.GroupConfigs[message.Chat.Id]
                 .Where(x => x.ConfigurationParameterId == "SpamNameControl")
                 .SingleOrDefault();

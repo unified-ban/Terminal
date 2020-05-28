@@ -54,18 +54,16 @@ namespace Unifiedban.Terminal.Utils
             return admins;
         }
 
-        public static void HandleSupportSessionMsg(Message message)
+        public static bool HandleSupportSessionMsg(Message message)
         {
-            if (message.Text != null)
-            if (message.Text.StartsWith("/"))
-                return;
-
             if (!CacheData.ActiveSupport
                 .Contains(message.Chat.Id))
-                return;
+                return false;
 
+            bool isFromOperator = false;
             if (BotTools.IsUserOperator(message.From.Id))
             {
+                isFromOperator = true;
                 Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
                 Models.ChatMessage newMsg = new Models.ChatMessage()
                 {
@@ -80,6 +78,8 @@ namespace Unifiedban.Terminal.Utils
             }
 
             Task.Run(() => RecordSupportSessionMessage(message));
+
+            return isFromOperator;
         }
 
         private static void RecordSupportSessionMessage(Message message)
