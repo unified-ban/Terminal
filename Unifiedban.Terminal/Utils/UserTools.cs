@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using Unifiedban.Models;
 
 namespace Unifiedban.Terminal.Utils
@@ -90,6 +92,152 @@ namespace Unifiedban.Terminal.Utils
                 TrustFactorId = CacheData.TrustFactors[telegramUserId].TrustFactorId,
                 ActionTakenBy = Bot.Manager.MyId
             });
+        }
+        
+        public static bool KickIfInBlacklist(Message message)
+        {
+            if (CacheData.BannedUsers
+                .Where(x => x.TelegramUserId == message.From.Id).Count() > 0)
+            {
+                string author = message.From.Username == null
+                    ? message.From.FirstName + " " + message.From.LastName
+                    : message.From.Username;
+
+                try
+                {
+                    Bot.Manager.BotClient.RestrictChatMemberAsync(
+                        message.Chat.Id,
+                        message.From.Id,
+                        new ChatPermissions()
+                        {
+                            CanSendMessages = false,
+                            CanAddWebPagePreviews = false,
+                            CanChangeInfo = false,
+                            CanInviteUsers = false,
+                            CanPinMessages = false,
+                            CanSendMediaMessages = false,
+                            CanSendOtherMessages = false,
+                            CanSendPolls = false
+                        }
+                    );
+                    Bot.Manager.BotClient.KickChatMemberAsync(message.Chat.Id, message.From.Id);
+
+                    Bot.Manager.BotClient.SendTextMessageAsync(
+                        chatId: CacheData.ControlChatId,
+                        parseMode: ParseMode.Markdown,
+                        text: String.Format(
+                            "*[Report]*\n" +
+                            "User in blacklist removed from chat.\n" +
+                            "\nUserId: {0}" +
+                            "\nUsername/Name: {1}" +
+                            "\nChat: {2}" +
+                            "\n\n*hash_code:* #UB{3}-{4}",
+                            message.From.Id,
+                            author,
+                            message.Chat.Title,
+                            message.Chat.Id.ToString().Replace("-", ""),
+                            Guid.NewGuid())
+                    );
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    Bot.Manager.BotClient.SendTextMessageAsync(
+                        chatId: CacheData.ControlChatId,
+                        parseMode: ParseMode.Markdown,
+                        text: String.Format(
+                            "*[Log]*\n" +
+                            "⚠️Error removing blacklisted user from group.\n" +
+                            "\nUserId: {0}" +
+                            "\nUsername/Name: {1}" +
+                            "\nChat: {2}" +
+                            "\nChatId: {3}" +
+                            "\n\n*hash_code:* #UB{4}-{5}",
+                            message.From.Id,
+                            author,
+                            message.Chat.Title,
+                            message.Chat.Id,
+                            message.Chat.Id.ToString().Replace("-", ""),
+                            Guid.NewGuid())
+                    );
+                    return false;
+                }
+            }
+
+            return false;
+        }
+        public static bool KickIfIsInBlacklist(Message message, User member)
+        {
+            if (CacheData.BannedUsers
+                .Where(x => x.TelegramUserId == member.Id).Count() > 0)
+            {
+                string author = member.Username == null
+                            ? member.FirstName + " " + member.LastName
+                            : member.Username;
+                        
+                        try
+                        {
+                            Bot.Manager.BotClient.RestrictChatMemberAsync(
+                                    message.Chat.Id,
+                                    member.Id,
+                                    new ChatPermissions()
+                                    {
+                                        CanSendMessages = false,
+                                        CanAddWebPagePreviews = false,
+                                        CanChangeInfo = false,
+                                        CanInviteUsers = false,
+                                        CanPinMessages = false,
+                                        CanSendMediaMessages = false,
+                                        CanSendOtherMessages = false,
+                                        CanSendPolls = false
+                                    }
+                                );
+                            Bot.Manager.BotClient.KickChatMemberAsync(message.Chat.Id, member.Id);
+                            
+                            Bot.Manager.BotClient.SendTextMessageAsync(
+                                chatId: CacheData.ControlChatId,
+                                parseMode: ParseMode.Markdown,
+                                text: String.Format(
+                                    "*[Report]*\n" +
+                                    "User in blacklist removed from chat.\n" +
+                                    "\nUserId: {0}" +
+                                    "\nUsername/Name: {1}" +
+                                    "\nChat: {2}" +
+                                    "\n\n*hash_code:* #UB{3}-{4}",
+                                    member.Id,
+                                    author,
+                                    message.Chat.Title,
+                                    message.Chat.Id.ToString().Replace("-",""),
+                                    Guid.NewGuid())
+                            );
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            Bot.Manager.BotClient.SendTextMessageAsync(
+                                chatId: CacheData.ControlChatId,
+                                parseMode: ParseMode.Markdown,
+                                text: String.Format(
+                                    "*[Log]*\n" +
+                                    "⚠️Error removing blacklisted user from group.\n" +
+                                    "\nUserId: {0}" +
+                                    "\nUsername/Name: {1}" +
+                                    "\nChat: {2}" +
+                                    "\nChatId: {3}" +
+                                    "\n\n*hash_code:* #UB{4}-{5}",
+                                    member.Id,
+                                    author,
+                                    message.Chat.Title,
+                                    message.Chat.Id,
+                                    message.Chat.Id.ToString().Replace("-",""),
+                                    Guid.NewGuid())
+                            );
+                        }
+            }
+
+            return false;
         }
     }
 }

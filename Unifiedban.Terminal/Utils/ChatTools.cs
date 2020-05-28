@@ -3,11 +3,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 using Hangfire;
-using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
 using Unifiedban.Terminal.Bot;

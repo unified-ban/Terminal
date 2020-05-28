@@ -158,7 +158,8 @@ namespace Unifiedban.Terminal.Bot
                 Functions.MigrateToChatId(e.Message);
             }
 
-            if (!String.IsNullOrEmpty(e.Message.Text))
+            if (!String.IsNullOrEmpty(e.Message.Text) &&
+                !Utils.UserTools.KickIfInBlacklist(e.Message))
             {
                 if (e.Message.Text.StartsWith('/'))
                 {
