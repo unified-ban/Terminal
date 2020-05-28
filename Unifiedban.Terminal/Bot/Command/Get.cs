@@ -42,7 +42,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 userId = message.From.Id;
                 dataMessage += "*Chat Id:* {{chat_id}}\n";
                 dataMessage += "*User Id:* {{from_id}}\n";
-                dataMessage += "*Username:* {{from_username}}\n";
+                dataMessage += "*Username:* `{{from_username}}`\n";
                 dataMessage += "*Is bot:* {{from_isBot}}\n";
             }
             else if (message.ReplyToMessage != null)
@@ -52,7 +52,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     userId = message.ReplyToMessage.ForwardFrom.Id;
                     dataMessage += "*Chat Id:* {{replyToMessage_forwardFrom_chat_id}}\n";
                     dataMessage += "*User Id:* {{replyToMessage_forwardFrom_from_id}}\n";
-                    dataMessage += "*Username:* {{replyToMessage_forwardFrom_from_username}}\n";
+                    dataMessage += "*Username:* `{{replyToMessage_forwardFrom_from_username}}`\n";
                     dataMessage += "*Is bot:* {{replyToMessage_forwardFrom_from_isBot}}\n";
                 }
                 else
@@ -60,7 +60,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     userId = message.ReplyToMessage.From.Id;
                     dataMessage += "*Chat Id:* {{replyToMessage_chat_id}}\n";
                     dataMessage += "*User Id:* {{replyToMessage_from_id}}\n";
-                    dataMessage += "*Username:* {{replyToMessage_from_username}}\n";
+                    dataMessage += "*Username:* `{{replyToMessage_from_username}}`\n";
                     dataMessage += "*Is bot:* {{replyToMessage_from_isBot}}\n";
                 }
             }
@@ -69,7 +69,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 userId = message.ForwardFrom.Id;
                 dataMessage += "*Chat Id:* {{forwardFrom_chat_id}}\n";
                 dataMessage += "*User Id:* {{forwardFrom_from_id}}\n";
-                dataMessage += "*Username:* {{forwardFrom_from_username}}\n";
+                dataMessage += "*Username:* `{{forwardFrom_from_username}}`\n";
                 dataMessage += "*Is bot:* {{forwardFrom_from_isBot}}\n";
             }
 
