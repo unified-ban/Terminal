@@ -43,7 +43,9 @@ namespace Unifiedban.Terminal.Bot
             {
                 Manager.BotClient.SendTextMessageAsync(
                     chatId: message.Chat.Id,
-                    text: $"Your group {message.Chat.Title} has been added successfully!"
+                    parseMode: ParseMode.Markdown,
+                    text: CacheData.GetTranslation("en", "message_group_first_join"),
+                    disableWebPagePreview: true
                 );
                 
                 Manager.BotClient.SendTextMessageAsync(
