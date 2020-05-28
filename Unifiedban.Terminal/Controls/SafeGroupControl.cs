@@ -17,12 +17,11 @@ namespace Unifiedban.Terminal.Controls
 
         public ControlResult DoCheck(Message message)
         {
-            if (Utils.BotTools.IsUserOperator(message.From.Id) ||
-                Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
+            if (Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
             {
                 return new ControlResult()
                 {
-                    CheckName = "SafeGroup",
+                    CheckName = "Safe Group",
                     Result = IControl.ControlResultType.skipped
                 };
             }
@@ -45,7 +44,7 @@ namespace Unifiedban.Terminal.Controls
             {
                 return new ControlResult()
                 {
-                    CheckName = "SafeGroup",
+                    CheckName = "Safe Group",
                     Result = IControl.ControlResultType.negative
                 };
 

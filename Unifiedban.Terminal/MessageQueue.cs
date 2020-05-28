@@ -13,7 +13,7 @@ namespace Unifiedban.Terminal
     public class MessageQueue
     {
         public long TelegramChatId { get; set; }
-        public Queue<ChatMessage> Queue { get; set; } = new Queue<ChatMessage>();
+        public Queue<Models.ChatMessage> Queue { get; set; } = new Queue<Models.ChatMessage>();
         public DateTime FirstMessageUtc { get; set; }
         public DateTime LastMessageUtc { get; set; }
         public int LastMinuteMessagesCount { get; set; } = 0;
@@ -57,7 +57,7 @@ namespace Unifiedban.Terminal
             }
 
             // Take next message from the queue and send it
-            ChatMessage msgToSend = Queue.Dequeue();
+            Models.ChatMessage msgToSend = Queue.Dequeue();
             if (msgToSend == null)
                 return;
             try
@@ -75,12 +75,12 @@ namespace Unifiedban.Terminal
                 switch (msgToSend.PostSentAction)
                 {
                     default:
-                    case ChatMessage.PostSentActions.None:
+                    case Models.ChatMessage.PostSentActions.None:
                         break;
-                    case ChatMessage.PostSentActions.Pin:
+                    case Models.ChatMessage.PostSentActions.Pin:
                         Bot.Manager.BotClient.PinChatMessageAsync(msgToSend.Chat.Id, sent.MessageId);
                         break;
-                    case ChatMessage.PostSentActions.Destroy:
+                    case Models.ChatMessage.PostSentActions.Destroy:
                         Task.Run(() =>
                         {
                             System.Threading.Thread.Sleep(1000 * msgToSend.AutoDestroyTimeInSeconds);

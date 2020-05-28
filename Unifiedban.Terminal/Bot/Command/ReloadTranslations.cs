@@ -23,7 +23,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 && x.Level == Models.Operator.Levels.Super) == null)
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
@@ -34,16 +34,24 @@ namespace Unifiedban.Terminal.Bot.Command
                     chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
-                        "User *{0}:{1}* tried to use command AddTranslation.",
+                        "*[Report]*\n" +
+                        "⚠️ Non operator tried to use /reloadtranslations\n" +
+                        "\n*Chat:* {0}" +
+                        "\n*ChatId:* {1}" +
+                        "\n*UserId:* {2}" +
+                        "\n\n*hash_code:* #UB{3}-{4}",
+                        message.Chat.Title,
+                        message.Chat.Id,
                         message.From.Id,
-                        message.From.Username)
+                        message.Chat.Id.ToString().Replace("-",""),
+                        Guid.NewGuid())
                 );
                 return;
             }
 
             Program.InitializeTranslations();
             MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,

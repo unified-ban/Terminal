@@ -43,7 +43,24 @@ namespace Unifiedban.Terminal.Bot
             {
                 Manager.BotClient.SendTextMessageAsync(
                     chatId: message.Chat.Id,
-                    text: $"Your group {message.Chat.Title} has been added successfully!"
+                    parseMode: ParseMode.Markdown,
+                    text: CacheData.GetTranslation("en", "message_group_first_join"),
+                    disableWebPagePreview: true
+                );
+                
+                Manager.BotClient.SendTextMessageAsync(
+                    chatId: CacheData.ControlChatId,
+                    parseMode: ParseMode.Markdown,
+                    text: String.Format(
+                        "*[Report]*\n" +
+                        "New group has chosen unified/ban ❗️\n" +
+                        "\nChat: {0}" +
+                        "\nChatId: {1}" +
+                        "\n\n*hash_code:* #UB{2}-{3}",
+                        message.Chat.Title,
+                        message.Chat.Id,
+                        message.Chat.Id.ToString().Replace("-",""),
+                        Guid.NewGuid())
                 );
             }
 
@@ -74,7 +91,16 @@ namespace Unifiedban.Terminal.Bot
                         Manager.BotClient.SendTextMessageAsync(
                             chatId: CacheData.ControlChatId,
                             parseMode: ParseMode.Markdown,
-                            text: $"Error registering the group with chat Id {message.Chat.Id}"
+                            text: String.Format(
+                                "*[Log]*\n" +
+                                "⚠️Error registering new group.\n" +
+                                "\nChat: {0}" +
+                                "\nChatId: {1}" +
+                                "\n\n*hash_code:* #UB{2}-{3}",
+                                message.Chat.Title,
+                                message.Chat.Id,
+                                message.Chat.Id.ToString().Replace("-",""),
+                                Guid.NewGuid())
                         );
                     }
                 }
@@ -90,6 +116,14 @@ namespace Unifiedban.Terminal.Bot
             if (blacklistConfig != null)
                 if (blacklistConfig.Value.ToLower() == "true")
                     blacklistEnabled = true;
+            
+            bool rtlNameCheckEnabled = false;
+            ConfigurationParameter rtlNameCheckConfig = CacheData.GroupConfigs[message.Chat.Id]
+                .Where(x => x.ConfigurationParameterId == "RTLNameFilter")
+                .FirstOrDefault();
+            if (rtlNameCheckConfig != null)
+                if (rtlNameCheckConfig.Value.ToLower() == "true")
+                    rtlNameCheckEnabled = true;
 
             bool captchaEnabled = false;
             ConfigurationParameter captchaConfig = CacheData.GroupConfigs[message.Chat.Id]
@@ -114,40 +148,14 @@ namespace Unifiedban.Terminal.Bot
                     continue;
                 }
 
-                Filters.FilterResult rtlCheck = RTLNameFilter.DoCheck(message,
-                    member.FirstName + " " + member.LastName);
-                if(rtlCheck.Result == Filters.IFilter.FilterResultType.positive)
-                {
-                    try
-                    {
-                        Manager.BotClient.RestrictChatMemberAsync(
-                                message.Chat.Id,
-                                member.Id,
-                                new ChatPermissions()
-                                {
-                                    CanSendMessages = false,
-                                    CanAddWebPagePreviews = false,
-                                    CanChangeInfo = false,
-                                    CanInviteUsers = false,
-                                    CanPinMessages = false,
-                                    CanSendMediaMessages = false,
-                                    CanSendOtherMessages = false,
-                                    CanSendPolls = false
-                                }
-                            );
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
-
-                    continue;
-                }
-
                 if (blacklistEnabled)
                     if (CacheData.BannedUsers
                         .Where(x => x.TelegramUserId == member.Id).Count() > 0)
                     {
+                        string author = member.Username == null
+                            ? member.FirstName + " " + member.LastName
+                            : member.Username;
+                        
                         try
                         {
                             Manager.BotClient.RestrictChatMemberAsync(
@@ -166,6 +174,73 @@ namespace Unifiedban.Terminal.Bot
                                     }
                                 );
                             Manager.BotClient.KickChatMemberAsync(message.Chat.Id, member.Id);
+                            
+                            Manager.BotClient.SendTextMessageAsync(
+                                chatId: CacheData.ControlChatId,
+                                parseMode: ParseMode.Markdown,
+                                text: String.Format(
+                                    "*[Report]*\n" +
+                                    "User in blacklist removed from chat.\n" +
+                                    "\nUserId: {0}" +
+                                    "\nUsername/Name: {1}" +
+                                    "\nChat: {2}" +
+                                    "\n\n*hash_code:* #UB{3}-{4}",
+                                    member.Id,
+                                    author,
+                                    message.Chat.Title,
+                                    message.Chat.Id.ToString().Replace("-",""),
+                                    Guid.NewGuid())
+                            );
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            Manager.BotClient.SendTextMessageAsync(
+                                chatId: CacheData.ControlChatId,
+                                parseMode: ParseMode.Markdown,
+                                text: String.Format(
+                                    "*[Log]*\n" +
+                                    "⚠️Error removing blacklisted user from group.\n" +
+                                    "\nUserId: {0}" +
+                                    "\nUsername/Name: {1}" +
+                                    "\nChat: {2}" +
+                                    "\nChatId: {3}" +
+                                    "\n\n*hash_code:* #UB{4}-{5}",
+                                    member.Id,
+                                    author,
+                                    message.Chat.Title,
+                                    message.Chat.Id,
+                                    message.Chat.Id.ToString().Replace("-",""),
+                                    Guid.NewGuid())
+                            );
+                        }
+
+                        continue;
+                    }
+
+                if (rtlNameCheckEnabled)
+                {
+                    Filters.FilterResult rtlCheck = RTLNameFilter.DoCheck(message,
+                        member.FirstName + " " + member.LastName);
+                    if (rtlCheck.Result == Filters.IFilter.FilterResultType.positive)
+                    {
+                        try
+                        {
+                            Manager.BotClient.RestrictChatMemberAsync(
+                                message.Chat.Id,
+                                member.Id,
+                                new ChatPermissions()
+                                {
+                                    CanSendMessages = false,
+                                    CanAddWebPagePreviews = false,
+                                    CanChangeInfo = false,
+                                    CanInviteUsers = false,
+                                    CanPinMessages = false,
+                                    CanSendMediaMessages = false,
+                                    CanSendOtherMessages = false,
+                                    CanSendPolls = false
+                                }
+                            );
                         }
                         catch (Exception ex)
                         {
@@ -174,9 +249,46 @@ namespace Unifiedban.Terminal.Bot
 
                         continue;
                     }
+                }
 
                 try
                 {
+                    bool pluginCheckOk = true;
+                    foreach (var plugin in CacheData.PreCaptchaAndWelcomePlugins)
+                    {
+                        if (!plugin.Execute(message, member, MessageQueueManager.EnqueueMessage))
+                        {
+                            pluginCheckOk = false;
+                            Manager.BotClient.KickChatMemberAsync(message.Chat.Id, member.Id);
+                            if (message.Chat.Type == ChatType.Supergroup)
+                                Manager.BotClient.UnbanChatMemberAsync(message.Chat.Id, member.Id);
+                            break;
+                        }
+                    }
+
+                    if (!pluginCheckOk)
+                    {
+                        continue;
+                    }
+                    
+                    if (CacheData.TrustFactors.ContainsKey(member.Id))
+                    {
+                        int points = CacheData.TrustFactors[member.Id].Points;
+                        if (points < 71)
+                        {
+                            Manager.BotClient.SendTextMessageAsync(
+                                chatId: message.Chat,
+                                parseMode: ParseMode.Markdown,
+                                text: String.Format(
+                                    "*[Alert]*\n" +
+                                    "⚠️ Trust factor of user {0}:{1} is below security threshold\n" +
+                                    "\n*Trust factor:* {2}/100",
+                                    member.Id,
+                                    member.Username,
+                                    points)
+                            );
+                        }
+                    }
                     if (captchaEnabled && CacheData.Operators
                         .SingleOrDefault(x => x.TelegramUserId == member.Id) == null)
                     {
@@ -198,7 +310,7 @@ namespace Unifiedban.Terminal.Bot
 
                         string name = member.Username != null ? "@" + member.Username : member.FirstName;
                         MessageQueueManager.EnqueueMessage(
-                            new ChatMessage()
+                            new Models.ChatMessage()
                             {
                                 Timestamp = DateTime.UtcNow,
                                 Chat = message.Chat,
@@ -228,7 +340,7 @@ namespace Unifiedban.Terminal.Bot
                         }
 
                         MessageQueueManager.EnqueueMessage(
-                           new ChatMessage()
+                           new Models.ChatMessage()
                            {
                                Timestamp = DateTime.UtcNow,
                                Chat = message.Chat,
@@ -240,6 +352,17 @@ namespace Unifiedban.Terminal.Bot
                                         buttons
                                     )
                            });
+                    }
+                    
+                    foreach (var plugin in CacheData.PostCaptchaAndWelcomePlugins)
+                    {
+                        if (!plugin.Execute(message, member, MessageQueueManager.EnqueueMessage))
+                        {
+                            Manager.BotClient.KickChatMemberAsync(message.Chat.Id, member.Id);
+                            if (message.Chat.Type == ChatType.Supergroup)
+                                Manager.BotClient.UnbanChatMemberAsync(message.Chat.Id, member.Id);
+                            break;
+                        }
                     }
                 }
                 catch (Exception ex)

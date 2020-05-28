@@ -16,8 +16,6 @@ namespace Unifiedban.Terminal.Utils
 {
     public class ChatTools
     {
-        static BusinessLogic.SupportSessionLogLogic logLogic = new BusinessLogic.SupportSessionLogLogic();
-
         public static void Initialize()
         {
             RecurringJob.AddOrUpdate("ChatTools_CheckNightSchedule", () => CheckNightSchedule(), "0 * * ? * *");
@@ -56,20 +54,18 @@ namespace Unifiedban.Terminal.Utils
             return admins;
         }
 
-        public static void HandleSupportSessionMsg(Message message)
+        public static bool HandleSupportSessionMsg(Message message)
         {
-            if (message.Text != null)
-            if (message.Text.StartsWith("/"))
-                return;
-
             if (!CacheData.ActiveSupport
                 .Contains(message.Chat.Id))
-                return;
+                return false;
 
+            bool isFromOperator = false;
             if (BotTools.IsUserOperator(message.From.Id))
             {
+                isFromOperator = true;
                 Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
-                ChatMessage newMsg = new ChatMessage()
+                Models.ChatMessage newMsg = new Models.ChatMessage()
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
@@ -82,6 +78,8 @@ namespace Unifiedban.Terminal.Utils
             }
 
             Task.Run(() => RecordSupportSessionMessage(message));
+
+            return isFromOperator;
         }
 
         private static void RecordSupportSessionMessage(Message message)
@@ -93,15 +91,14 @@ namespace Unifiedban.Terminal.Utils
                     .Contains(message.From.Id))
                 senderType = Models.SupportSessionLog.SenderType.Admin;
 
-            Models.SupportSessionLog log = new Models.SupportSessionLog()
+            LogTools.AddSupportSessionLog(new Models.SupportSessionLog()
             {
                 GroupId = CacheData.Groups[message.Chat.Id].GroupId,
                 SenderId = message.From.Id,
                 Text = message.Text,
                 Timestamp = DateTime.UtcNow,
                 Type = senderType
-            };
-            logLogic.Add(log, -2);
+            });
         }
 
         public static void CheckNightSchedule()

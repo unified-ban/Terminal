@@ -23,7 +23,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 && x.Level == Models.Operator.Levels.Super) == null)
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
@@ -44,7 +44,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (message.Text.Split(" ").Length != 2)
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
@@ -58,7 +58,7 @@ namespace Unifiedban.Terminal.Bot.Command
             try
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -108,7 +108,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 && x.Level == Models.Operator.Levels.Super) == null)
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = callbackQuery.Message.Chat,
@@ -144,7 +144,7 @@ namespace Unifiedban.Terminal.Bot.Command
 
                 if (entries.Count == 0)
                     MessageQueueManager.EnqueueMessage(
-                       new ChatMessage()
+                       new Models.ChatMessage()
                        {
                            Timestamp = DateTime.UtcNow,
                            Chat = callbackQuery.Message.Chat,
@@ -158,7 +158,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 Key translationKey = translationLogic.GetKeyById(keyId);
                 if (translationKey == null)
                     MessageQueueManager.EnqueueMessage(
-                       new ChatMessage()
+                       new Models.ChatMessage()
                        {
                            Timestamp = DateTime.UtcNow,
                            Chat = callbackQuery.Message.Chat,
@@ -169,7 +169,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 entries = translationLogic.GetEntriesById(keyId);
                 if (entries.Count == 0)
                     MessageQueueManager.EnqueueMessage(
-                       new ChatMessage()
+                       new Models.ChatMessage()
                        {
                            Timestamp = DateTime.UtcNow,
                            Chat = callbackQuery.Message.Chat,
@@ -184,7 +184,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 answer += $"\n*{translation.Language.Name}* : {translation.Translation}";
             }
             MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = callbackQuery.Message.Chat,

@@ -25,7 +25,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 !Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
@@ -47,7 +47,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 !Utils.ChatTools.IsUserAdmin(message.Chat.Id, callbackQuery.From.Id))
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
@@ -129,7 +129,7 @@ namespace Unifiedban.Terminal.Bot.Command
                                 ));
             if(message.From.Id != Manager.MyId)
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -156,13 +156,13 @@ namespace Unifiedban.Terminal.Bot.Command
                     if (CacheData.NightSchedules[groupId].UtcStartDate.Value.Hour == endTime.Hour)
                     {
                         MessageQueueManager.EnqueueMessage(
-                            new ChatMessage()
+                            new Models.ChatMessage()
                             {
                                 Timestamp = DateTime.UtcNow,
                                 Chat = message.Chat,
                                 ParseMode = ParseMode.Markdown,
                                 Text = "Opening and closing time matches the same hour. Please select a different time.",
-                                PostSentAction = ChatMessage.PostSentActions.Destroy,
+                                PostSentAction = Models.ChatMessage.PostSentActions.Destroy,
                                 AutoDestroyTimeInSeconds = 5
                             });
                         return;
@@ -191,13 +191,13 @@ namespace Unifiedban.Terminal.Bot.Command
                     if (CacheData.NightSchedules[groupId].UtcEndDate.Value.Hour == startTime.Hour)
                     {
                         MessageQueueManager.EnqueueMessage(
-                            new ChatMessage()
+                            new Models.ChatMessage()
                             {
                                 Timestamp = DateTime.UtcNow,
                                 Chat = message.Chat,
                                 ParseMode = ParseMode.Markdown,
                                 Text = "Opening and closing time matches the same hour. Please select a different time.",
-                                PostSentAction = ChatMessage.PostSentActions.Destroy,
+                                PostSentAction = Models.ChatMessage.PostSentActions.Destroy,
                                 AutoDestroyTimeInSeconds = 5
                             });
                         return;
@@ -214,7 +214,7 @@ namespace Unifiedban.Terminal.Bot.Command
             CacheData.NightSchedules[groupId] = nsl.GetByChat(groupId);
             Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
             MessageQueueManager.EnqueueMessage(
-                new ChatMessage()
+                new Models.ChatMessage()
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,

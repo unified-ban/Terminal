@@ -7,6 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Unifiedban.Models;
+using Unifiedban.Terminal.Bot;
+using Unifiedban.Terminal.Utils;
 
 namespace Unifiedban.Terminal.Controls
 {
@@ -40,12 +43,36 @@ namespace Unifiedban.Terminal.Controls
 
         public static void DoCheck(Message message)
         {
-            foreach (Controls.IControl control in controls)
+            foreach (var plugin in CacheData.PreControlsPlugins)
             {
-                Controls.ControlResult result = control.DoCheck(message);
-                if (result.Result == Controls.IControl.ControlResultType.positive)
+                if (!plugin.Execute(message, MessageQueueManager.EnqueueMessage))
+                {
+                    return;
+                }
+            }
+            
+            foreach (IControl control in controls)
+            {
+                ControlResult result = control.DoCheck(message);
+                if (result.Result == IControl.ControlResultType.positive)
                 {
                     RemoveMessageForPositiveControl(message, result);
+                    return;
+                }
+            }
+            
+            foreach (var plugin in CacheData.PostControlsPlugins)
+            {
+                if (!plugin.Execute(message, MessageQueueManager.EnqueueMessage))
+                {
+                    return;
+                }
+            }
+            
+            foreach (var plugin in CacheData.PreFiltersPlugins)
+            {
+                if (!plugin.Execute(message, MessageQueueManager.EnqueueMessage))
+                {
                     return;
                 }
             }
@@ -56,6 +83,14 @@ namespace Unifiedban.Terminal.Controls
                 if(result.Result == Filters.IFilter.FilterResultType.positive)
                 {
                     RemoveMessageForPositiveFilter(message, result);
+                    return;
+                }
+            }
+            
+            foreach (var plugin in CacheData.PostFiltersPlugins)
+            {
+                if (!plugin.Execute(message, MessageQueueManager.EnqueueMessage))
+                {
                     return;
                 }
             }
@@ -71,25 +106,27 @@ namespace Unifiedban.Terminal.Controls
             Bot.Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
             string author = message.From.Username == null
                 ? message.From.FirstName + " " + message.From.LastName
-                : message.From.Username;
+                : "@" + message.From.Username;
             Bot.Manager.BotClient.SendTextMessageAsync(
                     chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
                         "*[Report]*\n" +
                         "Message deleted due to control *{0}*.\n" +
-                        "\nChat: {1}" +
-                        "\nAuthor: {3}" +
-                        "\nUserId: {4}" +
-                        "\nOriginal message:\n{2}" +
-                        "\n\n*hash_code:* UB{5}-{6}",
+                        "⚠ do not open links you don't know ⚠\n" +
+                        "\nChat: `{1}`" +
+                        "\nAuthor: `{3}`" +
+                        "\nUserId: `{4}`` " +
+                        "\nOriginal message:\n```{2}```" +
+                        "\n\n*hash_code:* #UB{5}-{6}",
                         result.CheckName,
                         message.Chat.Title,
                         message.Text,
                         author,
                         message.From.Id,
                         message.Chat.Id.ToString().Replace("-",""),
-                        Guid.NewGuid())
+                        Guid.NewGuid()),
+                    disableWebPagePreview: true
                 );
         }
 
@@ -98,26 +135,27 @@ namespace Unifiedban.Terminal.Controls
             Bot.Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
             string author = message.From.Username == null
                 ? message.From.FirstName + " " + message.From.LastName
-                : message.From.Username;
+                : "@" + message.From.Username;
             Bot.Manager.BotClient.SendTextMessageAsync(
                     chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
                         "*[Report]*\n" +
-                        "Message deleted due to filter *{0}* provided positive result on rule *{1}*.\n" +
-                        "\nChat: {2}" +
-                        "\nAuthor: {4}" +
-                        "\nUserId: {5}" +
-                        "\nOriginal message:\n{3}" +
-                        "\n\n*hash_code:* UB{6}-{7}",
+                        "Message deleted due to filter *{0}* provided positive result.\n" +
+                        "⚠ do not open links you don't know ⚠\n" +
+                        "\nChat: `{1}`" +
+                        "\nAuthor: `{3}`" +
+                        "\nUserId: `{4}`" +
+                        "\nOriginal message:\n```{2}```" +
+                        "\n\n*hash_code:* #UB{5}-{6}",
                         result.CheckName,
-                        result.Rule,
                         message.Chat.Title,
                         message.Text,
                         author,
                         message.From.Id,
                         message.Chat.Id.ToString().Replace("-",""),
-                        Guid.NewGuid())
+                        Guid.NewGuid()),
+                    disableWebPagePreview: true
                 );
         }
 

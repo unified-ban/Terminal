@@ -26,7 +26,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 if (!message.ReplyToMessage.Text.StartsWith("#"))
                 {
                    MessageQueueManager.EnqueueMessage(
-                       new ChatMessage()
+                       new Models.ChatMessage()
                        {
                            Timestamp = DateTime.UtcNow,
                            Chat = message.Chat,
@@ -45,7 +45,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (!message.Text.Remove(0, 9).StartsWith("#"))
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -72,7 +72,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (matchedTags.Count == 0)
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -96,7 +96,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if(newNote == null)
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -106,17 +106,17 @@ namespace Unifiedban.Terminal.Bot.Command
             }
 
             MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
                         Text = CacheData.GetTranslation("en", "addnote_command_success"),
                         AutoDestroyTimeInSeconds = 5,
-                        PostSentAction = ChatMessage.PostSentActions.Destroy
+                        PostSentAction = Models.ChatMessage.PostSentActions.Destroy
                     });
 
             MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,

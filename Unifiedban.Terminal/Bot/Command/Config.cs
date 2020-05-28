@@ -5,10 +5,16 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Storage;
+using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using Unifiedban.BusinessLogic.Group;
+using Unifiedban.Models.Group;
 
 namespace Unifiedban.Terminal.Bot.Command
 {
@@ -21,14 +27,15 @@ namespace Unifiedban.Terminal.Bot.Command
 
         public void Execute(Message message, bool isUpdate = false)
         {
-            if(!isUpdate)
-                Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
-
-            if (!Utils.BotTools.IsUserOperator(message.From.Id) &&
+            bool isOperator = Utils.BotTools.IsUserOperator(message.From.Id);
+            if (!isOperator &&
                 !Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
             {
                 return;
             }
+            
+            if(!isUpdate)
+                Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
 
             List<List<InlineKeyboardButton>> configMenu = new List<List<InlineKeyboardButton>>();
             int btnCount;
@@ -41,7 +48,7 @@ namespace Unifiedban.Terminal.Bot.Command
 
             try
             {
-                foreach (Models.Group.ConfigurationParameter conf in CacheData.GroupConfigs[message.Chat.Id])
+                foreach (ConfigurationParameter conf in CacheData.GroupConfigs[message.Chat.Id])
                 {
                     if (btnCount == 2)
                     {
@@ -58,7 +65,7 @@ namespace Unifiedban.Terminal.Bot.Command
                         case "bool":
                             configMenu[depthLevel].Add(InlineKeyboardButton.WithCallbackData(
                                 CacheData.GetTranslation("en", conf.ConfigurationParameterId, true) + " " + icon,
-                                $"/config { conf.ConfigurationParameterId }|{ newSet }"
+                                $"/config { message.From.Id } { conf.ConfigurationParameterId }|{ newSet }"
                                 ));
                             break;
                         case "multiselect":
@@ -67,13 +74,13 @@ namespace Unifiedban.Terminal.Bot.Command
                         case "language":
                             configMenu[depthLevel].Add(InlineKeyboardButton.WithCallbackData(
                                 CacheData.GetTranslation("en", conf.ConfigurationParameterId, true),
-                                $"/config getValue|{ conf.ConfigurationParameterId }"
+                                $"/config { message.From.Id } getValue|{ conf.ConfigurationParameterId }"
                                 ));
                             break;
                         case "boolfunction":
                             configMenu[depthLevel].Add(InlineKeyboardButton.WithCallbackData(
                                 CacheData.GetTranslation("en", conf.ConfigurationParameterId, true) + " " + icon,
-                                $"/config exec|{ conf.ConfigurationParameterId }|{ newSet }"
+                                $"/config { message.From.Id } exec|{ conf.ConfigurationParameterId }|{ newSet }"
                                 ));
                             break;
                     }
@@ -91,13 +98,22 @@ namespace Unifiedban.Terminal.Bot.Command
             configMenu[depthLevel + 1].Add(InlineKeyboardButton.WithUrl("FAQ", "https://unifiedban.solutions/?p=faq"));
 
             configMenu.Add(new List<InlineKeyboardButton>());
-            configMenu[depthLevel + 2].Add(InlineKeyboardButton.WithCallbackData(
-                                CacheData.GetTranslation("en", "conf_enable_dashboard", true),
-                                $"/config dashboardToggle|true"
-                                ));
+            bool dashboardStatus = getDashboardStatus(message);
+            if (dashboardStatus || isOperator)
+            {
+                configMenu[depthLevel + 2].Add(InlineKeyboardButton.WithUrl("Dashboard", "https://unifiedban.solutions/signin"));
+            }
+            else
+            {
+                configMenu[depthLevel + 2].Add(InlineKeyboardButton.WithCallbackData(
+                    CacheData.GetTranslation("en", "conf_enable_dashboard", true),
+                    $"/config { message.From.Id } dashboardToggle|true"
+                ));
+            }
 
             configMenu.Add(new List<InlineKeyboardButton>());
-            configMenu[depthLevel + 3].Add(InlineKeyboardButton.WithCallbackData("Close menu", $"/config close"));
+            configMenu[depthLevel + 3].Add(InlineKeyboardButton.WithCallbackData("Close menu",
+                $"/config { message.From.Id } close"));
 
             if (isUpdate)
             {
@@ -105,7 +121,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     chatId: message.Chat.Id,
                     messageId: message.MessageId,
                     text: "*[ADMIN] [Config:]*",
-                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                    parseMode: ParseMode.Markdown,
                     replyMarkup: new InlineKeyboardMarkup(
                             configMenu
                         )
@@ -113,11 +129,11 @@ namespace Unifiedban.Terminal.Bot.Command
                 return;
             }
             MessageQueueManager.EnqueueMessage(
-                new ChatMessage()
+                new Models.ChatMessage()
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
-                    ParseMode = Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                    ParseMode = ParseMode.Markdown,
                     Text = "*[ADMIN] Settings*\nBot configuration for this group.",
                     ReplyMarkup = new InlineKeyboardMarkup(
                             configMenu
@@ -127,17 +143,23 @@ namespace Unifiedban.Terminal.Bot.Command
 
         public void Execute(CallbackQuery callbackQuery)
         {
-            if (!Utils.BotTools.IsUserOperator(callbackQuery.From.Id) &&
-                !Utils.ChatTools.IsUserAdmin(callbackQuery.Message.Chat.Id, callbackQuery.From.Id))
+            string[] data = callbackQuery.Data.Split(" ");
+            if (data.Length < 3)
+                return;
+            
+            int ownerId = -1;
+            if(!int.TryParse(data[1], out ownerId))
             {
                 return;
             }
-
-            string[] data = callbackQuery.Data.Split(" ");
-            if (data.Length < 2)
+            
+            if (!Utils.BotTools.IsUserOperator(callbackQuery.From.Id) &&
+                (ownerId == -1 || ownerId != callbackQuery.From.Id))
+            {
                 return;
-
-            string[] parameters = data[1].Split("|");
+            }
+            
+            string[] parameters = data[2].Split("|");
             if (parameters.Length < 1)
                 return;
             switch (parameters[0])
@@ -148,45 +170,47 @@ namespace Unifiedban.Terminal.Bot.Command
                         Execute(callbackQuery.Message);
                     break;
                 case "getValue":
-                    requestNewValue(callbackQuery.Message, parameters[1]);
+                    requestNewValue(callbackQuery, parameters[1]);
                     break;
                 case "exec":
                     if (parameters.Length > 2)
-                        execFunction(callbackQuery.Message, parameters[1], parameters[2]);
+                        execFunction(callbackQuery, parameters[1], parameters[2]);
                     break;
                 case "dashboardToggle":
-                    toggleDashboard(callbackQuery.Message, parameters[1]);
+                    toggleDashboard(callbackQuery);
                     break;
                 default:
                     if (parameters.Length < 2)
                         return;
-                    updateSetting(callbackQuery.Message, parameters[0], parameters[1]);
+                    updateSetting(callbackQuery, parameters[0], parameters[1]);
                     break;
             }
         }
 
         private void updateSetting(
-            Message message, string configurationParameterId, string newValue)
+            CallbackQuery callbackQuery, string configurationParameterId, string newValue)
         {
-            Models.Group.ConfigurationParameter config = CacheData.GroupConfigs[message.Chat.Id]
+            Models.Group.ConfigurationParameter config = CacheData.GroupConfigs[callbackQuery.Message.Chat.Id]
                 .Where(x => x.ConfigurationParameterId == configurationParameterId)
                 .SingleOrDefault();
             if (config == null)
                 return;
 
             // TODO - check if value is in allowed range
-            CacheData.GroupConfigs[message.Chat.Id]
-                [CacheData.GroupConfigs[message.Chat.Id]
+            CacheData.GroupConfigs[callbackQuery.Message.Chat.Id]
+                [CacheData.GroupConfigs[callbackQuery.Message.Chat.Id]
                 .IndexOf(config)]
                 .Value = newValue;
 
-            Execute(message, true);
+            callbackQuery.Message.From.Id = callbackQuery.From.Id;
+            Execute(callbackQuery.Message, true);
         }
 
-        private void requestNewValue(Message message, string configurationParameterId)
+        private void requestNewValue(CallbackQuery callbackQuery,
+            string configurationParameterId)
         {
-            Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
-            Models.Group.ConfigurationParameter conf = CacheData.GroupConfigs[message.Chat.Id]
+            Manager.BotClient.DeleteMessageAsync(callbackQuery.Message.Chat.Id, callbackQuery.Message.MessageId);
+            ConfigurationParameter conf = CacheData.GroupConfigs[callbackQuery.Message.Chat.Id]
                 .Where(x => x.ConfigurationParameterId == configurationParameterId)
                 .SingleOrDefault();
 
@@ -197,23 +221,23 @@ namespace Unifiedban.Terminal.Bot.Command
             {
                 case "string":
                     MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
-                        Chat = message.Chat,
-                        ParseMode = Telegram.Bot.Types.Enums.ParseMode.Markdown,
-                        Text = $"*[ADMIN] Settings [r:{message.MessageId}]*\nProvide new value:",
+                        Chat = callbackQuery.Message.Chat,
+                        ParseMode = ParseMode.Markdown,
+                        Text = $"*[ADMIN] Settings [r:{callbackQuery.Message.MessageId}]*\nProvide new value:",
                         ReplyMarkup = new ForceReplyMarkup() { Selective = true }
                     });
                     break;
                 case "language":
                     MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
-                        Chat = message.Chat,
-                        ParseMode = Telegram.Bot.Types.Enums.ParseMode.Markdown,
-                        Text = $"*[ADMIN] Settings [r:{message.MessageId}]*\nSelect language:",
+                        Chat = callbackQuery.Message.Chat,
+                        ParseMode = ParseMode.Markdown,
+                        Text = $"*[ADMIN] Settings [r:{callbackQuery.Message.MessageId}]*\nSelect language:",
                         ReplyMarkup = new InlineKeyboardMarkup(
                                 buildLanguageSelectionMenu()
                             )
@@ -260,26 +284,169 @@ namespace Unifiedban.Terminal.Bot.Command
             return langMenu;
         }
 
-        private void execFunction(Message message, string configurationParameterId, string newValue)
+        private void execFunction(CallbackQuery callbackQuery,
+            string configurationParameterId, string newValue)
         {
             switch (configurationParameterId)
             {
                 case "Gate":
-                    Gate.ToggleGate(message, newValue == "true" ? true : false);
-                    Execute(message, true);
+                    Gate.ToggleGate(callbackQuery.Message, newValue == "true" ? true : false);
+                    callbackQuery.Message.From.Id = callbackQuery.From.Id;
+                    Execute(callbackQuery.Message, true);
                     break;
                 case "GateSchedule":
-                    Gate.ToggleSchedule(message, newValue == "true" ? true : false);
-                    Execute(message, true);
+                    Gate.ToggleSchedule(callbackQuery.Message, newValue == "true" ? true : false);
+                    callbackQuery.Message.From.Id = callbackQuery.From.Id;
+                    Execute(callbackQuery.Message, true);
                     break;
                 default:
                     return;
             }
         }
 
-        private void toggleDashboard(Message message, string newValue)
+        private void toggleDashboard(CallbackQuery callbackQuery)
         {
+            Message message = callbackQuery.Message;
+            DashboardUserLogic dul = new DashboardUserLogic();
+            DashboardUser user = dul.GetByTelegramUserId(callbackQuery.From.Id);
+            
+            if (user == null)
+            {
+                string profilePic = "";
+                var photos = Manager.BotClient.GetUserProfilePhotosAsync(callbackQuery.From.Id).Result;
+                if (photos.TotalCount > 0)
+                {
+                    profilePic = photos.Photos[0][0].FileId;
+                }
 
+                user = dul.Add(callbackQuery.From.Id,
+                    callbackQuery.From.FirstName + " " + callbackQuery.From.LastName,
+                    profilePic, -2);
+                if (user == null)
+                {
+                    MessageQueueManager.EnqueueMessage(
+                        new Models.ChatMessage()
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            Chat = message.Chat,
+                            ParseMode = ParseMode.Markdown,
+                            Text = "*[Report]*\n" +
+                                   "Error enabling dashboard!"
+                        });
+                    return;
+                }
+            }
+            
+            DashboardPermissionLogic dpl = new DashboardPermissionLogic();
+            DashboardPermission permission =  dpl.GetByUserId(user.DashboardUserId,
+                CacheData.Groups[message.Chat.Id].GroupId);
+
+            if (permission == null)
+            {
+                if (dpl.Add(CacheData.Groups[message.Chat.Id].GroupId,
+                    user.DashboardUserId, DashboardPermission.Status.Active,
+                    -2) == null)
+                {
+                    MessageQueueManager.EnqueueMessage(
+                        new Models.ChatMessage()
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            Chat = message.Chat,
+                            ParseMode = ParseMode.Markdown,
+                            Text = "*[Report]*\n" +
+                                   "Error enabling dashboard!"
+                        });
+                    return;
+                }
+                
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        ParseMode = ParseMode.Markdown,
+                        Text = "Dashboard enabled!"
+                    });
+                callbackQuery.Message.From.Id = callbackQuery.From.Id;
+                Execute(callbackQuery.Message, true);
+                return;
+            }
+
+            if (permission.State == DashboardPermission.Status.Banned)
+            {
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        ParseMode = ParseMode.Markdown,
+                        Text = "*[Report]*\n" +
+                               "Error: you are banned from the dashboard!"
+                    });
+                return;
+            }
+            else if (permission.State == DashboardPermission.Status.Active)
+            {
+                permission.State = DashboardPermission.Status.Inactive;
+            }
+            else if (permission.State == DashboardPermission.Status.Inactive)
+            {
+                permission.State = DashboardPermission.Status.Active;
+            }
+
+            if (dpl.Update(permission, -2) == null)
+            {
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        ParseMode = ParseMode.Markdown,
+                        Text = "*[Report]*\n" +
+                               "Error enabling dashboard!"
+                    });
+            }
+            else
+            {   
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        ParseMode = ParseMode.Markdown,
+                        Text = "Dashboard status updated!"
+                    });
+
+                callbackQuery.Message.From.Id = callbackQuery.From.Id;
+                Execute(callbackQuery.Message, true);
+            }
+        }
+
+        private bool getDashboardStatus(Message message)
+        {
+            DashboardUserLogic dul = new DashboardUserLogic();
+
+            DashboardUser user = dul.GetByTelegramUserId(message.From.Id);
+            if (user == null)
+            {
+                return false;
+            }
+            
+            DashboardPermissionLogic dpl = new DashboardPermissionLogic();
+            DashboardPermission permission =  dpl.GetByUserId(user.DashboardUserId,
+                CacheData.Groups[message.Chat.Id].GroupId);
+
+            if (permission == null)
+            {
+                return false;
+            }
+            
+            if (permission.State == DashboardPermission.Status.Active)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

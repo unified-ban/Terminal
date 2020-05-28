@@ -17,7 +17,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 !Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
@@ -31,7 +31,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (arguments.Length != 3)
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
@@ -44,7 +44,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (!Utils.BotTools.IsValidUrl(arguments[2]))
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
@@ -60,7 +60,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (newBtn == null)
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
@@ -73,7 +73,7 @@ namespace Unifiedban.Terminal.Bot.Command
             Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
             string successMsg = CacheData.GetTranslation("en", "awb_command_success");
             MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,

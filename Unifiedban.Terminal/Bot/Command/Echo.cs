@@ -24,17 +24,11 @@ namespace Unifiedban.Terminal.Bot.Command
                 && x.Level == Models.Operator.Levels.Super) == null)
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
                        ReplyToMessageId = message.MessageId,
-                       Text = CacheData.GetTranslation("en", "error_not_auth_command")
-                   });
-                MessageQueueManager.EnqueueLog(
-                   new ChatMessage()
-                   {
-                       Timestamp = DateTime.UtcNow,
                        Text = CacheData.GetTranslation("en", "error_not_auth_command")
                    });
                 return;
@@ -43,7 +37,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if(message.ReplyToMessage == null)
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
@@ -54,7 +48,7 @@ namespace Unifiedban.Terminal.Bot.Command
             }
 
             MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,

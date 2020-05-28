@@ -105,7 +105,7 @@ namespace Unifiedban.Terminal.Bot
             return added;
         }
 
-        public static void EnqueueMessage(ChatMessage message)
+        public static void EnqueueMessage(Models.ChatMessage message)
         {
             if (!isInitialized || isDisposing)
                 return;
@@ -129,7 +129,7 @@ namespace Unifiedban.Terminal.Bot
                     .Enqueue(message);
             }
         }
-        public static void EnqueueLog(ChatMessage message)
+        public static void EnqueueLog(Models.ChatMessage message)
         {
             if (!isInitialized || isDisposing)
                 return;

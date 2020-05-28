@@ -19,7 +19,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (!Utils.BotTools.IsUserOperator(message.From.Id, Models.Operator.Levels.Basic))
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -37,7 +37,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     if (!CacheData.Usernames.Keys.Contains(message.Text.Split(" ")[1].Remove(0, 1)))
                     {
                         MessageQueueManager.EnqueueMessage(
-                            new ChatMessage()
+                            new Models.ChatMessage()
                             {
                                 Timestamp = DateTime.UtcNow,
                                 Chat = message.Chat,
@@ -53,7 +53,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     if (!isValid)
                     {
                         MessageQueueManager.EnqueueMessage(
-                            new ChatMessage()
+                            new Models.ChatMessage()
                             {
                                 Timestamp = DateTime.UtcNow,
                                 Chat = message.Chat,
@@ -73,7 +73,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if(removed == Models.SystemLog.ErrorCodes.Error)
             {
                 MessageQueueManager.EnqueueMessage(
-                new ChatMessage()
+                new Models.ChatMessage()
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
@@ -86,12 +86,20 @@ namespace Unifiedban.Terminal.Bot.Command
                     chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
-                        "Error removing User *{0}* from blacklist.", userToBan));
+                        "*[Report]*\n" +
+                        "Error removing user `{1}` from blacklist.\n" +
+                        "Operator: {0}" +
+                        "\n\n*hash_code:* #UB{2}-{3}",
+                        message.From.Id,
+                        userToBan,
+                        message.Chat.Id.ToString().Replace("-", ""),
+                        Guid.NewGuid())
+                );
             }
             else
             {
                 MessageQueueManager.EnqueueMessage(
-                new ChatMessage()
+                new Models.ChatMessage()
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
@@ -101,10 +109,17 @@ namespace Unifiedban.Terminal.Bot.Command
                 });
 
                 Manager.BotClient.SendTextMessageAsync(
-                        chatId: CacheData.ControlChatId,
-                        parseMode: ParseMode.Markdown,
-                        text: String.Format(
-                            "User *{0}* removed from blacklist.", userToBan));
+                    chatId: CacheData.ControlChatId,
+                    parseMode: ParseMode.Markdown,
+                    text: String.Format(
+                        "*[Report]*\n" +
+                        "Operator `{0}` removed user `{1}` from blacklist.\n" +
+                        "\n\n*hash_code:* #UB{2}-{3}",
+                        message.From.Id,
+                        userToBan,
+                        message.Chat.Id.ToString().Replace("-",""),
+                        Guid.NewGuid())
+                );
             }
         }
 

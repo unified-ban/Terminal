@@ -19,21 +19,13 @@ namespace Unifiedban.Terminal.Bot.Command
                 !Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
             {
                 MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
                        ReplyToMessageId = message.MessageId,
                        Text = CacheData.GetTranslation("en", "error_not_auth_command")
                    });
-                Manager.BotClient.SendTextMessageAsync(
-                    chatId: CacheData.ControlChatId,
-                    parseMode: ParseMode.Markdown,
-                    text: String.Format(
-                        "User *{0}:{1}* tried to use command Announce.",
-                        message.From.Id,
-                        message.From.Username)
-                );
                 return;
             }
 
@@ -50,13 +42,13 @@ namespace Unifiedban.Terminal.Bot.Command
             string messageHeader = CacheData.GetTranslation("en", "command_announce_header");
             string parsedMessage = messageHeader + "\n" + message.Text;
             MessageQueueManager.EnqueueMessage(
-                new ChatMessage()
+                new Models.ChatMessage()
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
                     ParseMode = ParseMode.Html,
                     Text = parsedMessage,
-                    PostSentAction = ChatMessage.PostSentActions.Pin
+                    PostSentAction = Models.ChatMessage.PostSentActions.Pin
                 });
         }
 

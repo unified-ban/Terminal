@@ -16,7 +16,7 @@ namespace Unifiedban.Terminal.Bot.Command
         public void Execute(Message message)
         {
             MessageQueueManager.EnqueueMessage(
-                new ChatMessage()
+                new Models.ChatMessage()
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,

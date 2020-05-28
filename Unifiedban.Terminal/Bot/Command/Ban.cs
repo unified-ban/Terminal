@@ -14,11 +14,11 @@ namespace Unifiedban.Terminal.Bot.Command
     {
         public void Execute(Message message)
         {
-            if (!Utils.BotTools.IsUserOperator(message.From.Id, Models.Operator.Levels.Basic) &&
-                !Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
+            if (!BotTools.IsUserOperator(message.From.Id, Models.Operator.Levels.Basic) &&
+                !ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -32,7 +32,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 .CanRestrictMembers == false)
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -50,7 +50,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     if(!CacheData.Usernames.Keys.Contains(message.Text.Split(" ")[1].Remove(0, 1)))
                     {
                         MessageQueueManager.EnqueueMessage(
-                            new ChatMessage()
+                            new Models.ChatMessage()
                             {
                                 Timestamp = DateTime.UtcNow,
                                 Chat = message.Chat,
@@ -66,7 +66,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     if (!isValid)
                     {
                         MessageQueueManager.EnqueueMessage(
-                            new ChatMessage()
+                            new Models.ChatMessage()
                             {
                                 Timestamp = DateTime.UtcNow,
                                 Chat = message.Chat,
@@ -79,12 +79,23 @@ namespace Unifiedban.Terminal.Bot.Command
             else
                 userToKick = message.ReplyToMessage.From.Id;
 
+            if (BotTools.IsUserOperator(userToKick))
+            {
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        Text = CacheData.GetTranslation("en", "command_to_operator_not_allowed")
+                    });
+            }
+            
             try
             {
                 Manager.BotClient.KickChatMemberAsync(message.Chat.Id, userToKick,
                     DateTime.UtcNow.AddMinutes(-5));
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -96,7 +107,7 @@ namespace Unifiedban.Terminal.Bot.Command
             catch
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,

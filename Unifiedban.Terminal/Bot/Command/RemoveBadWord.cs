@@ -22,7 +22,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (arguments.Length < 2)
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -38,7 +38,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (!removed)
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -49,7 +49,7 @@ namespace Unifiedban.Terminal.Bot.Command
 
             Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
             MessageQueueManager.EnqueueMessage(
-                new ChatMessage()
+                new Models.ChatMessage()
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,

@@ -20,6 +20,8 @@ namespace Unifiedban.Terminal
 
             //Gimmeconf();
             //RegisterOperators();
+            // var user = Bot.Manager.BotClient.GetChatMemberAsync(-1001125553456, 560445026).Result;
+            // Console.WriteLine(user.User.Username);
         }
 
         static void Gimmeconf()

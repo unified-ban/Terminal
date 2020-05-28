@@ -59,15 +59,26 @@ namespace Unifiedban.Terminal.Bot.Command
             {
                 replyText = CacheData.GetTranslation("en", "command_id_negative");
                 replyText = Utils.Parsers.VariablesParser(replyText, message);
-
+                
                 Manager.BotClient.SendTextMessageAsync(
                     chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
-                        "User *{0}:{1}* tried to use command Id.",
+                        "*[Report]*\n" +
+                        "⚠️ Non operator used command /id\n" +
+                        "\n*Chat:* {0}" +
+                        "\n*ChatId:* {1}" +
+                        "\n*UserId:* {2}" +
+                        "\n*Username:* {3}" +
+                        "\n\n*hash_code:* #UB{4}-{5}",
+                        message.Chat.Title,
+                        message.Chat.Id,
                         message.From.Id,
-                        message.From.Username)
+                        message.From.Username,
+                        message.Chat.Id.ToString().Replace("-",""),
+                        Guid.NewGuid())
                 );
+                
                 goto doReply;
             }
 
@@ -77,7 +88,7 @@ namespace Unifiedban.Terminal.Bot.Command
 
             doReply:
             MessageQueueManager.EnqueueMessage(
-                   new ChatMessage()
+                   new Models.ChatMessage()
                    {
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,

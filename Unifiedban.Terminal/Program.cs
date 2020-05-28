@@ -14,8 +14,10 @@ using Hangfire.SqlServer;
 using Hangfire.Storage;
 using Hangfire.Logging;
 using System.Linq;
+using System.Reflection;
 using Unifiedban.Models.Group;
 using Unifiedban.Models.User;
+using Unifiedban.Plugin.Common;
 
 namespace Unifiedban.Terminal
 {
@@ -274,6 +276,8 @@ namespace Unifiedban.Terminal
                 return;
             }
 
+            LoadPlugins();
+
             LoadFiltersData();
 
             Data.Utils.Logging.AddLog(new Models.SystemLog()
@@ -403,6 +407,77 @@ namespace Unifiedban.Terminal
 
             BusinessLogic.Filters.BadWordLogic badWordLogic = new BusinessLogic.Filters.BadWordLogic();
             CacheData.BadWords = badWordLogic.Get();
+        }
+
+        static void LoadPlugins()
+        {
+            Directory.CreateDirectory(Environment.CurrentDirectory + @"\Plugins");
+            string[] assemblies = Directory
+                .GetFiles(Environment.CurrentDirectory + @"\Plugins", "Unifiedban.Plugin.*.dll");
+            foreach (var file in assemblies)
+            {
+                try
+                { 
+                    Assembly assembly = Assembly.LoadFrom(file);
+                    foreach (Type type in assembly.GetTypes())
+                    {
+                        if (type.BaseType == typeof(UBPlugin))
+                        {
+                            Object o = Activator.CreateInstance(type);
+                            UBPlugin plugin = (o as UBPlugin);
+                            if (plugin == null)
+                            {
+                                continue;
+                            }
+                            switch (plugin.ExecutionPhase)
+                            {
+                                case IPlugin.Phase.PreCaptchaAndWelcome:
+                                    CacheData.PreCaptchaAndWelcomePlugins.Add(plugin);
+                                    break;
+                                case IPlugin.Phase.PostCaptchaAndWelcome:
+                                    CacheData.PostCaptchaAndWelcomePlugins.Add(plugin);
+                                    break;
+                                case IPlugin.Phase.PreControls:
+                                    CacheData.PreControlsPlugins.Add(plugin);
+                                    break;
+                                case IPlugin.Phase.PostControls:
+                                    CacheData.PostControlsPlugins.Add(plugin);
+                                    break;
+                                case IPlugin.Phase.PreFilters:
+                                    CacheData.PreFiltersPlugins.Add(plugin);
+                                    break;
+                                case IPlugin.Phase.PostFilters:
+                                    CacheData.PostFiltersPlugins.Add(plugin);
+                                    break;
+                            }
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Data.Utils.Logging.AddLog(new Models.SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Unifiedban Terminal Startup - LoadPlugins",
+                        Level = Models.SystemLog.Levels.Error,
+                        Message = ex.Message,
+                        UserId = -1
+                    });
+                    if (ex.InnerException != null)
+                    {
+                        Data.Utils.Logging.AddLog(new Models.SystemLog()
+                        {
+                            LoggerName = CacheData.LoggerName,
+                            Date = DateTime.Now,
+                            Function = "Unifiedban Terminal Startup - LoadPlugins",
+                            Level = Models.SystemLog.Levels.Error,
+                            Message = ex.InnerException.Message,
+                            UserId = -1
+                        });
+                    }
+                }
+            }
         }
 
         public static void AddMissingConfiguration(long telegramGroupId)

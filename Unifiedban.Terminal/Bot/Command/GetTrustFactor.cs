@@ -18,12 +18,16 @@ namespace Unifiedban.Terminal.Bot.Command
 
             if (message.ReplyToMessage == null)
             {
-                if (message.Text.Split(" ")[1].StartsWith("@"))
+                if (!message.Text.Trim().Contains(" "))
+                {
+                    userId = message.From.Id;
+                }
+                else if (message.Text.Split(" ")[1].StartsWith("@"))
                 {
                     if (!CacheData.Usernames.Keys.Contains(message.Text.Split(" ")[1].Remove(0, 1)))
                     {
                         MessageQueueManager.EnqueueMessage(
-                            new ChatMessage()
+                            new Models.ChatMessage()
                             {
                                 Timestamp = DateTime.UtcNow,
                                 Chat = message.Chat,
@@ -39,7 +43,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     if (!isValid)
                     {
                         MessageQueueManager.EnqueueMessage(
-                            new ChatMessage()
+                            new Models.ChatMessage()
                             {
                                 Timestamp = DateTime.UtcNow,
                                 Chat = message.Chat,
@@ -64,7 +68,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (String.IsNullOrEmpty(username))
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -75,11 +79,32 @@ namespace Unifiedban.Terminal.Bot.Command
                     chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(answerNoUsername, userId, points));
+
+                Manager.BotClient.SendTextMessageAsync(
+                    chatId: CacheData.ControlChatId,
+                    parseMode: ParseMode.Markdown,
+                    text: String.Format(
+                        "*[Report]*\n" +
+                        "ℹ️Requested trust factor of user.\n" +
+                        "\n*Chat:* {0}" +
+                        "\n*ChatId:* {1}" +
+                        "\n*UserId:* {2}" +
+                        "\n*Username:* `{3}`" +
+                        "\n*Trust factor:* {4}/100" + (points < 71 ? " ⚠️" : "") +
+                        "\n\n*hash_code:* #UB{5}-{6}",
+                        message.Chat.Title,
+                        message.Chat.Id,
+                        userId,
+                        username,
+                        points,
+                        message.Chat.Id.ToString().Replace("-",""),
+                        Guid.NewGuid())
+                );
             }
             else
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -89,7 +114,22 @@ namespace Unifiedban.Terminal.Bot.Command
                 Manager.BotClient.SendTextMessageAsync(
                     chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
-                    text: String.Format(answerWithUsername, userId, points, username));
+                    text: String.Format(
+                        "*[Report]*\n" +
+                        "ℹ️ Requested trust factor of user.\n" +
+                        "\n*Chat:* {0}" +
+                        "\n*ChatId:* {1}" +
+                        "\n*UserId:* {2}" +
+                        "\n*Trust factor:* {4}/100" + (points < 71 ? " ⚠️" : "") +
+                        "\n\n*hash_code:* #UB{5}-{6}",
+                        message.Chat.Title,
+                        message.Chat.Id,
+                        userId,
+                        username,
+                        points,
+                        message.Chat.Id.ToString().Replace("-",""),
+                        Guid.NewGuid())
+                );
             }
         }
 

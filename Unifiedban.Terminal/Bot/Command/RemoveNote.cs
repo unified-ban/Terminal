@@ -29,7 +29,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 !messageToCheck.Text.Contains("NoteId:"))
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -47,7 +47,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (note == null)
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -59,7 +59,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (note.GroupId != CacheData.Groups[messageToCheck.Chat.Id].GroupId)
             {
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -71,7 +71,7 @@ namespace Unifiedban.Terminal.Bot.Command
             Models.SystemLog.ErrorCodes removed = noteLogic.Remove(noteId, -2);
             if(removed == Models.SystemLog.ErrorCodes.Error)
                 MessageQueueManager.EnqueueMessage(
-                    new ChatMessage()
+                    new Models.ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
@@ -82,13 +82,13 @@ namespace Unifiedban.Terminal.Bot.Command
                 Manager.BotClient.DeleteMessageAsync(message.Chat.Id, messageToCheck.MessageId);
 
             MessageQueueManager.EnqueueMessage(
-                new ChatMessage()
+                new Models.ChatMessage()
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
                     Text = CacheData.GetTranslation("en", "removenote_command_success"),
                     AutoDestroyTimeInSeconds = 5,
-                    PostSentAction = ChatMessage.PostSentActions.Destroy
+                    PostSentAction = Models.ChatMessage.PostSentActions.Destroy
                 });
         }
 

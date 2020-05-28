@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Unifiedban.Models;
 
 namespace Unifiedban.Terminal.Utils
 {
@@ -81,6 +82,14 @@ namespace Unifiedban.Terminal.Utils
                         "New trust factor: {3}",
                         telegramUserId, action.ToString(),
                         CacheData.TrustFactors[telegramUserId].Points));
+
+            LogTools.AddTrustFactorLog(new TrustFactorLog
+            {
+                Action = action,
+                DateTime =  DateTime.UtcNow,
+                TrustFactorId = CacheData.TrustFactors[telegramUserId].TrustFactorId,
+                ActionTakenBy = Bot.Manager.MyId
+            });
         }
     }
 }
