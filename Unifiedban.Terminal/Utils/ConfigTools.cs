@@ -7,6 +7,8 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Unifiedban.Terminal.Utils
 {
@@ -78,13 +80,31 @@ namespace Unifiedban.Terminal.Utils
             try
             {
                 CacheData.Groups[groupId].WelcomeText = text;
+                
+                Bot.Manager.BotClient.SendTextMessageAsync(
+                    chatId: CacheData.Groups[groupId].TelegramChatId,
+                    parseMode: ParseMode.Markdown,
+                    text: CacheData.GetTranslation(
+                        CacheData.Groups[groupId].SettingsLanguage,
+                        "command_setwelcome_success"),
+                    replyMarkup: new ReplyKeyboardRemove() { Selective = true }
+                );
                 return true;
             }
             catch
             {
+                Bot.Manager.BotClient.SendTextMessageAsync(
+                    chatId: CacheData.Groups[groupId].TelegramChatId,
+                    parseMode: ParseMode.Markdown,
+                    text: CacheData.GetTranslation(
+                        CacheData.Groups[groupId].SettingsLanguage,
+                        "command_setwelcome_error"),
+                    replyMarkup: new ReplyKeyboardRemove() { Selective = true }
+                );
                 return false;
             }
         }
+        
 
         public static bool UpdateRulesText(long groupId, string text)
         {
