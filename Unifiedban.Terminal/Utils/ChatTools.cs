@@ -3,11 +3,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 using Hangfire;
-using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
 using Unifiedban.Terminal.Bot;
@@ -34,12 +32,20 @@ namespace Unifiedban.Terminal.Utils
 
         public static bool IsUserAdmin(long chatId, long userId)
         {
-            var administrators = Bot.Manager.BotClient.GetChatAdministratorsAsync(chatId).Result;
-            foreach(Telegram.Bot.Types.ChatMember member in administrators)
+            try
             {
-                if (member.User.Id == userId)
-                    return true;
+                var administrators = Bot.Manager.BotClient.GetChatAdministratorsAsync(chatId).Result;
+                foreach (ChatMember member in administrators)
+                {
+                    if (member.User.Id == userId)
+                        return true;
+                }
             }
+            catch
+            {
+                return false;
+            }
+
             return false;
         }
 

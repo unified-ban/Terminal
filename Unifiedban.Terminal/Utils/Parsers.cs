@@ -126,7 +126,7 @@ namespace Unifiedban.Terminal.Utils
             string parsedText = text;
 
             string username = user.Username != null ? "@" + user.Username : user.FirstName;
-            parsedText = parsedText.Replace("{{username}}", username);
+            parsedText = parsedText.Replace("{{from_username}}", username);
             parsedText = parsedText.Replace("{{first_name}}", user.FirstName);
             parsedText = parsedText.Replace("{{last_name}}", user.LastName);
             parsedText = parsedText.Replace("{{user_id}}", user.Id.ToString());
