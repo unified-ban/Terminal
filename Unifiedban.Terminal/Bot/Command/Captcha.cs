@@ -89,7 +89,7 @@ namespace Unifiedban.Terminal.Bot.Command
                         Timestamp = DateTime.UtcNow,
                         Chat = callbackQuery.Message.Chat,
                         ParseMode = ParseMode.Markdown,
-                        Text = $"Thank you {name}!\nYou are now fully unlocked.",
+                        Text = $"Thank you `{name}`!\nYou are now fully unlocked.",
                     });
 
         }
