@@ -32,12 +32,20 @@ namespace Unifiedban.Terminal.Utils
 
         public static bool IsUserAdmin(long chatId, long userId)
         {
-            var administrators = Bot.Manager.BotClient.GetChatAdministratorsAsync(chatId).Result;
-            foreach(Telegram.Bot.Types.ChatMember member in administrators)
+            try
             {
-                if (member.User.Id == userId)
-                    return true;
+                var administrators = Bot.Manager.BotClient.GetChatAdministratorsAsync(chatId).Result;
+                foreach (ChatMember member in administrators)
+                {
+                    if (member.User.Id == userId)
+                        return true;
+                }
             }
+            catch
+            {
+                return false;
+            }
+
             return false;
         }
 
