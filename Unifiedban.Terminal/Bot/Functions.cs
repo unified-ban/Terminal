@@ -1,4 +1,4 @@
-﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -82,6 +82,32 @@ namespace Unifiedban.Terminal.Bot
                     Message = $"I have been added to Group {message.Chat.Title} ID {message.Chat.Id}",
                     UserId = -1
                 });
+                
+#if DEBUG
+                if (!CacheData.BetaAuthChats.Contains(message.Chat.Id))
+                {
+                    Manager.BotClient.SendTextMessageAsync(
+                        chatId: message.Chat.Id,
+                        text: "⚠️Error registering new group. Not authorized to Beta channel.\n" +
+                              "Join our support group to verify if you could join it: @unifiedban_group"
+                    );
+                    Manager.BotClient.SendTextMessageAsync(
+                        chatId: CacheData.ControlChatId,
+                        parseMode: ParseMode.Markdown,
+                        text: String.Format(
+                            "*[Log]*\n" +
+                            "⚠️Error registering new group. Not authorized to Beta channel.\n" +
+                            "\nChat: {0}" +
+                            "\nChatId: {1}" +
+                            "\n\n*hash_code:* #UB{2}-{3}",
+                            message.Chat.Title,
+                            message.Chat.Id,
+                            message.Chat.Id.ToString().Replace("-",""),
+                            Guid.NewGuid())
+                    );
+                    return;
+                }
+#endif
 
                 if (!CacheData.Groups.ContainsKey(message.Chat.Id))
                 {
