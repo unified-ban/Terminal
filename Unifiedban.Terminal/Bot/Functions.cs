@@ -1,4 +1,4 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
+﻿/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -169,7 +169,8 @@ namespace Unifiedban.Terminal.Bot
 
             foreach (User member in message.NewChatMembers)
             {
-                if (member.Id == Manager.MyId)
+                if (member.Id == Manager.MyId ||
+                    member.Id == 777000) // Telegram's official updateServiceNotification
                 {
                     continue;
                 }

@@ -66,6 +66,19 @@ namespace Unifiedban.Terminal.Bot.Command
             }
             else
                 userToKick = message.ReplyToMessage.From.Id;
+            
+            if (userToKick == 777000) // Telegram's official updateServiceNotification
+            {
+                Manager.BotClient.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    parseMode: ParseMode.Markdown,
+                    text: String.Format(
+                        "*[Error]*\n" +
+                        "This is an official Telegram's user/id.")
+                );
+
+                return;
+            }
 
             if (BotTools.IsUserOperator(userToKick))
             {

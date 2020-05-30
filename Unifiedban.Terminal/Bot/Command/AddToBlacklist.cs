@@ -67,6 +67,19 @@ namespace Unifiedban.Terminal.Bot.Command
             else
                 userToBan = message.ReplyToMessage.From.Id;
 
+            if (userToBan == 777000) // Telegram's official updateServiceNotification
+            {
+                Manager.BotClient.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    parseMode: ParseMode.Markdown,
+                    text: String.Format(
+                        "*[Error]*\n" +
+                        "This is an official Telegram's user/id.")
+                );
+
+                return;
+            }
+
             List<List<InlineKeyboardButton>> buttons = new List<List<InlineKeyboardButton>>();
             buttons.Add(new List<InlineKeyboardButton>(){
                 InlineKeyboardButton.WithCallbackData(

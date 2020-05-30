@@ -176,7 +176,8 @@ namespace Unifiedban.Terminal.Bot
                     }
                 }
 
-                if (!Utils.ChatTools.HandleSupportSessionMsg(e.Message))
+                if (!Utils.ChatTools.HandleSupportSessionMsg(e.Message) &&
+                    e.Message.From.Id != 777000)  // Telegram's official updateServiceNotification
                 {
                     Controls.Manager.DoCheck(e.Message);   
                 }
