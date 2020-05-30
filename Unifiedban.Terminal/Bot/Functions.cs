@@ -52,8 +52,8 @@ namespace Unifiedban.Terminal.Bot
                     chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
-                        "*[Report]*\n" +
-                        "New group has chosen unified/ban ❗️\n" +
+                        "*[Log]*\n" +
+                        "New group has chosen unified/ban 🥳\n" +
                         "\nChat: {0}" +
                         "\nChatId: {1}" +
                         "\n\n*hash_code:* #UB{2}-{3}",
