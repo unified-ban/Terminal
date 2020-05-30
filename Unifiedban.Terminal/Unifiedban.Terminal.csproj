@@ -10,7 +10,7 @@
     <RepositoryUrl>https://github.com/unified-ban/Terminal</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
     <AssemblyVersion>3.0.0</AssemblyVersion>
-    <FileVersion>3.0.0.434</FileVersion>
+    <FileVersion>3.0.0.435</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
