@@ -111,10 +111,27 @@ namespace Unifiedban.Terminal.Utils
             try
             {
                 CacheData.Groups[groupId].RulesText = text;
+                
+                Bot.Manager.BotClient.SendTextMessageAsync(
+                    chatId: CacheData.Groups[groupId].TelegramChatId,
+                    parseMode: ParseMode.Markdown,
+                    text: CacheData.GetTranslation(
+                        CacheData.Groups[groupId].SettingsLanguage,
+                        "command_setrules_success"),
+                    replyMarkup: new ReplyKeyboardRemove() { Selective = true }
+                );
                 return true;
             }
             catch
             {
+                Bot.Manager.BotClient.SendTextMessageAsync(
+                    chatId: CacheData.Groups[groupId].TelegramChatId,
+                    parseMode: ParseMode.Markdown,
+                    text: CacheData.GetTranslation(
+                        CacheData.Groups[groupId].SettingsLanguage,
+                        "command_setrules_error"),
+                    replyMarkup: new ReplyKeyboardRemove() { Selective = true }
+                );
                 return false;
             }
         }

@@ -99,7 +99,11 @@ namespace Unifiedban.Terminal.Bot
                     case "SetRulesText":
                         if (String.IsNullOrEmpty(message.Text))
                             break;
-                        Utils.ConfigTools.UpdateRulesText(message.Chat.Id, message.Text);
+                        if(Utils.ConfigTools.UpdateRulesText(message.Chat.Id, message.Text))
+                        {
+                            Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.ReplyToMessage.MessageId);
+                            Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+                        }
                         break;
                     case "Feedback":
                         if (String.IsNullOrEmpty(message.Text))

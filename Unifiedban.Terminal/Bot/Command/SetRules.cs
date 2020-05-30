@@ -36,7 +36,11 @@ namespace Unifiedban.Terminal.Bot.Command
             string[] hasMessage = message.Text.Split(" ");
             if(hasMessage.Length > 1)
             {
-                Utils.ConfigTools.UpdateRulesText(message.Chat.Id, message.Text.Remove(0, hasMessage[0].Length + 1));
+                bool result = Utils.ConfigTools.UpdateRulesText(message.Chat.Id, message.Text.Remove(0, hasMessage[0].Length + 1));
+                if (result)
+                {
+                    Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+                }
                 return;
             }
 
@@ -55,9 +59,10 @@ namespace Unifiedban.Terminal.Bot.Command
                     Chat = message.Chat,
                     ReplyToMessageId = message.MessageId,
                     ParseMode = ParseMode.Html,
-                    Text = $"<b>[ADMIN] [r:{message.MessageId}]</b>\nProvide new rules message.\n\n"
-                    + "<b>Available variables:</b> {{from_username}}, {{from_first_name}}, {{from_last_name}}, {{chat_title}}.\n\n"
-                    + "<b>Available markup:</b> HTML with \\n as line break.",
+                    Text = $"<b>[ADMIN] [r:{message.MessageId}]</b>\n"
+                           + CacheData.GetTranslation(
+                               CacheData.Groups[message.Chat.Id].SettingsLanguage,
+                               "command_setrules_instructions"),
                     ReplyMarkup = new ForceReplyMarkup() { Selective = true }
                 });
         }
