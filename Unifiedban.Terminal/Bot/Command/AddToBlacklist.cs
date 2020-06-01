@@ -121,7 +121,7 @@ namespace Unifiedban.Terminal.Bot.Command
         public void Execute(CallbackQuery callbackQuery)
         {
             if (!Utils.BotTools.IsUserOperator(callbackQuery.From.Id,
-                Models.Operator.Levels.Advanced))
+                Models.Operator.Levels.Basic))
             {
                 return;
             }
