@@ -5,6 +5,8 @@
 using System;
 using System.Linq;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
+using Unifiedban.Terminal.Utils;
 
 namespace Unifiedban.Terminal.Bot.Command
 {
@@ -14,15 +16,45 @@ namespace Unifiedban.Terminal.Bot.Command
         {
             Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
 
+            string text = Utils.Parsers.VariablesParser(CacheData.SysConfigs
+                .Single(x => x.SysConfigId == "HelpMenu")
+                .Value);
+
+            if (ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
+            {
+                text += Environment.NewLine;
+                text += CacheData.SysConfigs
+                    .Single(x => x.SysConfigId == "HelpMenuAdmin")
+                    .Value;
+            }
+            
+            if (BotTools.IsUserOperator(message.From.Id))
+            {
+                text += Environment.NewLine;
+                text += CacheData.SysConfigs
+                    .Single(x => x.SysConfigId == "HelpMenuOperatorBase")
+                    .Value;
+                
+                if (BotTools.IsUserOperator(message.From.Id, Models.Operator.Levels.Advanced))
+                {
+                    text += Environment.NewLine;
+                    text += CacheData.SysConfigs
+                        .Single(x => x.SysConfigId == "HelpMenuOperatorAdv")
+                        .Value;
+                }
+            }
+            
+            text += Environment.NewLine;
+            text += Environment.NewLine;
+            text += "* usernames are saved in cache and never stored on database or file. The cache is cleared at every reboot or update.";
+            
             MessageQueueManager.EnqueueMessage(
                 new Models.ChatMessage()
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
-                    ParseMode = Telegram.Bot.Types.Enums.ParseMode.Markdown,
-                    Text = Utils.Parsers.VariablesParser(CacheData.SysConfigs
-                            .Single(x => x.SysConfigId == "HelpMenu")
-                            .Value)
+                    ParseMode = ParseMode.Html,
+                    Text = text
                 });
         }
 
