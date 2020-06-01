@@ -158,16 +158,17 @@ namespace Unifiedban.Terminal.Bot
                 Functions.MigrateToChatId(e.Message);
             }
 
+            
             if (!String.IsNullOrEmpty(e.Message.Text) &&
                 !Utils.UserTools.KickIfInBlacklist(e.Message))
             {
+                bool isCommand = false;
                 if (e.Message.Text.StartsWith('/'))
                 {
-                    await Task.Run(() => Command.Parser.Parse(e.Message));
-                    return;
+                    isCommand = Command.Parser.Parse(e.Message).Result;
                 }
 
-                if (e.Message.ReplyToMessage != null)
+                if (e.Message.ReplyToMessage != null && !isCommand)
                 {
                     if (e.Message.ReplyToMessage.From.Id == MyId)
                     {
@@ -176,7 +177,7 @@ namespace Unifiedban.Terminal.Bot
                     }
                 }
 
-                if (!Utils.ChatTools.HandleSupportSessionMsg(e.Message) &&
+                if (!Utils.ChatTools.HandleSupportSessionMsg(e.Message) && !isCommand &&
                     e.Message.From.Id != 777000)  // Telegram's official updateServiceNotification
                 {
                     Controls.Manager.DoCheck(e.Message);   
