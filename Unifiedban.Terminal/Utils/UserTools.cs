@@ -31,6 +31,7 @@ namespace Unifiedban.Terminal.Utils
         public static void Dispose()
         {
             SyncTrustFactor();
+            SyncBlacklist();
         }
 
         public static bool NameIsRTL(string fullName)
