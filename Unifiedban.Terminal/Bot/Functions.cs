@@ -296,12 +296,22 @@ namespace Unifiedban.Terminal.Bot
                     {
                         BusinessLogic.ButtonLogic buttonLogic = new BusinessLogic.ButtonLogic();
                         List<List<InlineKeyboardButton>> buttons = new List<List<InlineKeyboardButton>>();
+                        int btnCount = 0;
+                        int depthLevel = 0;
+                        buttons.Add(new List<InlineKeyboardButton>());
+                        
                         foreach (Button btn in buttonLogic
                             .GetByChat(CacheData.Groups[message.Chat.Id]
                             .GroupId))
                         {
-                            buttons.Add(new List<InlineKeyboardButton>());
-                            buttons[buttons.Count -1].Add(InlineKeyboardButton.WithUrl(btn.Name, btn.Content));
+                            if (btnCount == 2)
+                            {
+                                btnCount = 0;
+                                buttons.Add(new List<InlineKeyboardButton>());
+                                depthLevel++;
+                            }
+                            buttons[depthLevel].Add(InlineKeyboardButton.WithUrl(btn.Name, btn.Content));
+                            btnCount++;
                         }
 
                         MessageQueueManager.EnqueueMessage(

@@ -28,7 +28,7 @@ namespace Unifiedban.Terminal.Bot.Command
             }
 
             string[] arguments = message.Text.Split(" ");
-            if (arguments.Length != 3)
+            if (arguments.Length < 3)
             {
                 MessageQueueManager.EnqueueMessage(
                    new Models.ChatMessage()
@@ -41,7 +41,13 @@ namespace Unifiedban.Terminal.Bot.Command
                 return;
             }
 
-            if (!Utils.BotTools.IsValidUrl(arguments[2]))
+            string text = message.Text
+                .Replace(arguments[0], "")
+                .Replace(arguments[arguments.Length - 1], "")
+                .Trim();
+            string url = arguments[arguments.Length - 1];
+
+            if (!Utils.BotTools.IsValidUrl(url))
             {
                 MessageQueueManager.EnqueueMessage(
                    new Models.ChatMessage()
@@ -56,7 +62,7 @@ namespace Unifiedban.Terminal.Bot.Command
 
             BusinessLogic.ButtonLogic buttonLogic = new BusinessLogic.ButtonLogic();
             Models.Button newBtn = buttonLogic.Add(CacheData.Groups[message.Chat.Id].GroupId,
-                arguments[1], arguments[2], Models.Button.Scopes.Welcome, -2);
+                text, url, Models.Button.Scopes.Welcome, -2);
             if (newBtn == null)
             {
                 MessageQueueManager.EnqueueMessage(
