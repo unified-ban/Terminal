@@ -67,6 +67,19 @@ namespace Unifiedban.Terminal.Bot.Command
             }
             else
                 userId = message.ReplyToMessage.From.Id;
+            
+            if (BotTools.IsUserOperator(userId))
+            {
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        Text = CacheData.GetTranslation("en", "command_to_operator_not_allowed")
+                    });
+
+                return;
+            }
 
             try
             {
