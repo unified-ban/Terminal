@@ -28,7 +28,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 return;
             }
 
-            int userToBan;
+            int userToUnban;
 
             if (message.ReplyToMessage == null)
             {
@@ -45,11 +45,11 @@ namespace Unifiedban.Terminal.Bot.Command
                             });
                         return;
                     }
-                    userToBan = CacheData.Usernames[message.Text.Split(" ")[1].Remove(0, 1)];
+                    userToUnban = CacheData.Usernames[message.Text.Split(" ")[1].Remove(0, 1)];
                 }
                 else
                 {
-                    bool isValid = int.TryParse(message.Text.Split(" ")[1], out userToBan);
+                    bool isValid = int.TryParse(message.Text.Split(" ")[1], out userToUnban);
                     if (!isValid)
                     {
                         MessageQueueManager.EnqueueMessage(
@@ -64,63 +64,9 @@ namespace Unifiedban.Terminal.Bot.Command
                 }
             }
             else
-                userToBan = message.ReplyToMessage.From.Id;
-
-            BusinessLogic.User.BannedLogic bl = new BusinessLogic.User.BannedLogic();
-            Models.SystemLog.ErrorCodes removed = bl.Remove(userToBan, -2);
-            CacheData.BannedUsers.RemoveAll(x => x.TelegramUserId == userToBan);
-
-            if(removed == Models.SystemLog.ErrorCodes.Error)
-            {
-                MessageQueueManager.EnqueueMessage(
-                new Models.ChatMessage()
-                {
-                    Timestamp = DateTime.UtcNow,
-                    Chat = message.Chat,
-                    ParseMode = ParseMode.Markdown,
-                    Text = String.Format(
-                        "Error removing User *{0}* from blacklist.", userToBan)
-                });
-
-                Manager.BotClient.SendTextMessageAsync(
-                    chatId: CacheData.ControlChatId,
-                    parseMode: ParseMode.Markdown,
-                    text: String.Format(
-                        "*[Report]*\n" +
-                        "Error removing user `{1}` from blacklist.\n" +
-                        "Operator: {0}" +
-                        "\n\n*hash_code:* #UB{2}-{3}",
-                        message.From.Id,
-                        userToBan,
-                        message.Chat.Id.ToString().Replace("-", ""),
-                        Guid.NewGuid())
-                );
-            }
-            else
-            {
-                MessageQueueManager.EnqueueMessage(
-                new Models.ChatMessage()
-                {
-                    Timestamp = DateTime.UtcNow,
-                    Chat = message.Chat,
-                    ParseMode = ParseMode.Markdown,
-                    Text = String.Format(
-                        "User *{0}* removed from blacklist.", userToBan)
-                });
-
-                Manager.BotClient.SendTextMessageAsync(
-                    chatId: CacheData.ControlChatId,
-                    parseMode: ParseMode.Markdown,
-                    text: String.Format(
-                        "*[Report]*\n" +
-                        "Operator `{0}` removed user `{1}` from blacklist.\n" +
-                        "\n\n*hash_code:* #UB{2}-{3}",
-                        message.From.Id,
-                        userToBan,
-                        message.Chat.Id.ToString().Replace("-",""),
-                        Guid.NewGuid())
-                );
-            }
+                userToUnban = message.ReplyToMessage.From.Id;
+            
+            Utils.UserTools.RemoveUserFromBlacklist(message, userToUnban);
         }
 
         public void Execute(CallbackQuery callbackQuery) { }

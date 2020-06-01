@@ -115,7 +115,7 @@ namespace Unifiedban.Terminal.Bot
                         if (String.IsNullOrEmpty(message.Text))
                             break;
                         DenqueueMessage(commandMessage);
-                        Command.AddToBlacklist.AddUserToBlacklist(message.From.Id, message,
+                        Utils.UserTools.AddUserToBlacklist(message.From.Id, message,
                             Convert.ToInt32(commandMessage.Value), Models.User.Banned.BanReasons.Other,
                             message.Text);
                         break;

@@ -8,6 +8,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Unifiedban.Models;
 using Unifiedban.Models.User;
+using Unifiedban.Terminal.Bot;
 
 namespace Unifiedban.Terminal.Utils
 {
@@ -16,10 +17,15 @@ namespace Unifiedban.Terminal.Utils
         private static BusinessLogic.User.TrustFactorLogic tfl =
             new BusinessLogic.User.TrustFactorLogic();
         static object trustFactorLock = new object();
+        private static BusinessLogic.User.BannedLogic bl =
+            new BusinessLogic.User.BannedLogic();
+        static object blacklistLock = new object();
+        static List<Banned> newBans = new List<Banned>();
 
         public static void Initialize()
         {
             RecurringJob.AddOrUpdate("UserTools_SyncTrustFactor", () => SyncTrustFactor(), "0/30 * * ? * *");
+            RecurringJob.AddOrUpdate("UserTools_SyncBlacklist", () => SyncBlacklist(), "0/30 * * ? * *");
         }
 
         public static void Dispose()
@@ -257,6 +263,144 @@ namespace Unifiedban.Terminal.Utils
                 tfToSync = new List<TrustFactor>(CacheData.TrustFactors.Values);
             }
             tfToSync.ForEach(x => tfl.Update(x, -2));
+        }
+        public static void SyncBlacklist()
+        {
+            List<Banned> bannedToSync = new List<Banned>();
+            lock (blacklistLock)
+            {
+                bannedToSync = new List<Banned>(newBans);
+                newBans.Clear();
+            }
+            bannedToSync.ForEach(x => bl.AddIfNotExist(x, -2));
+        }
+        public static void AddUserToBlacklist(int operatorId, Message message,
+            int userToBan, Banned.BanReasons reason,
+            string otherReason)
+        {
+            lock (blacklistLock)
+            {
+                // Wait for unlock
+            }
+            
+            try
+            {
+                Manager.BotClient.KickChatMemberAsync(message.Chat.Id, userToBan);
+                
+                BusinessLogic.User.BannedLogic bl = new BusinessLogic.User.BannedLogic();
+                Banned banned = bl.Add(userToBan, reason, -2);
+                if(banned == null)
+                {
+                    MessageQueueManager.EnqueueMessage(
+                        new Models.ChatMessage()
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            Chat = message.Chat,
+                            Text = CacheData.GetTranslation("en", "bb_command_error")
+                        });
+
+                    return;
+                }
+                
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        Text = CacheData.GetTranslation("en", "bb_command_success")
+                    });
+
+                CacheData.BannedUsers.Add(banned);
+                newBans.Add(banned);
+
+                Manager.BotClient.SendTextMessageAsync(
+                    chatId: CacheData.ControlChatId,
+                    parseMode: ParseMode.Markdown,
+                    text: String.Format(
+                        "*[Report]*\n" +
+                        "Operator `{0}` added user `{1}` to blacklist.\n" +
+                        "\nReason:\n{2}" +
+                        "\n\n*hash_code:* #UB{3}-{4}",
+                        operatorId,
+                        userToBan,
+                        reason.ToString(),
+                        message.Chat.Id.ToString().Replace("-",""),
+                        Guid.NewGuid())
+                );
+            }
+            catch
+            {
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        Text = CacheData.GetTranslation("en", "bb_command_error")
+                    });
+            }
+        }
+        public static void RemoveUserFromBlacklist(Message message, int userToUnban)
+        {
+            lock (blacklistLock)
+            {
+                // Wait for unlock
+            }
+            
+            SystemLog.ErrorCodes removed = bl.Remove(userToUnban, -2);
+            CacheData.BannedUsers.RemoveAll(x => x.TelegramUserId == userToUnban);
+            newBans.RemoveAll(x => x.TelegramUserId == userToUnban);
+
+            if(removed == SystemLog.ErrorCodes.Error)
+            {
+                MessageQueueManager.EnqueueMessage(
+                new ChatMessage()
+                {
+                    Timestamp = DateTime.UtcNow,
+                    Chat = message.Chat,
+                    ParseMode = ParseMode.Markdown,
+                    Text = String.Format(
+                        "Error removing User *{0}* from blacklist.", userToUnban)
+                });
+
+                Manager.BotClient.SendTextMessageAsync(
+                    chatId: CacheData.ControlChatId,
+                    parseMode: ParseMode.Markdown,
+                    text: String.Format(
+                        "*[Report]*\n" +
+                        "Error removing user `{1}` from blacklist.\n" +
+                        "Operator: {0}" +
+                        "\n\n*hash_code:* #UB{2}-{3}",
+                        message.From.Id,
+                        userToUnban,
+                        message.Chat.Id.ToString().Replace("-", ""),
+                        Guid.NewGuid())
+                );
+            }
+            else
+            {
+                MessageQueueManager.EnqueueMessage(
+                new ChatMessage()
+                {
+                    Timestamp = DateTime.UtcNow,
+                    Chat = message.Chat,
+                    ParseMode = ParseMode.Markdown,
+                    Text = String.Format(
+                        "User *{0}* removed from blacklist.", userToUnban)
+                });
+
+                Manager.BotClient.SendTextMessageAsync(
+                    chatId: CacheData.ControlChatId,
+                    parseMode: ParseMode.Markdown,
+                    text: String.Format(
+                        "*[Report]*\n" +
+                        "Operator `{0}` removed user `{1}` from blacklist.\n" +
+                        "\n\n*hash_code:* #UB{2}-{3}",
+                        message.From.Id,
+                        userToUnban,
+                        message.Chat.Id.ToString().Replace("-",""),
+                        Guid.NewGuid())
+                );
+            }
         }
     }
 }
