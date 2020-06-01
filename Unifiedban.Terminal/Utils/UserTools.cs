@@ -11,8 +11,6 @@ namespace Unifiedban.Terminal.Utils
 {
     public class UserTools
     {
-        private static List<Models.TrustFactorLog> trustFactorLogs =
-            new List<Models.TrustFactorLog>();
         private static BusinessLogic.User.TrustFactorLogic tfl =
             new BusinessLogic.User.TrustFactorLogic();
 
@@ -57,7 +55,7 @@ namespace Unifiedban.Terminal.Utils
                 {
                     Bot.Manager.BotClient.SendTextMessageAsync(
                     chatId: CacheData.ControlChatId,
-                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                    parseMode: ParseMode.Markdown,
                     text: String.Format(
                         "ERROR: Impossible to record Trust Factor for user id {0} !!.",
                         telegramUserId));
@@ -68,20 +66,13 @@ namespace Unifiedban.Terminal.Utils
             }
 
             CacheData.TrustFactors[telegramUserId].Points += penality;
-            trustFactorLogs.Add(new Models.TrustFactorLog
-            {
-                TrustFactorId = CacheData.TrustFactors[telegramUserId].TrustFactorId,
-                Action = action,
-                DateTime = DateTime.UtcNow,
-                ActionTakenBy = actionTakenBy
-            });
 
             Bot.Manager.BotClient.SendTextMessageAsync(
                     chatId: CacheData.ControlChatId,
-                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                    parseMode: ParseMode.Markdown,
                     text: String.Format(
                         "Penality added to user id {0} with reason: {1}\n" +
-                        "New trust factor: {3}",
+                        "New trust factor: {2}",
                         telegramUserId, action.ToString(),
                         CacheData.TrustFactors[telegramUserId].Points));
 
@@ -212,6 +203,7 @@ namespace Unifiedban.Terminal.Utils
                                     message.Chat.Id.ToString().Replace("-",""),
                                     Guid.NewGuid())
                             );
+                            return true;
                         }
                         catch (Exception ex)
                         {
