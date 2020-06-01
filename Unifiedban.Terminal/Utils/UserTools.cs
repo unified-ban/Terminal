@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Hangfire;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Unifiedban.Models;
+using Unifiedban.Models.User;
 
 namespace Unifiedban.Terminal.Utils
 {
@@ -13,6 +15,17 @@ namespace Unifiedban.Terminal.Utils
     {
         private static BusinessLogic.User.TrustFactorLogic tfl =
             new BusinessLogic.User.TrustFactorLogic();
+        static object trustFactorLock = new object();
+
+        public static void Initialize()
+        {
+            RecurringJob.AddOrUpdate("UserTools_SyncTrustFactor", () => SyncTrustFactor(), "0/30 * * ? * *");
+        }
+
+        public static void Dispose()
+        {
+            SyncTrustFactor();
+        }
 
         public static bool NameIsRTL(string fullName)
         {
@@ -30,6 +43,10 @@ namespace Unifiedban.Terminal.Utils
             Models.TrustFactorLog.TrustFactorAction action,
             int actionTakenBy)
         {
+            lock (trustFactorLock)
+            {
+                // Wait for unlock
+            }
             int penality = 0;
             switch (action)
             {
@@ -230,6 +247,16 @@ namespace Unifiedban.Terminal.Utils
             }
 
             return false;
+        }
+
+        public static void SyncTrustFactor()
+        {
+            List<TrustFactor> tfToSync = new List<TrustFactor>();
+            lock (trustFactorLock)
+            {
+                tfToSync = new List<TrustFactor>(CacheData.TrustFactors.Values);
+            }
+            tfToSync.ForEach(x => tfl.Update(x, -2));
         }
     }
 }
