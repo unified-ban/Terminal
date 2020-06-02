@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using Hangfire;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 using Unifiedban.Models;
 using Unifiedban.Models.User;
 using Unifiedban.Terminal.Bot;
@@ -304,11 +305,12 @@ namespace Unifiedban.Terminal.Utils
                 }
                 
                 MessageQueueManager.EnqueueMessage(
-                    new Models.ChatMessage()
+                    new ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
-                        Text = CacheData.GetTranslation("en", "bb_command_success")
+                        Text = CacheData.GetTranslation("en", "bb_command_success"),
+                        ReplyMarkup = new ReplyKeyboardRemove()
                     });
 
                 CacheData.BannedUsers.Add(banned);
