@@ -136,7 +136,7 @@ namespace Unifiedban.Terminal.Bot.Command
                         ReplyToMessageId = message.MessageId,
                         ParseMode = ParseMode.Markdown,
                         Text = $"*[ADMIN]*\nSelect at what time (in 24h format) you want to {action} the group.\n\n" +
-                        $"⚠️ my reference time is { DateTime.UtcNow.ToString(@"HH:MM") }, " +
+                        $"⚠️ my reference time is { DateTime.UtcNow.ToString(@"HH:mm") }, " +
                         $"I kindly ask you to consider the timezone difference during selection.",
                         ReplyMarkup = new InlineKeyboardMarkup(
                             timesList
@@ -155,7 +155,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 Convert.ToInt32(time.Split(":")[0]), Convert.ToInt32(time.Split(":")[1]), 0);
             if(endTime < DateTime.UtcNow)
             {
-                endTime.AddDays(1);
+                endTime = endTime.AddDays(1);
             }
             if (CacheData.NightSchedules.ContainsKey(groupId))
             {
@@ -195,7 +195,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 Convert.ToInt32(time.Split(":")[0]), Convert.ToInt32(time.Split(":")[1]), 0);
             if (startTime < DateTime.UtcNow)
             {
-                startTime.AddDays(1);
+                startTime = startTime.AddDays(1);
             }
             if (CacheData.NightSchedules.ContainsKey(groupId))
             {

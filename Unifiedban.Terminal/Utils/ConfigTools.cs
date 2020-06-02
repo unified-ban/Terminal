@@ -139,7 +139,9 @@ namespace Unifiedban.Terminal.Utils
         public static void SyncNightScheduleToDatabase()
         {
             foreach (Models.Group.NightSchedule nightSchedule in CacheData.NightSchedules.Values)
+            {
                 nsl.Update(nightSchedule, -2);
+            }
         }
     }
 }

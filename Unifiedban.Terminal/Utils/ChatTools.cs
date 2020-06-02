@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
+using Unifiedban.Models;
 using Unifiedban.Terminal.Bot;
 
 namespace Unifiedban.Terminal.Utils
@@ -121,10 +123,10 @@ namespace Unifiedban.Terminal.Utils
         {
             foreach(Models.Group.NightSchedule nightSchedule in nightSchedules)
             {
-                if (CacheData.NightSchedules[nightSchedule.GroupId].State == Models.Group.NightSchedule.Status.Active)
+                if (CacheData.NightSchedules[nightSchedule.GroupId].State != Models.Group.NightSchedule.Status.Programmed)
                     continue;
 
-                if(nightSchedule.UtcStartDate.Value.TimeOfDay <= DateTime.UtcNow.TimeOfDay)
+                if(nightSchedule.UtcStartDate.Value <= DateTime.UtcNow)
                 {
                     CacheData.NightSchedules[nightSchedule.GroupId].State = Models.Group.NightSchedule.Status.Active;
 
@@ -141,6 +143,18 @@ namespace Unifiedban.Terminal.Utils
                             CanSendOtherMessages = false,
                             CanSendPolls = false
                         });
+
+                    long chatId = CacheData.Groups.Values
+                        .Single(x => x.GroupId == nightSchedule.GroupId).TelegramChatId;
+                    MessageQueueManager.EnqueueMessage(
+                        new ChatMessage()
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            Chat = new Chat() { Id = chatId, Type = ChatType.Supergroup },
+                            Text = $"The group is now closed as per Night Schedule settings."
+                        });
+                    CacheData.NightSchedules[nightSchedule.GroupId].UtcStartDate =
+                        CacheData.NightSchedules[nightSchedule.GroupId].UtcStartDate.Value.AddDays(1);
                 }
             }
         }
@@ -149,10 +163,10 @@ namespace Unifiedban.Terminal.Utils
         {
             foreach (Models.Group.NightSchedule nightSchedule in nightSchedules)
             {
-                if (CacheData.NightSchedules[nightSchedule.GroupId].State == Models.Group.NightSchedule.Status.Programmed)
+                if (CacheData.NightSchedules[nightSchedule.GroupId].State != Models.Group.NightSchedule.Status.Active)
                     continue;
 
-                if (nightSchedule.UtcEndDate.Value.TimeOfDay <= DateTime.UtcNow.TimeOfDay)
+                if (nightSchedule.UtcEndDate.Value <= DateTime.UtcNow)
                 {
                     CacheData.NightSchedules[nightSchedule.GroupId].State = Models.Group.NightSchedule.Status.Programmed;
 
@@ -169,6 +183,18 @@ namespace Unifiedban.Terminal.Utils
                             CanSendOtherMessages = true,
                             CanSendPolls = true
                         });
+
+                    long chatId = CacheData.Groups.Values
+                        .Single(x => x.GroupId == nightSchedule.GroupId).TelegramChatId;
+                    MessageQueueManager.EnqueueMessage(
+                        new ChatMessage()
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            Chat = new Chat() { Id = chatId, Type = ChatType.Supergroup },
+                            Text = $"The group is now open as per Night Schedule settings."
+                        });
+                    CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate =
+                        CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate.Value.AddDays(1);
                 }
             }
         }
