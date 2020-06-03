@@ -3,11 +3,11 @@
 # unified/ban
 This is the terminal that runs the V3 of unified/ban. It is written in C# (instead of Python) and it is still work in progress.
 
-For any doubt or support need join our [official group](https://t.me/unifiedban_group).
-Visit our [official website](https://github.com/unified-ban)
+For any doubt or support need join our [official group](https://t.me/unifiedban_group).\
+Visit our [official website](https://unifiedban.solutions/)
 
 ## Badges
-[![License Badge](https://img.shields.io/badge/license-MPL--2.0-blue)](https://github.com/unified-ban/Terminal/blob/master/LICENSE) ![Development Version](https://img.shields.io/badge/DevVersion-beta.18-blue) ![Development Version](https://img.shields.io/badge/StableVersion-NotReady-red)
+[![License Badge](https://img.shields.io/badge/license-MPL--2.0-blue)](https://github.com/unified-ban/Terminal/blob/master/LICENSE) ![Development Version](https://img.shields.io/badge/DevVersion-beta.28-blue) ![Development Version](https://img.shields.io/badge/StableVersion-NotReady-red)
 
 # Sponsor
 unified/ban is a project by [Mirko Brombin](https://mirko.pm/) and [Prometheus Studio](https://www.twitch.tv/prometheus_studio/).\
