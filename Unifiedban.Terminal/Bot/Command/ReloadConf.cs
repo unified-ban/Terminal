@@ -53,8 +53,18 @@ namespace Unifiedban.Terminal.Bot.Command
                 BusinessLogic.SysConfigLogic sysConfigLogic = new BusinessLogic.SysConfigLogic();
                 CacheData.SysConfigs = new List<Models.SysConfig>(sysConfigLogic.Get());
 
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban.Terminal.Command.ReloadConf",
+                    Level = Models.SystemLog.Levels.Info,
+                    Message = "Conf reloaded successfully.",
+                    UserId = -1
+                    
+                });
                 Manager.BotClient.SendTextMessageAsync(
-                    chatId: CacheData.ControlChatId,
+                    chatId: message.Chat.Id,
                     text: "Conf reloaded successfully."
                 );
             }
@@ -71,7 +81,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 });
 
                 Manager.BotClient.SendTextMessageAsync(
-                    chatId: CacheData.ControlChatId,
+                    chatId: message.Chat.Id,
                     text: "Error reloading conf. Check logs."
                 );
             }

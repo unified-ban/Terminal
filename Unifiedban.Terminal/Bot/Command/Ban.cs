@@ -102,6 +102,8 @@ namespace Unifiedban.Terminal.Bot.Command
                         Chat = message.Chat,
                         Text = CacheData.GetTranslation("en", "command_to_operator_not_allowed")
                     });
+
+                return;
             }
             
             try
@@ -115,8 +117,6 @@ namespace Unifiedban.Terminal.Bot.Command
                         Chat = message.Chat,
                         Text = CacheData.GetTranslation("en", "ban_command_success")
                     });
-                UserTools.AddPenality(userToKick,
-                    Models.TrustFactorLog.TrustFactorAction.ban, Manager.MyId);
             }
             catch
             {
@@ -127,7 +127,11 @@ namespace Unifiedban.Terminal.Bot.Command
                         Chat = message.Chat,
                         Text = CacheData.GetTranslation("en", "ban_command_error")
                     });
+                return;
             }
+            
+            UserTools.AddPenality(userToKick,
+                Models.TrustFactorLog.TrustFactorAction.ban, Manager.MyId);
         }
 
         public void Execute(CallbackQuery callbackQuery) { }

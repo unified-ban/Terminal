@@ -135,7 +135,9 @@ namespace Unifiedban.Terminal.Bot.Command
                         Chat = message.Chat,
                         ReplyToMessageId = message.MessageId,
                         ParseMode = ParseMode.Markdown,
-                        Text = $"*[ADMIN]*\nSelect at what time (in 24h format) you want to {action} the group:",
+                        Text = $"*[ADMIN]*\nSelect at what time (in 24h format) you want to {action} the group.\n\n" +
+                        $"⚠️ my reference time is { DateTime.UtcNow.ToString(@"HH:mm") }, " +
+                        $"I kindly ask you to consider the timezone difference during selection.",
                         ReplyMarkup = new InlineKeyboardMarkup(
                             timesList
                         )
@@ -148,8 +150,13 @@ namespace Unifiedban.Terminal.Bot.Command
         private void SetOpenTime(Message message, string time)
         {
             string groupId = CacheData.Groups[message.Chat.Id].GroupId;
-            DateTime endTime = new DateTime(1994, 1, 8, 
+            DateTime endTime = new DateTime(
+                DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 
                 Convert.ToInt32(time.Split(":")[0]), Convert.ToInt32(time.Split(":")[1]), 0);
+            if(endTime < DateTime.UtcNow)
+            {
+                endTime = endTime.AddDays(1);
+            }
             if (CacheData.NightSchedules.ContainsKey(groupId))
             {
                 if (CacheData.NightSchedules[groupId].UtcStartDate.HasValue)
@@ -183,8 +190,13 @@ namespace Unifiedban.Terminal.Bot.Command
         private void SetCloseTime(Message message, string time)
         {
             string groupId = CacheData.Groups[message.Chat.Id].GroupId;
-            DateTime startTime = new DateTime(1994, 1, 8,
+            DateTime startTime = new DateTime(
+                DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day,
                 Convert.ToInt32(time.Split(":")[0]), Convert.ToInt32(time.Split(":")[1]), 0);
+            if (startTime < DateTime.UtcNow)
+            {
+                startTime = startTime.AddDays(1);
+            }
             if (CacheData.NightSchedules.ContainsKey(groupId))
             {
                 if(CacheData.NightSchedules[groupId].UtcEndDate.HasValue)
@@ -202,12 +214,12 @@ namespace Unifiedban.Terminal.Bot.Command
                             });
                         return;
                     }
-                nsl.Update(groupId, Models.Group.NightSchedule.Status.Deactivated,
-                    startTime, CacheData.NightSchedules[groupId].UtcEndDate, -2);
+                nsl.Update(groupId, Models.Group.NightSchedule.Status.Active,
+                    startTime, CacheData.NightSchedules[groupId].UtcEndDate, - 2);
             }
             else
             {
-                nsl.Add(groupId, Models.Group.NightSchedule.Status.Deactivated,
+                nsl.Add(groupId, Models.Group.NightSchedule.Status.Active,
                     startTime, null, -2);
             }
 
@@ -221,6 +233,16 @@ namespace Unifiedban.Terminal.Bot.Command
                     ParseMode = ParseMode.Markdown,
                     Text = "Congratulations! The night schedule has been updated!"
                 });
+
+            Models.Group.ConfigurationParameter config = CacheData.GroupConfigs[message.Chat.Id]
+                .Where(x => x.ConfigurationParameterId == "GateSchedule")
+                .SingleOrDefault();
+            if (config == null)
+                return;
+            CacheData.GroupConfigs[message.Chat.Id]
+                [CacheData.GroupConfigs[message.Chat.Id]
+                .IndexOf(config)]
+                .Value = "true";
         }
     }
 }

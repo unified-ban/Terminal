@@ -90,12 +90,20 @@ namespace Unifiedban.Terminal.Bot
                     case "SetWelcomeText":
                         if (String.IsNullOrEmpty(message.Text))
                             break;
-                        Utils.ConfigTools.UpdateWelcomeText(message.Chat.Id, message.Text);
+                        if (Utils.ConfigTools.UpdateWelcomeText(message.Chat.Id, message.Text))
+                        {
+                            Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.ReplyToMessage.MessageId);
+                            Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+                        }
                         break;
                     case "SetRulesText":
                         if (String.IsNullOrEmpty(message.Text))
                             break;
-                        Utils.ConfigTools.UpdateRulesText(message.Chat.Id, message.Text);
+                        if(Utils.ConfigTools.UpdateRulesText(message.Chat.Id, message.Text))
+                        {
+                            Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.ReplyToMessage.MessageId);
+                            Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+                        }
                         break;
                     case "Feedback":
                         if (String.IsNullOrEmpty(message.Text))
@@ -107,7 +115,7 @@ namespace Unifiedban.Terminal.Bot
                         if (String.IsNullOrEmpty(message.Text))
                             break;
                         DenqueueMessage(commandMessage);
-                        Command.AddToBlacklist.AddUserToBlacklist(message.From.Id, message,
+                        Utils.UserTools.AddUserToBlacklist(message.From.Id, message,
                             Convert.ToInt32(commandMessage.Value), Models.User.Banned.BanReasons.Other,
                             message.Text);
                         break;

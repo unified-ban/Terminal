@@ -52,8 +52,8 @@ namespace Unifiedban.Terminal.Bot
                     chatId: CacheData.ControlChatId,
                     parseMode: ParseMode.Markdown,
                     text: String.Format(
-                        "*[Report]*\n" +
-                        "New group has chosen unified/ban ❗️\n" +
+                        "*[Log]*\n" +
+                        "New group has chosen unified/ban 🥳\n" +
                         "\nChat: {0}" +
                         "\nChatId: {1}" +
                         "\n\n*hash_code:* #UB{2}-{3}",
@@ -296,12 +296,22 @@ namespace Unifiedban.Terminal.Bot
                     {
                         BusinessLogic.ButtonLogic buttonLogic = new BusinessLogic.ButtonLogic();
                         List<List<InlineKeyboardButton>> buttons = new List<List<InlineKeyboardButton>>();
+                        int btnCount = 0;
+                        int depthLevel = 0;
+                        buttons.Add(new List<InlineKeyboardButton>());
+                        
                         foreach (Button btn in buttonLogic
                             .GetByChat(CacheData.Groups[message.Chat.Id]
                             .GroupId))
                         {
-                            buttons.Add(new List<InlineKeyboardButton>());
-                            buttons[buttons.Count -1].Add(InlineKeyboardButton.WithUrl(btn.Name, btn.Content));
+                            if (btnCount == 2)
+                            {
+                                btnCount = 0;
+                                buttons.Add(new List<InlineKeyboardButton>());
+                                depthLevel++;
+                            }
+                            buttons[depthLevel].Add(InlineKeyboardButton.WithUrl(btn.Name, btn.Content));
+                            btnCount++;
                         }
 
                         MessageQueueManager.EnqueueMessage(

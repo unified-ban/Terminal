@@ -89,6 +89,8 @@ namespace Unifiedban.Terminal.Bot.Command
                         Chat = message.Chat,
                         Text = CacheData.GetTranslation("en", "command_to_operator_not_allowed")
                     });
+
+                return;
             }
             
             try
@@ -96,8 +98,6 @@ namespace Unifiedban.Terminal.Bot.Command
                 Manager.BotClient.KickChatMemberAsync(message.Chat.Id, userToKick);
                 if (message.Chat.Type == ChatType.Supergroup)
                     Manager.BotClient.UnbanChatMemberAsync(message.Chat.Id, userToKick);
-                UserTools.AddPenality(userToKick,
-                    Models.TrustFactorLog.TrustFactorAction.kick, Manager.MyId);
             }
             catch
             {
@@ -109,7 +109,11 @@ namespace Unifiedban.Terminal.Bot.Command
                        ParseMode = ParseMode.Markdown,
                        Text = CacheData.GetTranslation("en", "command_kick_error")
                    });
+                return;
             }
+            
+            UserTools.AddPenality(userToKick,
+                Models.TrustFactorLog.TrustFactorAction.kick, Manager.MyId);
         }
 
         public void Execute(CallbackQuery callbackQuery) { }

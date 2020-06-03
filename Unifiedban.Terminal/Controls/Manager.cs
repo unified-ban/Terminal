@@ -181,7 +181,7 @@ namespace Unifiedban.Terminal.Controls
                     });
                 }
 
-                if (htmlCode.Contains("tgme_page_extra"))
+                if (htmlCode.Contains("tgme_page_extra") && htmlCode.Contains("member"))
                     return true;
 
                 return false;

@@ -239,7 +239,7 @@ namespace Unifiedban.Terminal.Bot.Command
                         ParseMode = ParseMode.Markdown,
                         Text = $"*[ADMIN] Settings [r:{callbackQuery.Message.MessageId}]*\nSelect language:",
                         ReplyMarkup = new InlineKeyboardMarkup(
-                                buildLanguageSelectionMenu()
+                                buildLanguageSelectionMenu(callbackQuery.From.Id)
                             )
                     });
                     break;
@@ -248,7 +248,7 @@ namespace Unifiedban.Terminal.Bot.Command
             }
         }
 
-        private List<List<InlineKeyboardButton>> buildLanguageSelectionMenu()
+        private List<List<InlineKeyboardButton>> buildLanguageSelectionMenu(int fromId)
         {
             List<List<InlineKeyboardButton>> langMenu = new List<List<InlineKeyboardButton>>();
             int btnCount = 0;
@@ -268,7 +268,7 @@ namespace Unifiedban.Terminal.Bot.Command
 
                     langMenu[depthLevel].Add(InlineKeyboardButton.WithCallbackData(
                                 lang.Name,
-                                $"/config Language|{ lang.LanguageId }"
+                                $"/config { fromId } Language|{ lang.LanguageId }"
                                 ));
 
                     btnCount++;
@@ -279,7 +279,8 @@ namespace Unifiedban.Terminal.Bot.Command
 
             }
             langMenu.Add(new List<InlineKeyboardButton>());
-            langMenu[depthLevel + 1].Add(InlineKeyboardButton.WithCallbackData("Close menu", $"/config close|true"));
+            langMenu[depthLevel + 1].Add(InlineKeyboardButton.WithCallbackData("Close menu", 
+                $"/config { fromId } close|true"));
 
             return langMenu;
         }

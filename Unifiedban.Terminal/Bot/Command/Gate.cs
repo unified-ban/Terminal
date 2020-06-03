@@ -102,6 +102,19 @@ namespace Unifiedban.Terminal.Bot.Command
                 .IndexOf(config)]
                 .Value = newStatus ? "true" : "false";
 
+            if (!CacheData.NightSchedules.ContainsKey(CacheData.Groups[message.Chat.Id].GroupId))
+            {
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        ParseMode = ParseMode.Markdown,
+                        Text = CacheData.GetTranslation("en", "command_gate_missing_schedule")
+                    });
+                return;
+            }
+            
             Models.Group.NightSchedule nightSchedule = 
                 CacheData.NightSchedules[CacheData.Groups[message.Chat.Id].GroupId];
 
@@ -112,11 +125,11 @@ namespace Unifiedban.Terminal.Bot.Command
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
-                        Text = "Impossible to change schedule status. The schedule time is not set."
+                        ParseMode = ParseMode.Markdown,
+                        Text = CacheData.GetTranslation("en", "command_gate_missing_schedule")
                     });
                 return;
             }
-
             CacheData.NightSchedules[CacheData.Groups[message.Chat.Id].GroupId]
                 .State = newStatus ? Models.Group.NightSchedule.Status.Programmed
                     : Models.Group.NightSchedule.Status.Deactivated;

@@ -71,14 +71,24 @@ namespace Unifiedban.Terminal
                 return keyId;
 
             if (!Translations[languageId].ContainsKey(keyId))
+            {
                 if (!Translations["en"].ContainsKey(keyId))
+                {
                     return keyId;
+                }
+                else
+                {
+                    languageId = "en";
+                }
+            }
 
             string value = Translations[languageId][keyId].Translation;
 
             if (firstCapital)
+            {
                 return value.Substring(0, 1).ToUpper() + value.Substring(1, value.Length - 1);
-            
+            }
+
             return value;
         }
 

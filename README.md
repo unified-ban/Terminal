@@ -7,10 +7,7 @@ For any doubt or support need join our [official group](https://t.me/unifiedban_
 Visit our [official website](https://github.com/unified-ban)
 
 ## Badges
-[![License Badge](https://img.shields.io/badge/license-MPL--2.0-blue)](https://github.com/unified-ban/Terminal/blob/master/LICENSE) ![Development Version](https://img.shields.io/badge/DevVersion-beta.9-blue) ![Development Version](https://img.shields.io/badge/StableVersion-NotReady-red)
-
-# BETA Access
-It is now possible to candidate for a Beta Access of our V3. Please use the [form at the dedicated page](https://unifiedban.solutions/beta) if you are interested.
+[![License Badge](https://img.shields.io/badge/license-MPL--2.0-blue)](https://github.com/unified-ban/Terminal/blob/master/LICENSE) ![Development Version](https://img.shields.io/badge/DevVersion-beta.18-blue) ![Development Version](https://img.shields.io/badge/StableVersion-NotReady-red)
 
 # Sponsor
 unified/ban is a project by [Mirko Brombin](https://mirko.pm/) and [Prometheus Studio](https://www.twitch.tv/prometheus_studio/).\
