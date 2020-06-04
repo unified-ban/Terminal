@@ -54,12 +54,41 @@ namespace Unifiedban.Terminal.Controls
             {
                 string url = match.Value;
                 if (url.StartsWith("@"))
+                {
+                    if (message.Chat.Username != null)
+                    {
+                        if(match.Value.Remove(0, 1) == message.Chat.Username)
+                        {
+                            return new ControlResult()
+                            {
+                                CheckName = "Safe Group",
+                                Result = IControl.ControlResultType.skipped
+                            };
+                        }
+                    }
                     url = "https://t.me/" + match.Value.Remove(0, 1);
+                }
+                
                 if (url.StartsWith("t.me"))
                     url = "https://" + match.Value;
-                if (url.StartsWith("http"))
+                if (url.Contains("t.me/") &&
+                    url.StartsWith("http") &&
+                    !url.StartsWith("https"))
                     url = url.Replace("http", "https");
 
+                string inviteLink = Bot.Manager.BotClient.GetChatAsync(message.Chat.Id).Result.InviteLink;
+                if (inviteLink != null)
+                {
+                    if(match.Value == inviteLink)
+                    {
+                        return new ControlResult()
+                        {
+                            CheckName = "Safe Group",
+                            Result = IControl.ControlResultType.skipped
+                        };
+                    }
+                }
+                
                 if (url.Contains("/c/"))
                 {
                     if (url.Split("/c/")[1].Split('/')[0] == message.Chat.Id.ToString())
