@@ -16,6 +16,7 @@ namespace Unifiedban.Terminal.Utils
 {
     public class ChatTools
     {
+        static Dictionary<long, ChatPermissions> chatPermissionses = new Dictionary<long, ChatPermissions>();
         public static void Initialize()
         {
             RecurringJob.AddOrUpdate("ChatTools_CheckNightSchedule", () => CheckNightSchedule(), "0 * * ? * *");
@@ -129,9 +130,12 @@ namespace Unifiedban.Terminal.Utils
                 if(nightSchedule.UtcStartDate.Value <= DateTime.UtcNow)
                 {
                     CacheData.NightSchedules[nightSchedule.GroupId].State = Models.Group.NightSchedule.Status.Active;
+                    long chatId = CacheData.Groups.Values
+                        .Single(x => x.GroupId == nightSchedule.GroupId).TelegramChatId;
+                    
+                    chatPermissionses[chatId] = Manager.BotClient.GetChatAsync(chatId).Result.Permissions;
 
-                    Manager.BotClient.SetChatPermissionsAsync(CacheData.Groups.Values
-                        .Single(x => x.GroupId == nightSchedule.GroupId).TelegramChatId,
+                    Manager.BotClient.SetChatPermissionsAsync(chatId,
                         new ChatPermissions()
                         {
                             CanSendMessages = false,
@@ -144,8 +148,6 @@ namespace Unifiedban.Terminal.Utils
                             CanSendPolls = false
                         });
 
-                    long chatId = CacheData.Groups.Values
-                        .Single(x => x.GroupId == nightSchedule.GroupId).TelegramChatId;
                     MessageQueueManager.EnqueueMessage(
                         new ChatMessage()
                         {
@@ -170,22 +172,38 @@ namespace Unifiedban.Terminal.Utils
                 {
                     CacheData.NightSchedules[nightSchedule.GroupId].State = Models.Group.NightSchedule.Status.Programmed;
 
-                    Manager.BotClient.SetChatPermissionsAsync(CacheData.Groups.Values
-                        .Single(x => x.GroupId == nightSchedule.GroupId).TelegramChatId,
-                        new ChatPermissions()
-                        {
-                            CanSendMessages = true,
-                            CanAddWebPagePreviews = true,
-                            CanChangeInfo = true,
-                            CanInviteUsers = true,
-                            CanPinMessages = true,
-                            CanSendMediaMessages = true,
-                            CanSendOtherMessages = true,
-                            CanSendPolls = true
-                        });
-
                     long chatId = CacheData.Groups.Values
                         .Single(x => x.GroupId == nightSchedule.GroupId).TelegramChatId;
+
+                    if (chatPermissionses.ContainsKey(chatId))
+                    {
+                        Manager.BotClient.SetChatPermissionsAsync(chatId,
+                            chatPermissionses[chatId]);
+                    }
+                    else
+                    {
+                        MessageQueueManager.EnqueueMessage(
+                            new ChatMessage()
+                            {
+                                Timestamp = DateTime.UtcNow,
+                                Chat = new Chat() { Id = chatId, Type = ChatType.Supergroup },
+                                Text = "*[Report]*\nImpossible to find previous permissions set.\n" +
+                                       "Using default value (all true except CanChangeInfo)."
+                            });
+                        Manager.BotClient.SetChatPermissionsAsync(chatId,
+                            new ChatPermissions()
+                            {
+                                CanSendMessages = true,
+                                CanAddWebPagePreviews = true,
+                                CanChangeInfo = false,
+                                CanInviteUsers = true,
+                                CanPinMessages = true,
+                                CanSendMediaMessages = true,
+                                CanSendOtherMessages = true,
+                                CanSendPolls = true
+                            });
+                    }
+
                     MessageQueueManager.EnqueueMessage(
                         new ChatMessage()
                         {
