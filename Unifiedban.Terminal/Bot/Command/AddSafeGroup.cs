@@ -24,10 +24,16 @@ namespace Unifiedban.Terminal.Bot.Command
                 return;
             }
 
-            string url = message.Text.Split(" ")[1];
+            string url = message.Text.Split(" ")[1].Trim();
 
-            if (message.Text.Split(" ")[1].StartsWith("@"))
+            if (url.StartsWith("@"))
+            {
                 url = "https://t.me/" + message.Text.Split(" ")[1].Remove(0, 1);
+            }
+            else if (url.StartsWith("t.me/"))
+            {
+                url = "https://" + url;
+            }
 
             if (!Controls.Manager.IsTelegramLink(url))
             {
