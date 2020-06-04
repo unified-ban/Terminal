@@ -49,17 +49,7 @@ namespace Unifiedban.Terminal.Controls
                 };
 
             }
-            if (message.Text.Contains("/c/"))
-            {
-                if(message.Text.Split("/c/")[1].Split('/')[0] == message.Chat.Id.ToString())
-                    return new ControlResult()
-                    {
-                        CheckName = "Safe Group",
-                        Result = IControl.ControlResultType.skipped
-                    };
-            }
             
-
             foreach (Match match in matchedWords)
             {
                 string url = match.Value;
@@ -67,6 +57,30 @@ namespace Unifiedban.Terminal.Controls
                     url = "https://t.me/" + match.Value.Remove(0, 1);
                 if (url.StartsWith("t.me"))
                     url = "https://" + match.Value;
+
+                if (url.Contains("/c/"))
+                {
+                    if (url.Split("/c/")[1].Split('/')[0] == message.Chat.Id.ToString())
+                    {
+                        return new ControlResult()
+                        {
+                            CheckName = "Safe Group",
+                            Result = IControl.ControlResultType.skipped
+                        };
+                    }
+                }
+
+                if (url == "https://t.me/unifiedban_group" ||
+                    url == "https://t.me/unifiedban_news" ||
+                    url == "https://t.me/unifiedban_bot" ||
+                    url == "https://t.me/unifiedbanBeta_bot")
+                {
+                    return new ControlResult()
+                    {
+                        CheckName = "Safe Group",
+                        Result = IControl.ControlResultType.skipped
+                    };
+                }
 
                 if (Manager.IsTelegramLink(url))
                     if (safeGroupFilter.DoCheck(
