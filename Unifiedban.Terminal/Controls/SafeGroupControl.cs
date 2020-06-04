@@ -37,7 +37,7 @@ namespace Unifiedban.Terminal.Controls
                         Result = IControl.ControlResultType.skipped
                     };
 
-            string regex = @"(((http|ftp|https):\/\/)|(tg:\/\/)|(t.me\/))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])?|(?![\w_])(@[\w_]+)(?!.)";
+            string regex = @"(((http|https):\/\/)|(tg:\/\/)|(t.me\/))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])?|(?![\w_])(@[\w_]+)(?!.)";
             Regex reg = new Regex(regex, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
             MatchCollection matchedWords = reg.Matches(message.Text);
             if (matchedWords.Count == 0)
@@ -57,6 +57,8 @@ namespace Unifiedban.Terminal.Controls
                     url = "https://t.me/" + match.Value.Remove(0, 1);
                 if (url.StartsWith("t.me"))
                     url = "https://" + match.Value;
+                if (url.StartsWith("http"))
+                    url = url.Replace("http", "https");
 
                 if (url.Contains("/c/"))
                 {
@@ -73,7 +75,9 @@ namespace Unifiedban.Terminal.Controls
                 if (url == "https://t.me/unifiedban_group" ||
                     url == "https://t.me/unifiedban_news" ||
                     url == "https://t.me/unifiedban_bot" ||
-                    url == "https://t.me/unifiedbanBeta_bot")
+                    url == "https://t.me/unifiedbanBeta_bot" ||
+                    url == "https://t.me/joinchat/B35YY0QbLfd034CFnvCtCA" || // Support chat of the TelegramBots library
+                    url == "https://t.me/dotnetgram") // .NET global discussion and support chat
                 {
                     return new ControlResult()
                     {
