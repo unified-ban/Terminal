@@ -5,6 +5,7 @@
 using System;
 using System.Linq;
 using System.Collections.Concurrent;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Unifiedban.Models.Group;
 
@@ -133,6 +134,13 @@ namespace Unifiedban.Terminal.Bot
         {
             if (!isInitialized || isDisposing)
                 return;
+
+            message.Chat = new Chat()
+            {
+                Id = CacheData.ControlChatId,
+                Type = ChatType.Channel,
+            };
+            message.DisableWebPagePreview = true;
 
             PrivateChats[CacheData.ControlChatId]
                     .Queue

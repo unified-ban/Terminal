@@ -103,45 +103,18 @@ namespace Unifiedban.Terminal.Controls
 
         private static void RemoveMessageForPositiveControl(Message message, Controls.ControlResult result)
         {
-            Bot.Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
-            string author = message.From.Username == null
-                ? message.From.FirstName + " " + message.From.LastName
-                : "@" + message.From.Username;
-            Bot.Manager.BotClient.SendTextMessageAsync(
-                    chatId: CacheData.ControlChatId,
-                    parseMode: ParseMode.Markdown,
-                    text: String.Format(
+            try
+            {
+                Bot.Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+                string author = message.From.Username == null
+                    ? message.From.FirstName + " " + message.From.LastName
+                    : "@" + message.From.Username;
+                MessageQueueManager.EnqueueLog(new ChatMessage()
+                {
+                    ParseMode = ParseMode.Markdown,
+                    Text = String.Format(
                         "*[Report]*\n" +
                         "Message deleted due to control *{0}*.\n" +
-                        "⚠ do not open links you don't know ⚠\n" +
-                        "\nChat: `{1}`" +
-                        "\nAuthor: `{3}`" +
-                        "\nUserId: `{4}`` " +
-                        "\nOriginal message:\n```{2}```" +
-                        "\n\n*hash_code:* #UB{5}-{6}",
-                        result.CheckName,
-                        message.Chat.Title,
-                        message.Text,
-                        author,
-                        message.From.Id,
-                        message.Chat.Id.ToString().Replace("-",""),
-                        Guid.NewGuid()),
-                    disableWebPagePreview: true
-                );
-        }
-
-        private static void RemoveMessageForPositiveFilter(Message message, Filters.FilterResult result)
-        {
-            Bot.Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
-            string author = message.From.Username == null
-                ? message.From.FirstName + " " + message.From.LastName
-                : "@" + message.From.Username;
-            Bot.Manager.BotClient.SendTextMessageAsync(
-                    chatId: CacheData.ControlChatId,
-                    parseMode: ParseMode.Markdown,
-                    text: String.Format(
-                        "*[Report]*\n" +
-                        "Message deleted due to filter *{0}* provided positive result.\n" +
                         "⚠ do not open links you don't know ⚠\n" +
                         "\nChat: `{1}`" +
                         "\nAuthor: `{3}`" +
@@ -153,10 +126,85 @@ namespace Unifiedban.Terminal.Controls
                         message.Text,
                         author,
                         message.From.Id,
-                        message.Chat.Id.ToString().Replace("-",""),
-                        Guid.NewGuid()),
-                    disableWebPagePreview: true
-                );
+                        message.Chat.Id.ToString().Replace("-", ""),
+                        Guid.NewGuid())
+                });
+            }
+            catch (Exception ex)
+            {
+                Data.Utils.Logging.AddLog(new SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban.Terminal.Controls.Manager.RemoveMessageForPositiveControl",
+                    Level = SystemLog.Levels.Error,
+                    Message = ex.Message,
+                    UserId = -1
+                });
+                if(ex.InnerException != null)
+                    Data.Utils.Logging.AddLog(new SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Unifiedban.Terminal.Controls.Manager.RemoveMessageForPositiveControl",
+                        Level = SystemLog.Levels.Error,
+                        Message = ex.InnerException.Message,
+                        UserId = -1
+                    });
+            }
+        }
+
+        private static void RemoveMessageForPositiveFilter(Message message, Filters.FilterResult result)
+        {
+            try
+            {
+                Bot.Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+                string author = message.From.Username == null
+                    ? message.From.FirstName + " " + message.From.LastName
+                    : "@" + message.From.Username;
+                MessageQueueManager.EnqueueLog(new ChatMessage()
+                {
+                    ParseMode = ParseMode.Markdown,
+                    Text = String.Format(
+                    "*[Report]*\n" +
+                    "Message deleted due to filter *{0}* provided positive result.\n" +
+                    "⚠ do not open links you don't know ⚠\n" +
+                    "\nChat: `{1}`" +
+                    "\nAuthor: `{3}`" +
+                    "\nUserId: `{4}`" +
+                    "\nOriginal message:\n```{2}```" +
+                    "\n\n*hash_code:* #UB{5}-{6}",
+                    result.CheckName,
+                    message.Chat.Title,
+                    message.Text,
+                    author,
+                    message.From.Id,
+                    message.Chat.Id.ToString().Replace("-", ""),
+                    Guid.NewGuid())
+                });
+            }
+            catch (Exception ex)
+            {
+                Data.Utils.Logging.AddLog(new SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban.Terminal.Controls.Manager.RemoveMessageForPositiveFilter",
+                    Level = SystemLog.Levels.Error,
+                    Message = ex.Message,
+                    UserId = -1
+                });
+                if(ex.InnerException != null)
+                    Data.Utils.Logging.AddLog(new SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Unifiedban.Terminal.Controls.Manager.RemoveMessageForPositiveFilter",
+                        Level = SystemLog.Levels.Error,
+                        Message = ex.InnerException.Message,
+                        UserId = -1
+                    });
+            }
         }
 
         public static bool IsTelegramLink(string siteUri)
