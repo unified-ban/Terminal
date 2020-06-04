@@ -70,6 +70,10 @@ namespace Unifiedban.Terminal.Bot.Command
                 case "close":
                     SetCloseTime(message, parameters[2]);
                     break;
+                case "cancel":
+                    Manager.BotClient.DeleteMessageAsync(callbackQuery.Message.Chat.Id,
+                        callbackQuery.Message.MessageId);
+                    break;
             }
         }
 
@@ -127,6 +131,11 @@ namespace Unifiedban.Terminal.Bot.Command
                                 $"➡️",
                                 $"/setgate nextPage {index + 1} {action}"
                                 ));
+            timesList.Add(new List<InlineKeyboardButton>());
+            timesList[4].Add(InlineKeyboardButton.WithCallbackData(
+                $"Cancel",
+                $"/setgate cancel"
+            ));
             if(message.From.Id != Manager.MyId)
                 MessageQueueManager.EnqueueMessage(
                     new Models.ChatMessage()
