@@ -50,7 +50,7 @@ namespace Unifiedban.Terminal.Filters
 
         private string removeEmojis(string text)
         {
-            string regex = @"(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])"; // Emojis
+            string regex = @"(¯\\_\(ツ\)_\/¯)|(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])"; // Emojis
 
             Regex reg = new Regex(regex, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
             MatchCollection matchedWords = reg.Matches(text);
@@ -58,7 +58,7 @@ namespace Unifiedban.Terminal.Filters
                 text = text.Replace(match.Value, string.Empty);
 
             text = Regex.Replace(text, @"\uFE0F+", string.Empty); // remove all Control and non-printable chars
-            text = Regex.Replace(text, @"(¯\\_\(ツ\)_\/¯)|ツ", string.Empty); // remove commonly used smiles
+            //text = Regex.Replace(text, @"(¯\\_\(ツ\)_\/¯)|ツ", string.Empty); // remove commonly used smiles
             text = Regex.Replace(text, @"º|µ|¶|«|»|´|¿|¡|µ|¾|½|¼|¤|¹|²|³|¤|×|¨|°|÷|£|¢|’|ª|·", string.Empty); // whitelisted chars
             return text;
         }
