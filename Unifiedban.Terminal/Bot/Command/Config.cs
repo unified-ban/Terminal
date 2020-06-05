@@ -37,6 +37,8 @@ namespace Unifiedban.Terminal.Bot.Command
             if(!isUpdate)
                 Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
 
+            string settingsLang = CacheData.Groups[message.Chat.Id].SettingsLanguage;
+
             List<List<InlineKeyboardButton>> configMenu = new List<List<InlineKeyboardButton>>();
             int btnCount;
             int depthLevel = 0;
@@ -64,7 +66,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     {
                         case "bool":
                             configMenu[depthLevel].Add(InlineKeyboardButton.WithCallbackData(
-                                CacheData.GetTranslation("en", conf.ConfigurationParameterId, true) + " " + icon,
+                                CacheData.GetTranslation(settingsLang, conf.ConfigurationParameterId, true) + " " + icon,
                                 $"/config { message.From.Id } { conf.ConfigurationParameterId }|{ newSet }"
                                 ));
                             break;
@@ -73,13 +75,13 @@ namespace Unifiedban.Terminal.Bot.Command
                         case "string":
                         case "language":
                             configMenu[depthLevel].Add(InlineKeyboardButton.WithCallbackData(
-                                CacheData.GetTranslation("en", conf.ConfigurationParameterId, true),
+                                CacheData.GetTranslation(settingsLang, conf.ConfigurationParameterId, true),
                                 $"/config { message.From.Id } getValue|{ conf.ConfigurationParameterId }"
                                 ));
                             break;
                         case "boolfunction":
                             configMenu[depthLevel].Add(InlineKeyboardButton.WithCallbackData(
-                                CacheData.GetTranslation("en", conf.ConfigurationParameterId, true) + " " + icon,
+                                CacheData.GetTranslation(settingsLang, conf.ConfigurationParameterId, true) + " " + icon,
                                 $"/config { message.From.Id } exec|{ conf.ConfigurationParameterId }|{ newSet }"
                                 ));
                             break;
@@ -106,7 +108,7 @@ namespace Unifiedban.Terminal.Bot.Command
             else
             {
                 configMenu[depthLevel + 2].Add(InlineKeyboardButton.WithCallbackData(
-                    CacheData.GetTranslation("en", "conf_enable_dashboard", true),
+                    CacheData.GetTranslation(settingsLang, "conf_enable_dashboard", true),
                     $"/config { message.From.Id } dashboardToggle|true"
                 ));
             }
@@ -179,6 +181,9 @@ namespace Unifiedban.Terminal.Bot.Command
                 case "dashboardToggle":
                     toggleDashboard(callbackQuery);
                     break;
+                case "setLanguage":
+                    changeLanguage(callbackQuery, parameters[1]);
+                    break;
                 default:
                     if (parameters.Length < 2)
                         return;
@@ -190,7 +195,7 @@ namespace Unifiedban.Terminal.Bot.Command
         private void updateSetting(
             CallbackQuery callbackQuery, string configurationParameterId, string newValue)
         {
-            Models.Group.ConfigurationParameter config = CacheData.GroupConfigs[callbackQuery.Message.Chat.Id]
+            ConfigurationParameter config = CacheData.GroupConfigs[callbackQuery.Message.Chat.Id]
                 .Where(x => x.ConfigurationParameterId == configurationParameterId)
                 .SingleOrDefault();
             if (config == null)
@@ -268,7 +273,7 @@ namespace Unifiedban.Terminal.Bot.Command
 
                     langMenu[depthLevel].Add(InlineKeyboardButton.WithCallbackData(
                                 lang.Name,
-                                $"/config { fromId } Language|{ lang.LanguageId }"
+                                $"/config { fromId } setLanguage|{ lang.LanguageId }"
                                 ));
 
                     btnCount++;
@@ -448,6 +453,12 @@ namespace Unifiedban.Terminal.Bot.Command
             }
 
             return false;
+        }
+
+        private void changeLanguage(CallbackQuery callbackQuery, string languageId)
+        {
+            CacheData.Groups[callbackQuery.Message.Chat.Id].SettingsLanguage = languageId;
+            Execute(callbackQuery.Message, true);
         }
     }
 }
