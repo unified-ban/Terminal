@@ -65,13 +65,39 @@ namespace Unifiedban.Terminal.Filters
                 if (!cleanValue.Contains(".") && cleanValue.Length < 4)
                     continue;
 
-                if (linksList.Contains(cleanValue) &&
-                    !safeSingleLetter.Contains(cleanValue))
-                    return new FilterResult()
+                if (!safeSingleLetter.Contains(cleanValue))
+                {
+                    string toCheck = match.Value;
+                    if (!match.Value.StartsWith("http://") &&
+                        !match.Value.StartsWith("https://"))
                     {
-                        CheckName = "ScamFilter",
-                        Result = IFilter.FilterResultType.positive
-                    };
+                        toCheck = "://" + match.Value;
+                    }
+                    else if (match.Value.StartsWith("https"))
+                    {
+                        toCheck = match.Value.Remove(0, 5);
+                    }
+                    else if (match.Value.StartsWith("http"))
+                    {
+                        toCheck = match.Value.Remove(0, 4);
+                    }
+
+                    toCheck = toCheck
+                        .Replace("/", @"\/")
+                        .Replace(".", @"\.")
+                        .Replace("?", @"\?");
+                    
+                    string regexToTest = string.Format(@"{0}[\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-]?", toCheck);
+                    Regex matchTest = new Regex(regexToTest, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+                    if (matchTest.IsMatch(linksList))
+                    {
+                        return new FilterResult()
+                        {
+                            CheckName = "ScamFilter",
+                            Result = IFilter.FilterResultType.positive
+                        };
+                    }
+                }
             }
 
             return new FilterResult()
