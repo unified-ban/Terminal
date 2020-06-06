@@ -1,6 +1,8 @@
-<div align="center"><a href="https://unifiedban.solutions/?ref=github"><img width="100" src="https://unifiedban.solutions/static/images/Icons/512.png" /></a></div>
+<div align="center">
+  <a href="https://unifiedban.solutions/?ref=github"><img width="100" src="https://raw.githubusercontent.com/unified-ban/Branding/master/Logo/Mercury/mercury-dark.svg" /></a>
+  <h1>unified/ban</h1>
+</div>
 
-# unified/ban
 is the most complete solution for users and groups protection. It filters dangerous elements like SPAM, SCAM, flood and phishing. It allows to record a set of banned words, allows to deny to send links that refer to other groups and much more.
 
 ## Links
