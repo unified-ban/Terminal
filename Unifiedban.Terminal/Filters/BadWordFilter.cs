@@ -26,6 +26,14 @@ namespace Unifiedban.Terminal.Filters
 
         public FilterResult DoCheck(Message message)
         {
+            if (Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
+            {
+                return new FilterResult()
+                {
+                    CheckName = "BadWord",
+                    Result = IFilter.FilterResultType.skipped
+                };
+            }
             return DoCheck(message, message.Text);
         }
         public FilterResult DoCheck(Message message, string text)
