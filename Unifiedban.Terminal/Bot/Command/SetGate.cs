@@ -183,7 +183,7 @@ namespace Unifiedban.Terminal.Bot.Command
                             });
                         return;
                     }
-                nsl.Update(groupId, Models.Group.NightSchedule.Status.Deactivated,
+                nsl.Update(groupId, CacheData.NightSchedules[groupId].State,
                     CacheData.NightSchedules[groupId].UtcStartDate, endTime, -2);
             }
             else
@@ -223,13 +223,21 @@ namespace Unifiedban.Terminal.Bot.Command
                             });
                         return;
                     }
-                nsl.Update(groupId, Models.Group.NightSchedule.Status.Active,
+                nsl.Update(groupId, Models.Group.NightSchedule.Status.Programmed,
                     startTime, CacheData.NightSchedules[groupId].UtcEndDate, - 2);
             }
             else
             {
-                nsl.Add(groupId, Models.Group.NightSchedule.Status.Active,
-                    startTime, null, -2);
+                Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        ParseMode = ParseMode.Markdown,
+                        Text = "*[Error]*\nSet an opening time first."
+                    });
+                return;
             }
 
             CacheData.NightSchedules[groupId] = nsl.GetByChat(groupId);
