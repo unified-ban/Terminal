@@ -8,6 +8,7 @@ using System.Linq;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using Unifiedban.Models;
 
 namespace Unifiedban.Terminal.Bot.Command
 {
@@ -56,17 +57,23 @@ namespace Unifiedban.Terminal.Bot.Command
                         "Operator *{0}* started a support session.",
                         message.From.Username)
                 );
-                Manager.BotClient.SendTextMessageAsync(
-                    chatId: CacheData.ControlChatId,
-                    parseMode: ParseMode.Markdown,
-                    text: String.Format(
-                        "Operator *{0}:{1}* started support in *{2}:[{3}]({4})*",
-                        message.From.Id,
+                MessageQueueManager.EnqueueLog(new ChatMessage()
+                {
+                    ParseMode = ParseMode.Markdown,
+                    Text = String.Format(
+                        "*[Log]*" +
+                        "Support session started by operator *{0}*" +
+                        "\nChatId: `{1}`" +
+                        "\nChat: `{2}`" +
+                        "\nUserId: `{3}`" +
+                        "\n\n*hash_code:* #UB{4}-{5}",
                         message.From.Username,
                         message.Chat.Id,
                         message.Chat.Title,
-                        "https://t.me/" + message.Chat.Username)
-                );
+                        message.From.Id,
+                        message.Chat.Id.ToString().Replace("-", ""),
+                        Guid.NewGuid())
+                });
             }
         }
 
