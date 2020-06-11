@@ -185,7 +185,9 @@ namespace Unifiedban.Terminal.Bot
             }
 
             if (e.Message.NewChatMembers != null)
-                Functions.UserJoinedAction(e.Message);                
+                Functions.UserJoinedAction(e.Message);
+            if (e.Message.LeftChatMember != null)
+                Functions.UserLeftAction(e.Message);                
 
             if (!String.IsNullOrEmpty(e.Message.MediaGroupId) ||
                 e.Message.Photo != null ||
