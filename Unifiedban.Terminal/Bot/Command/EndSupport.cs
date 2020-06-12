@@ -45,7 +45,7 @@ namespace Unifiedban.Terminal.Bot.Command
                     ParseMode = ParseMode.Markdown,
                     Text = String.Format(
                         "*[Log]*" +
-                        "Support session ended by operator *{0}*" +
+                        "\n\nSupport session ended by operator *{0}*" +
                         "\nChatId: `{1}`" +
                         "\nChat: `{2}`" +
                         "\nUserId: `{3}`" +
