@@ -321,6 +321,8 @@ namespace Unifiedban.Terminal.Utils
                         ReplyMarkup = new ReplyKeyboardRemove()
                     });
 
+                Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+
                 CacheData.BannedUsers.Add(banned);
                 newBans.Add(banned);
 
@@ -342,7 +344,7 @@ namespace Unifiedban.Terminal.Utils
             catch
             {
                 MessageQueueManager.EnqueueMessage(
-                    new Models.ChatMessage()
+                    new ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
