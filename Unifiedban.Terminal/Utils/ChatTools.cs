@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Timers;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Unifiedban.Models;
@@ -16,6 +17,8 @@ namespace Unifiedban.Terminal.Utils
 {
     public class ChatTools
     {
+        static Dictionary<long, DateTime> lastOperatorSupportMsg = new Dictionary<long, DateTime>();
+        static Dictionary<long, ChatPermissions> chatPermissionses = new Dictionary<long, ChatPermissions>();
         public static void Initialize()
         {
             RecurringJob.AddOrUpdate("ChatTools_CheckNightSchedule", () => CheckNightSchedule(), "0 * * ? * *");
@@ -61,28 +64,79 @@ namespace Unifiedban.Terminal.Utils
             }
             return admins;
         }
-
+        
         public static bool HandleSupportSessionMsg(Message message)
         {
             if (!CacheData.ActiveSupport
                 .Contains(message.Chat.Id))
                 return false;
 
+            if (!lastOperatorSupportMsg.ContainsKey(message.Chat.Id))
+            {
+                lastOperatorSupportMsg[message.Chat.Id] = DateTime.UtcNow;
+            }
+
             bool isFromOperator = false;
             if (BotTools.IsUserOperator(message.From.Id))
             {
                 isFromOperator = true;
                 Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
-                Models.ChatMessage newMsg = new Models.ChatMessage()
+                ChatMessage newMsg = new ChatMessage()
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
+                    ParseMode = ParseMode.Html,
                     Text = message.Text +
-                        "\n\nMessage from operator: " + message.From.Username
+                        "\n\nMessage from operator: <b>" + message.From.Username + "</b>"
                 };
                 if (message.ReplyToMessage != null)
                     newMsg.ReplyToMessageId = message.ReplyToMessage.MessageId;
                 MessageQueueManager.EnqueueMessage(newMsg);
+                lastOperatorSupportMsg[message.Chat.Id] = DateTime.UtcNow;
+            }
+
+            var timeDifference = DateTime.UtcNow - lastOperatorSupportMsg[message.Chat.Id];
+            if (timeDifference.Minutes >= 3 && timeDifference.Minutes < 5)
+            {
+                ChatMessage newMsg = new ChatMessage()
+                {
+                    Timestamp = DateTime.UtcNow,
+                    Chat = message.Chat,
+                    ParseMode = ParseMode.Markdown,
+                    Text = "*[Alert]*" +
+                           "\n\nSupport session is going to be automatically closed in 2 minutes " +
+                           "due to operator's inactivity"
+                };
+                MessageQueueManager.EnqueueMessage(newMsg);
+            }
+            if (timeDifference.Minutes >= 5)
+            {
+                ChatMessage newMsg = new ChatMessage()
+                {
+                    Timestamp = DateTime.UtcNow,
+                    Chat = message.Chat,
+                    ParseMode = ParseMode.Markdown,
+                    Text = "*[Alert]*" +
+                           "\n\nSupport session is closed due to operator's inactivity"
+                };
+                MessageQueueManager.EnqueueMessage(newMsg);
+                CacheData.ActiveSupport.Remove(message.Chat.Id);
+                CacheData.CurrentChatAdmins.Remove(message.Chat.Id);
+                
+                MessageQueueManager.EnqueueLog(new ChatMessage()
+                {
+                    ParseMode = ParseMode.Markdown,
+                    Text = String.Format(
+                        "*[Log]*" +
+                        "\n\nSupport session ended due to operator's inactivity" +
+                        "\nChatId: `{0}`" +
+                        "\nChat: `{1}`" +
+                        "\n\n*hash_code:* #UB{2}-{3}",
+                        message.Chat.Id,
+                        message.Chat.Title,
+                        message.Chat.Id.ToString().Replace("-", ""),
+                        Guid.NewGuid())
+                });
             }
 
             Task.Run(() => RecordSupportSessionMessage(message));
@@ -129,9 +183,12 @@ namespace Unifiedban.Terminal.Utils
                 if(nightSchedule.UtcStartDate.Value <= DateTime.UtcNow)
                 {
                     CacheData.NightSchedules[nightSchedule.GroupId].State = Models.Group.NightSchedule.Status.Active;
+                    long chatId = CacheData.Groups.Values
+                        .Single(x => x.GroupId == nightSchedule.GroupId).TelegramChatId;
+                    
+                    chatPermissionses[chatId] = Manager.BotClient.GetChatAsync(chatId).Result.Permissions;
 
-                    Manager.BotClient.SetChatPermissionsAsync(CacheData.Groups.Values
-                        .Single(x => x.GroupId == nightSchedule.GroupId).TelegramChatId,
+                    Manager.BotClient.SetChatPermissionsAsync(chatId,
                         new ChatPermissions()
                         {
                             CanSendMessages = false,
@@ -144,8 +201,6 @@ namespace Unifiedban.Terminal.Utils
                             CanSendPolls = false
                         });
 
-                    long chatId = CacheData.Groups.Values
-                        .Single(x => x.GroupId == nightSchedule.GroupId).TelegramChatId;
                     MessageQueueManager.EnqueueMessage(
                         new ChatMessage()
                         {
@@ -170,22 +225,38 @@ namespace Unifiedban.Terminal.Utils
                 {
                     CacheData.NightSchedules[nightSchedule.GroupId].State = Models.Group.NightSchedule.Status.Programmed;
 
-                    Manager.BotClient.SetChatPermissionsAsync(CacheData.Groups.Values
-                        .Single(x => x.GroupId == nightSchedule.GroupId).TelegramChatId,
-                        new ChatPermissions()
-                        {
-                            CanSendMessages = true,
-                            CanAddWebPagePreviews = true,
-                            CanChangeInfo = true,
-                            CanInviteUsers = true,
-                            CanPinMessages = true,
-                            CanSendMediaMessages = true,
-                            CanSendOtherMessages = true,
-                            CanSendPolls = true
-                        });
-
                     long chatId = CacheData.Groups.Values
                         .Single(x => x.GroupId == nightSchedule.GroupId).TelegramChatId;
+
+                    if (chatPermissionses.ContainsKey(chatId))
+                    {
+                        Manager.BotClient.SetChatPermissionsAsync(chatId,
+                            chatPermissionses[chatId]);
+                    }
+                    else
+                    {
+                        MessageQueueManager.EnqueueMessage(
+                            new ChatMessage()
+                            {
+                                Timestamp = DateTime.UtcNow,
+                                Chat = new Chat() { Id = chatId, Type = ChatType.Supergroup },
+                                Text = "*[Report]*\nImpossible to find previous permissions set.\n" +
+                                       "Using default value (all true except CanChangeInfo)."
+                            });
+                        Manager.BotClient.SetChatPermissionsAsync(chatId,
+                            new ChatPermissions()
+                            {
+                                CanSendMessages = true,
+                                CanAddWebPagePreviews = true,
+                                CanChangeInfo = false,
+                                CanInviteUsers = true,
+                                CanPinMessages = true,
+                                CanSendMediaMessages = true,
+                                CanSendOtherMessages = true,
+                                CanSendPolls = true
+                            });
+                    }
+
                     MessageQueueManager.EnqueueMessage(
                         new ChatMessage()
                         {

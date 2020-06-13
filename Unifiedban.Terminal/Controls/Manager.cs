@@ -56,7 +56,27 @@ namespace Unifiedban.Terminal.Controls
                 ControlResult result = control.DoCheck(message);
                 if (result.Result == IControl.ControlResultType.positive)
                 {
-                    RemoveMessageForPositiveControl(message, result);
+                    var actionToTake = CacheData.GroupConfigs[message.Chat.Id]
+                        .SingleOrDefault(x => x.ConfigurationParameterId == "SpamAction");
+                    if (actionToTake == null)
+                    {
+                        RemoveMessageForPositiveControl(message, result);
+                        return;
+                    }
+
+                    switch (actionToTake.Value)
+                    {
+                        case "delete":
+                            RemoveMessageForPositiveControl(message, result);
+                            break;
+                        case "limit":
+                            LimitUserForPositiveControl(message, result);
+                            break;
+                        case "ban":
+                            BanUserForPositiveControl(message, result);
+                            break;
+                    }
+
                     return;
                 }
             }
@@ -82,7 +102,26 @@ namespace Unifiedban.Terminal.Controls
                 Filters.FilterResult result = filter.DoCheck(message);
                 if(result.Result == Filters.IFilter.FilterResultType.positive)
                 {
-                    RemoveMessageForPositiveFilter(message, result);
+                    var actionToTake = CacheData.GroupConfigs[message.Chat.Id]
+                        .SingleOrDefault(x => x.ConfigurationParameterId == "SpamAction");
+                    if (actionToTake == null)
+                    {
+                        RemoveMessageForPositiveFilter(message, result);
+                        return;
+                    }
+
+                    switch (actionToTake.Value)
+                    {
+                        case "delete":
+                            RemoveMessageForPositiveFilter(message, result);
+                            break;
+                        case "limit":
+                            LimitUserForPositiveFilter(message, result);
+                            break;
+                        case "ban":
+                            BanUserForPositiveFilter(message, result);
+                            break;
+                    }
                     return;
                 }
             }
@@ -101,62 +140,355 @@ namespace Unifiedban.Terminal.Controls
             // TODO !
         }
 
-        private static void RemoveMessageForPositiveControl(Message message, Controls.ControlResult result)
+        private static void RemoveMessageForPositiveControl(Message message, ControlResult result)
         {
-            Bot.Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
-            string author = message.From.Username == null
-                ? message.From.FirstName + " " + message.From.LastName
-                : "@" + message.From.Username;
-            Bot.Manager.BotClient.SendTextMessageAsync(
-                    chatId: CacheData.ControlChatId,
-                    parseMode: ParseMode.Markdown,
-                    text: String.Format(
-                        "*[Report]*\n" +
-                        "Message deleted due to control *{0}*.\n" +
-                        "⚠ do not open links you don't know ⚠\n" +
-                        "\nChat: `{1}`" +
-                        "\nAuthor: `{3}`" +
-                        "\nUserId: `{4}`` " +
-                        "\nOriginal message:\n```{2}```" +
-                        "\n\n*hash_code:* #UB{5}-{6}",
-                        result.CheckName,
-                        message.Chat.Title,
-                        message.Text,
-                        author,
-                        message.From.Id,
-                        message.Chat.Id.ToString().Replace("-",""),
-                        Guid.NewGuid()),
-                    disableWebPagePreview: true
-                );
+            try
+            {
+                Bot.Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+                string author = message.From.Username == null
+                    ? message.From.FirstName + " " + message.From.LastName
+                    : "@" + message.From.Username;
+                string logMessage = String.Format(
+                    "*[Report]*\n" +
+                    "Message deleted due to control *{0}*.\n" +
+                    "⚠ do not open links you don't know ⚠\n" +
+                    "\nChat: `{1}`" +
+                    "\nAuthor: `{3}`" +
+                    "\nUserId: `{4}`" +
+                    "\nOriginal message:\n```{2}```" +
+                    "\n\n*hash_code:* #UB{5}-{6}",
+                    result.CheckName,
+                    message.Chat.Title,
+                    message.Text,
+                    author,
+                    message.From.Id,
+                    message.Chat.Id.ToString().Replace("-", ""),
+                    Guid.NewGuid());
+                MessageQueueManager.EnqueueLog(new ChatMessage()
+                {
+                    ParseMode = ParseMode.Markdown,
+                    Text = logMessage
+                });
+                
+                LogTools.AddActionLog(new ActionLog()
+                {
+                    GroupId = CacheData.Groups[message.Chat.Id].GroupId,
+                    UtcDate = DateTime.UtcNow,
+                    ActionTypeId = "autoDelete",
+                    Parameters = logMessage,
+                });
+            }
+            catch (Exception ex)
+            {
+                Data.Utils.Logging.AddLog(new SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban.Terminal.Controls.Manager.RemoveMessageForPositiveControl",
+                    Level = SystemLog.Levels.Error,
+                    Message = ex.Message,
+                    UserId = -1
+                });
+                if(ex.InnerException != null)
+                    Data.Utils.Logging.AddLog(new SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Unifiedban.Terminal.Controls.Manager.RemoveMessageForPositiveControl",
+                        Level = SystemLog.Levels.Error,
+                        Message = ex.InnerException.Message,
+                        UserId = -1
+                    });
+            }
         }
 
         private static void RemoveMessageForPositiveFilter(Message message, Filters.FilterResult result)
         {
-            Bot.Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+            try
+            {
+                Bot.Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+                string author = message.From.Username == null
+                    ? message.From.FirstName + " " + message.From.LastName
+                    : "@" + message.From.Username;
+                string logMessage = String.Format(
+                    "*[Report]*\n" +
+                    "Message deleted due to filter *{0}* provided positive result.\n" +
+                    "⚠ do not open links you don't know ⚠\n" +
+                    "\nChat: `{1}`" +
+                    "\nAuthor: `{3}`" +
+                    "\nUserId: `{4}`" +
+                    "\nOriginal message:\n```{2}```" +
+                    "\n\n*hash_code:* #UB{5}-{6}",
+                    result.CheckName,
+                    message.Chat.Title,
+                    message.Text,
+                    author,
+                    message.From.Id,
+                    message.Chat.Id.ToString().Replace("-", ""),
+                    Guid.NewGuid());
+                MessageQueueManager.EnqueueLog(new ChatMessage()
+                {
+                    ParseMode = ParseMode.Markdown,
+                    Text = logMessage
+                });
+                
+                LogTools.AddActionLog(new ActionLog()
+                {
+                    GroupId = CacheData.Groups[message.Chat.Id].GroupId,
+                    UtcDate = DateTime.UtcNow,
+                    ActionTypeId = "autoDelete",
+                    Parameters = logMessage,
+                });
+            }
+            catch (Exception ex)
+            {
+                Data.Utils.Logging.AddLog(new SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban.Terminal.Controls.Manager.RemoveMessageForPositiveFilter",
+                    Level = SystemLog.Levels.Error,
+                    Message = ex.Message,
+                    UserId = -1
+                });
+                if(ex.InnerException != null)
+                    Data.Utils.Logging.AddLog(new SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Unifiedban.Terminal.Controls.Manager.RemoveMessageForPositiveFilter",
+                        Level = SystemLog.Levels.Error,
+                        Message = ex.InnerException.Message,
+                        UserId = -1
+                    });
+            }
+        }
+
+        private static void LimitUserForPositiveControl(Message message, ControlResult result)
+        {
+            int limitTime = 3;
+            Models.Group.ConfigurationParameter configValue = CacheData.GroupConfigs[message.Chat.Id]
+                .Where(x => x.ConfigurationParameterId == "SpamActionLimitTime")
+                .SingleOrDefault();
+            if (configValue != null)
+            {
+                int.TryParse(configValue.Value, out limitTime);
+            }
+            RemoveMessageForPositiveControl(message, result);
+            Bot.Manager.BotClient.RestrictChatMemberAsync(
+                message.Chat.Id,
+                message.From.Id,
+                new ChatPermissions()
+                {
+                    CanSendMessages = false,
+                    CanAddWebPagePreviews = false,
+                    CanChangeInfo = false,
+                    CanInviteUsers = false,
+                    CanPinMessages = false,
+                    CanSendMediaMessages = false,
+                    CanSendOtherMessages = false,
+                    CanSendPolls = false
+                },
+                DateTime.UtcNow.AddMinutes(limitTime));
+            
             string author = message.From.Username == null
                 ? message.From.FirstName + " " + message.From.LastName
                 : "@" + message.From.Username;
-            Bot.Manager.BotClient.SendTextMessageAsync(
-                    chatId: CacheData.ControlChatId,
-                    parseMode: ParseMode.Markdown,
-                    text: String.Format(
-                        "*[Report]*\n" +
-                        "Message deleted due to filter *{0}* provided positive result.\n" +
-                        "⚠ do not open links you don't know ⚠\n" +
-                        "\nChat: `{1}`" +
-                        "\nAuthor: `{3}`" +
-                        "\nUserId: `{4}`" +
-                        "\nOriginal message:\n```{2}```" +
-                        "\n\n*hash_code:* #UB{5}-{6}",
-                        result.CheckName,
-                        message.Chat.Title,
-                        message.Text,
-                        author,
-                        message.From.Id,
-                        message.Chat.Id.ToString().Replace("-",""),
-                        Guid.NewGuid()),
-                    disableWebPagePreview: true
-                );
+            string logMessage = String.Format(
+                "*[Report]*\n" +
+                "User limited as per group _Spam Action_ preference.\n" +
+                "⚠ do not open links you don't know ⚠\n" +
+                "\nControl: `{0}`" +
+                "\nChat: `{1}`" +
+                "\nAuthor: `{2}`" +
+                "\nUserId: `{3}`" +
+                "\n\n*hash_code:* #UB{4}-{5}",
+                result.CheckName,
+                message.Chat.Title,
+                author,
+                message.From.Id,
+                message.Chat.Id.ToString().Replace("-", ""),
+                Guid.NewGuid());
+            MessageQueueManager.EnqueueLog(new ChatMessage()
+            {
+                ParseMode = ParseMode.Markdown,
+                Text = logMessage
+            });
+                
+            LogTools.AddActionLog(new ActionLog()
+            {
+                GroupId = CacheData.Groups[message.Chat.Id].GroupId,
+                UtcDate = DateTime.UtcNow,
+                ActionTypeId = "autoLimit",
+                Parameters = logMessage,
+            });
+        }
+        private static void LimitUserForPositiveFilter(Message message, Filters.FilterResult result)
+        {
+            
+            int limitTime = 3;
+            Models.Group.ConfigurationParameter configValue = CacheData.GroupConfigs[message.Chat.Id]
+                .Where(x => x.ConfigurationParameterId == "SpamActionLimitTime")
+                .SingleOrDefault();
+            if (configValue != null)
+            {
+                int.TryParse(configValue.Value, out limitTime);
+            }
+            RemoveMessageForPositiveFilter(message, result);
+            Bot.Manager.BotClient.RestrictChatMemberAsync(
+                message.Chat.Id,
+                message.From.Id,
+                new ChatPermissions()
+                {
+                    CanSendMessages = false,
+                    CanAddWebPagePreviews = false,
+                    CanChangeInfo = false,
+                    CanInviteUsers = false,
+                    CanPinMessages = false,
+                    CanSendMediaMessages = false,
+                    CanSendOtherMessages = false,
+                    CanSendPolls = false
+                },
+                DateTime.UtcNow.AddMinutes(limitTime));
+            
+            string author = message.From.Username == null
+                ? message.From.FirstName + " " + message.From.LastName
+                : "@" + message.From.Username;
+            string logMessage = String.Format(
+                "*[Report]*\n" +
+                "User limited as per group _Spam Action_ preference.\n" +
+                "⚠ do not open links you don't know ⚠\n" +
+                "\nControl: `{0}`" +
+                "\nChat: `{1}`" +
+                "\nAuthor: `{2}`" +
+                "\nUserId: `{3}`" +
+                "\n\n*hash_code:* #UB{4}-{5}",
+                result.CheckName,
+                message.Chat.Title,
+                author,
+                message.From.Id,
+                message.Chat.Id.ToString().Replace("-", ""),
+                Guid.NewGuid());
+            MessageQueueManager.EnqueueLog(new ChatMessage()
+            {
+                ParseMode = ParseMode.Markdown,
+                Text = logMessage
+            });
+                
+            LogTools.AddActionLog(new ActionLog()
+            {
+                GroupId = CacheData.Groups[message.Chat.Id].GroupId,
+                UtcDate = DateTime.UtcNow,
+                ActionTypeId = "autoLimit",
+                Parameters = logMessage,
+            });
+        }
+        private static void BanUserForPositiveControl(Message message, ControlResult result)
+        {
+            
+            int limitTime = 3;
+            Models.Group.ConfigurationParameter configValue = CacheData.GroupConfigs[message.Chat.Id]
+                .Where(x => x.ConfigurationParameterId == "SpamActionLimitTime")
+                .SingleOrDefault();
+            if (configValue != null)
+            {
+                int.TryParse(configValue.Value, out limitTime);
+            }
+            RemoveMessageForPositiveControl(message, result);
+            
+            Bot.Manager.BotClient.KickChatMemberAsync(message.Chat.Id, message.From.Id,
+                DateTime.UtcNow.AddMinutes(-5));
+            
+            UserTools.AddPenalty(message.Chat.Id, message.From.Id,
+                Models.TrustFactorLog.TrustFactorAction.ban, Bot.Manager.MyId);
+            
+            string author = message.From.Username == null
+                ? message.From.FirstName + " " + message.From.LastName
+                : "@" + message.From.Username;
+            string logMessage = String.Format(
+                "*[Report]*\n" +
+                "User banned as per group _Spam Action_ preference.\n" +
+                "⚠ do not open links you don't know ⚠\n" +
+                "\nControl: `{0}`" +
+                "\nChat: `{1}`" +
+                "\nAuthor: `{2}`" +
+                "\nUserId: `{3}`" +
+                "\n\n*hash_code:* #UB{4}-{5}",
+                result.CheckName,
+                message.Chat.Title,
+                author,
+                message.From.Id,
+                message.Chat.Id.ToString().Replace("-", ""),
+                Guid.NewGuid());
+            MessageQueueManager.EnqueueLog(new ChatMessage()
+            {
+                ParseMode = ParseMode.Markdown,
+                Text = logMessage
+            });
+                
+            LogTools.AddActionLog(new ActionLog()
+            {
+                GroupId = CacheData.Groups[message.Chat.Id].GroupId,
+                UtcDate = DateTime.UtcNow,
+                ActionTypeId = "autoBan",
+                Parameters = logMessage,
+            });
+        }
+        private static void BanUserForPositiveFilter(Message message, Filters.FilterResult result)
+        {
+            
+            int limitTime = 3;
+            Models.Group.ConfigurationParameter configValue = CacheData.GroupConfigs[message.Chat.Id]
+                .Where(x => x.ConfigurationParameterId == "SpamActionLimitTime")
+                .SingleOrDefault();
+            if (configValue != null)
+            {
+                int.TryParse(configValue.Value, out limitTime);
+            }
+            RemoveMessageForPositiveFilter(message, result);
+            
+            Bot.Manager.BotClient.KickChatMemberAsync(message.Chat.Id, message.From.Id,
+                DateTime.UtcNow.AddMinutes(-5));
+            UserTools.AddPenalty(message.Chat.Id, message.From.Id,
+                Models.TrustFactorLog.TrustFactorAction.ban, Bot.Manager.MyId);
+            
+            Bot.Manager.BotClient.KickChatMemberAsync(message.Chat.Id, message.From.Id,
+                DateTime.UtcNow.AddMinutes(-5));
+            
+            UserTools.AddPenalty(message.Chat.Id, message.From.Id,
+                Models.TrustFactorLog.TrustFactorAction.ban, Bot.Manager.MyId);
+            
+            string author = message.From.Username == null
+                ? message.From.FirstName + " " + message.From.LastName
+                : "@" + message.From.Username;
+            string logMessage = String.Format(
+                "*[Report]*\n" +
+                "User banned as per group _Spam Action_ preference.\n" +
+                "⚠ do not open links you don't know ⚠\n" +
+                "\nControl: `{0}`" +
+                "\nChat: `{1}`" +
+                "\nAuthor: `{2}`" +
+                "\nUserId: `{3}`" +
+                "\n\n*hash_code:* #UB{4}-{5}",
+                result.CheckName,
+                message.Chat.Title,
+                author,
+                message.From.Id,
+                message.Chat.Id.ToString().Replace("-", ""),
+                Guid.NewGuid());
+            MessageQueueManager.EnqueueLog(new ChatMessage()
+            {
+                ParseMode = ParseMode.Markdown,
+                Text = logMessage
+            });
+                
+            LogTools.AddActionLog(new ActionLog()
+            {
+                GroupId = CacheData.Groups[message.Chat.Id].GroupId,
+                UtcDate = DateTime.UtcNow,
+                ActionTypeId = "autoBan",
+                Parameters = logMessage,
+            });
         }
 
         public static bool IsTelegramLink(string siteUri)

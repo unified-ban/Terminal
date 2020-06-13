@@ -32,17 +32,7 @@ namespace Unifiedban.Terminal.Bot.Command
             Manager.BotClient.RestrictChatMemberAsync(
                     callbackQuery.Message.Chat.Id,
                     callbackQuery.From.Id,
-                    new ChatPermissions()
-                    {
-                        CanSendMessages = true,
-                        CanAddWebPagePreviews = true,
-                        CanChangeInfo = true,
-                        CanInviteUsers = true,
-                        CanPinMessages = true,
-                        CanSendMediaMessages = true,
-                        CanSendOtherMessages = true,
-                        CanSendPolls = true
-                    });
+                    Manager.BotClient.GetChatAsync(callbackQuery.Message.Chat.Id).Result.Permissions);
 
             string name = callbackQuery.From.Username != null ? "@" + callbackQuery.From.Username : callbackQuery.From.FirstName;
 

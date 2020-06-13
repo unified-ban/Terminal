@@ -47,8 +47,8 @@ namespace Unifiedban.Terminal.Utils
             return false;
         }
 
-        public static void AddPenality(int telegramUserId,
-            Models.TrustFactorLog.TrustFactorAction action,
+        public static void AddPenalty(long chatId, int telegramUserId,
+            TrustFactorLog.TrustFactorAction action,
             int actionTakenBy)
         {
             lock (trustFactorLock)
@@ -60,13 +60,13 @@ namespace Unifiedban.Terminal.Utils
             {
                 default:
                 case Models.TrustFactorLog.TrustFactorAction.limit:
-                    penality = int.Parse(CacheData.Configuration["TFLimitPenality"]);
+                    penality = int.Parse(CacheData.Configuration["TFLimitPenalty"]);
                     break;
                 case Models.TrustFactorLog.TrustFactorAction.kick:
-                    penality = int.Parse(CacheData.Configuration["TFKickPenality"]);
+                    penality = int.Parse(CacheData.Configuration["TFKickPenalty"]);
                     break;
                 case Models.TrustFactorLog.TrustFactorAction.ban:
-                    penality = int.Parse(CacheData.Configuration["TFBanPenality"]);
+                    penality = int.Parse(CacheData.Configuration["TFBanPenalty"]);
                     break;
                 case Models.TrustFactorLog.TrustFactorAction.blacklist:
                     penality = CacheData.TrustFactors[telegramUserId].Points;
@@ -91,15 +91,23 @@ namespace Unifiedban.Terminal.Utils
             }
 
             CacheData.TrustFactors[telegramUserId].Points += penality;
-
-            Bot.Manager.BotClient.SendTextMessageAsync(
-                    chatId: CacheData.ControlChatId,
-                    parseMode: ParseMode.Markdown,
-                    text: String.Format(
-                        "Penality added to user id {0} with reason: {1}\n" +
-                        "New trust factor: {2}",
-                        telegramUserId, action.ToString(),
-                        CacheData.TrustFactors[telegramUserId].Points));
+            
+            MessageQueueManager.EnqueueLog(new ChatMessage()
+            {
+                ParseMode = ParseMode.Markdown,
+                Text = String.Format(
+                    "*[Report]*\n" +
+                    "Penalty added to user id {0} with reason: {1}\n" +
+                    "New trust factor: {2}" +
+                    "\nChatId: `{3}`" +
+                    "\n\n*hash_code:* #UB{4}-{5}",
+                    telegramUserId,
+                    action.ToString(),
+                    CacheData.TrustFactors[telegramUserId].Points,
+                    chatId,
+                    chatId.ToString().Replace("-",""),
+                    Guid.NewGuid())
+            });
 
             LogTools.AddTrustFactorLog(new TrustFactorLog
             {
@@ -313,6 +321,8 @@ namespace Unifiedban.Terminal.Utils
                         ReplyMarkup = new ReplyKeyboardRemove()
                     });
 
+                Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+
                 CacheData.BannedUsers.Add(banned);
                 newBans.Add(banned);
 
@@ -334,7 +344,7 @@ namespace Unifiedban.Terminal.Utils
             catch
             {
                 MessageQueueManager.EnqueueMessage(
-                    new Models.ChatMessage()
+                    new ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,

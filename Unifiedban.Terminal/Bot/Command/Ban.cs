@@ -130,7 +130,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 return;
             }
             
-            UserTools.AddPenality(userToKick,
+            UserTools.AddPenalty(message.Chat.Id, userToKick,
                 Models.TrustFactorLog.TrustFactorAction.ban, Manager.MyId);
         }
 

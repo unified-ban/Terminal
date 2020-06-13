@@ -70,6 +70,10 @@ namespace Unifiedban.Terminal.Bot.Command
                 case "close":
                     SetCloseTime(message, parameters[2]);
                     break;
+                case "cancel":
+                    Manager.BotClient.DeleteMessageAsync(callbackQuery.Message.Chat.Id,
+                        callbackQuery.Message.MessageId);
+                    break;
             }
         }
 
@@ -127,6 +131,11 @@ namespace Unifiedban.Terminal.Bot.Command
                                 $"➡️",
                                 $"/setgate nextPage {index + 1} {action}"
                                 ));
+            timesList.Add(new List<InlineKeyboardButton>());
+            timesList[4].Add(InlineKeyboardButton.WithCallbackData(
+                $"Cancel",
+                $"/setgate cancel"
+            ));
             if(message.From.Id != Manager.MyId)
                 MessageQueueManager.EnqueueMessage(
                     new Models.ChatMessage()
@@ -174,7 +183,7 @@ namespace Unifiedban.Terminal.Bot.Command
                             });
                         return;
                     }
-                nsl.Update(groupId, Models.Group.NightSchedule.Status.Deactivated,
+                nsl.Update(groupId, CacheData.NightSchedules[groupId].State,
                     CacheData.NightSchedules[groupId].UtcStartDate, endTime, -2);
             }
             else
@@ -214,13 +223,21 @@ namespace Unifiedban.Terminal.Bot.Command
                             });
                         return;
                     }
-                nsl.Update(groupId, Models.Group.NightSchedule.Status.Active,
+                nsl.Update(groupId, Models.Group.NightSchedule.Status.Programmed,
                     startTime, CacheData.NightSchedules[groupId].UtcEndDate, - 2);
             }
             else
             {
-                nsl.Add(groupId, Models.Group.NightSchedule.Status.Active,
-                    startTime, null, -2);
+                Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        ParseMode = ParseMode.Markdown,
+                        Text = "*[Error]*\nSet an opening time first."
+                    });
+                return;
             }
 
             CacheData.NightSchedules[groupId] = nsl.GetByChat(groupId);

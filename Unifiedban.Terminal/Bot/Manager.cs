@@ -106,6 +106,8 @@ namespace Unifiedban.Terminal.Bot
         {
             if (e.CallbackQuery.Message.Date < DateTime.Now.AddDays(-1))
                 return;
+            
+            await Task.Run(() => CacheData.IncrementHandledMessages());
 
             if(CacheData.Groups[e.CallbackQuery.Message.Chat.Id].State != 
                 Models.Group.TelegramGroup.Status.Active) return;
@@ -135,6 +137,9 @@ namespace Unifiedban.Terminal.Bot
 
             if (e.Message.Date < DateTime.Now.AddDays(-1))
                 return;
+            
+            await Task.Run(() => CacheData.IncrementHandledMessages());
+            
             if(CacheData.Groups.Keys.Contains(e.Message.Chat.Id))
                 if (CacheData.Groups[e.Message.Chat.Id].State !=
                     Models.Group.TelegramGroup.Status.Active &&
@@ -150,7 +155,6 @@ namespace Unifiedban.Terminal.Bot
                 UserId = -1
             });
 
-            await Task.Run(() => CacheData.IncrementHandledMessages());
             await Task.Run(() => Functions.CacheUsername(e.Message));
 
             if (e.Message.MigrateToChatId != 0)
@@ -185,7 +189,9 @@ namespace Unifiedban.Terminal.Bot
             }
 
             if (e.Message.NewChatMembers != null)
-                Functions.UserJoinedAction(e.Message);                
+                Functions.UserJoinedAction(e.Message);
+            if (e.Message.LeftChatMember != null)
+                Functions.UserLeftAction(e.Message);                
 
             if (!String.IsNullOrEmpty(e.Message.MediaGroupId) ||
                 e.Message.Photo != null ||

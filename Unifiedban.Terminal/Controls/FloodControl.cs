@@ -10,6 +10,8 @@ using System.Text;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using Unifiedban.Models;
+using Unifiedban.Terminal.Bot;
 using Unifiedban.Terminal.Utils;
 
 namespace Unifiedban.Terminal.Controls
@@ -18,6 +20,8 @@ namespace Unifiedban.Terminal.Controls
     {
         static ConcurrentDictionary<long, Dictionary<int, Flood>> FloodCounter =
             new ConcurrentDictionary<long, Dictionary<int, Flood>>();
+        static ConcurrentDictionary<int, DateTime> limitedUsers =
+            new ConcurrentDictionary<int, DateTime>();
 
         struct Flood
         {
@@ -55,14 +59,6 @@ namespace Unifiedban.Terminal.Controls
                         Result = IControl.ControlResultType.skipped
                     };
 
-            var userLimitations = Bot.Manager.BotClient.GetChatMemberAsync(message.Chat.Id, message.From.Id).Result;
-            if(userLimitations.CanSendMessages == false)
-                return new ControlResult()
-                {
-                    CheckName = "Anti Flood",
-                    Result = IControl.ControlResultType.skipped
-                };
-
             Dictionary<int, Flood> floodCounter = FloodCounter.GetValueOrDefault(message.Chat.Id);
             if (floodCounter == null)
                 FloodCounter.TryAdd(message.Chat.Id, new Dictionary<int, Flood>());
@@ -96,14 +92,25 @@ namespace Unifiedban.Terminal.Controls
                 FloodCounter[message.Chat.Id][message.From.Id] = currentValue;
             }
 
-            if (FloodCounter[message.Chat.Id][message.From.Id].Messages >= 3)
+            if (FloodCounter[message.Chat.Id][message.From.Id].Messages >= 5)
             {
-                int minutes = 10;
+                int minutes = 5;
 
-                Models.SysConfig floodBanMinutes = CacheData.SysConfigs.Where(x => x.SysConfigId == "FloodBanInMinutes")
+                SysConfig floodBanMinutes = CacheData.SysConfigs.Where(x => x.SysConfigId == "FloodBanInMinutes")
                     .SingleOrDefault();
                 if (floodBanMinutes != null)
                     int.TryParse(floodBanMinutes.Value, out minutes);
+                
+                if (limitedUsers.ContainsKey(message.From.Id))
+                {
+                    if (limitedUsers[message.From.Id] > DateTime.UtcNow.AddMinutes(-minutes))
+                    {
+                        goto skipLimitAndPenality;
+                    }
+                }
+
+                limitedUsers.AddOrUpdate(message.From.Id, DateTime.UtcNow, 
+                    (key, value) => value = DateTime.UtcNow);
 
                 Bot.Manager.BotClient.RestrictChatMemberAsync(
                                 message.Chat.Id,
@@ -122,31 +129,37 @@ namespace Unifiedban.Terminal.Controls
                                 DateTime.UtcNow.AddMinutes(minutes)
                             ).Wait();
                 
-                Bot.Manager.BotClient.SendTextMessageAsync(
-                    chatId: CacheData.ControlChatId,
-                    parseMode: ParseMode.Markdown,
-                    text: String.Format(
+                string author = message.From.Username == null
+                    ? message.From.FirstName + " " + message.From.LastName
+                    : "@" + message.From.Username;
+                MessageQueueManager.EnqueueLog(new ChatMessage()
+                {
+                    ParseMode = ParseMode.Markdown,
+                    Text = String.Format(
                         "*[Report]*\n" +
-                        "User *{0}* muted for {1} minutes due to flood.\n" +
-                        "\nChat: {2}" +
-                        "\n\n*hash_code:* #UB{3}-{4}",
-                        message.From.Id,
+                        "User muted for {0} minutes due to flood.\n" +
+                        "\nChat: `{1}`" +
+                        "\nAuthor: `{3}`" +
+                        "\nUserId: `{2}`" +
+                        "\n\n*hash_code:* #UB{4}-{5}",
                         minutes,
                         message.Chat.Title,
+                        message.From.Id,
+                        author,
                         message.Chat.Id.ToString().Replace("-",""),
                         Guid.NewGuid())
-                );
+                });
 
-                UserTools.AddPenality(message.From.Id,
-                    Models.TrustFactorLog.TrustFactorAction.limit, Bot.Manager.MyId);
+                UserTools.AddPenalty(message.Chat.Id, message.From.Id,
+                    TrustFactorLog.TrustFactorAction.limit, Bot.Manager.MyId);
 
-                Bot.MessageQueueManager.EnqueueMessage(
-                    new Models.ChatMessage()
+                MessageQueueManager.EnqueueMessage(
+                    new ChatMessage()
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
-                        ParseMode = Telegram.Bot.Types.Enums.ParseMode.Markdown,
-                        Text = $"User {message.From.Username} has been limited for {minutes} minutes due to flood.\n."
+                        ParseMode = ParseMode.Markdown,
+                        Text = $"User {message.From.Username} has been limited for {minutes} minutes due to flood.\n"
                         + "An admin can immediately remove this limitation by clicking the button below.",
                         ReplyMarkup = new InlineKeyboardMarkup(
                             InlineKeyboardButton.WithCallbackData(
@@ -156,6 +169,7 @@ namespace Unifiedban.Terminal.Controls
                         )
                     });
 
+                skipLimitAndPenality:
                 return new ControlResult()
                 {
                     CheckName = "Anti Flood",

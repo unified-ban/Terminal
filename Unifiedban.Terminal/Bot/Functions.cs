@@ -170,7 +170,8 @@ namespace Unifiedban.Terminal.Bot
             foreach (User member in message.NewChatMembers)
             {
                 if (member.Id == Manager.MyId ||
-                    member.Id == 777000) // Telegram's official updateServiceNotification
+                    member.Id == 777000 || // Telegram's official updateServiceNotification
+                    member.IsBot) 
                 {
                     continue;
                 }
@@ -370,6 +371,44 @@ namespace Unifiedban.Terminal.Bot
         {
             if (message.From.Username != null)
                 CacheData.Usernames[message.From.Username] = message.From.Id;
+        }
+
+        public static void UserLeftAction(Message message)
+        {
+            if (Utils.BotTools.IsUserOperator(message.LeftChatMember.Id))
+            {
+                if (!CacheData.ActiveSupport
+                    .Contains(message.Chat.Id))
+                {
+                    CacheData.ActiveSupport.Remove(message.Chat.Id);
+                    CacheData.CurrentChatAdmins.Remove(message.Chat.Id);
+
+                    Manager.BotClient.SendTextMessageAsync(
+                        chatId: message.Chat.Id,
+                        parseMode: ParseMode.Markdown,
+                        text: String.Format(
+                            "Support session *{0}* ended since operator left the chat.",
+                            message.LeftChatMember.Username)
+                    );
+                    MessageQueueManager.EnqueueLog(new ChatMessage()
+                    {
+                        ParseMode = ParseMode.Markdown,
+                        Text = String.Format(
+                            "*[Log]*" +
+                            "Support session ended since operator *{0}* left the chat." +
+                            "\nChatId: `{1}`" +
+                            "\nChat: `{2}`" +
+                            "\nUserId: `{3}`" +
+                            "\n\n*hash_code:* #UB{4}-{5}",
+                            message.LeftChatMember.Username,
+                            message.Chat.Id,
+                            message.Chat.Title,
+                            message.LeftChatMember.Id,
+                            message.Chat.Id.ToString().Replace("-", ""),
+                            Guid.NewGuid())
+                    });
+                }
+            }
         }
     }
 }
