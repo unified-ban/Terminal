@@ -92,152 +92,164 @@ namespace Unifiedban.Terminal.Filters
 
         private static void BuildDictionary()
         {
-            replacements.Add('A', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('À', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('Á', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('Â', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('Ä', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('Æ', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('Ã', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('Å', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('Ā', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('a', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('à', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('á', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('â', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('ä', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('æ', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('ã', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('å', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('ā', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('ª', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('@', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
-            replacements.Add('4', "[A*À*Á*Â*Ä*Æ*Ã*Å*Ā*a*à*á*â*ä*æ*ã*å*ā*ª*@*4*]\\s*");
+            replacements.Add('A', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('À', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('Á', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('Â', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('Ä', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('Æ', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('Ã', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('Å', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('Ā', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('a', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('à', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('á', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('â', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('ä', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('æ', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('ã', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('å', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('ā', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('ª', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('@', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
+            replacements.Add('4', "[AÀÁÂÄÆÃÅĀaàáâäæãåāª@4]\\s*");
 
-            replacements.Add('B', "[B*b*ß*8*]\\s*");
-            replacements.Add('b', "[B*b*ß*8*]\\s*");
-            replacements.Add('ß', "[B*b*ß*S*Ś*Š*$*s*ś*š*5*8*]\\s*");
-            replacements.Add('8', "[B*b*ß*8*]\\s*");
+            replacements.Add('B', "[Bbß8]\\s*");
+            replacements.Add('b', "[Bbß8]\\s*");
+            replacements.Add('ß', "[BbßSŚŠ$sśš58]\\s*");
+            replacements.Add('8', "[Bbß8]\\s*");
 
-            replacements.Add('C', "[C*Ç*Ć*Č*c*ç*ć*č*(*[*{*]\\s*");
-            replacements.Add('Ç', "[C*Ç*Ć*Č*c*ç*ć*č*(*[*{*]\\s*");
-            replacements.Add('Ć', "[C*Ç*Ć*Č*c*ç*ć*č*(*[*{*]\\s*");
-            replacements.Add('Č', "[C*Ç*Ć*Č*c*ç*ć*č*(*[*{*]\\s*");
-            replacements.Add('c', "[C*Ç*Ć*Č*c*ç*ć*č*(*[*{*]\\s*");
-            replacements.Add('ç', "[C*Ç*Ć*Č*c*ç*ć*č*(*[*{*]\\s*");
-            replacements.Add('ć', "[C*Ç*Ć*Č*c*ç*ć*č*(*[*{*]\\s*");
-            replacements.Add('č', "[C*Ç*Ć*Č*c*ç*ć*č*(*[*{*]\\s*");
-            replacements.Add('(', "[C*Ç*Ć*Č*c*ç*ć*č*(*[*{*]\\s*");
-            replacements.Add('[', "[C*Ç*Ć*Č*c*ç*ć*č*(*[*{*]\\s*");
-            replacements.Add('{', "[C*Ç*Ć*Č*c*ç*ć*č*(*[*{*]\\s*");
+            replacements.Add('C', "[CÇĆČcçćč([{]\\s*");
+            replacements.Add('Ç', "[CÇĆČcçćč([{]\\s*");
+            replacements.Add('Ć', "[CÇĆČcçćč([{]\\s*");
+            replacements.Add('Č', "[CÇĆČcçćč([{]\\s*");
+            replacements.Add('c', "[CÇĆČcçćč([{]\\s*");
+            replacements.Add('ç', "[CÇĆČcçćč([{]\\s*");
+            replacements.Add('ć', "[CÇĆČcçćč([{]\\s*");
+            replacements.Add('č', "[CÇĆČcçćč([{]\\s*");
+            replacements.Add('(', "[CÇĆČcçćč([{]\\s*");
+            replacements.Add('[', "[CÇĆČcçćč([{]\\s*");
+            replacements.Add('{', "[CÇĆČcçćč([{]\\s*");
 
-            replacements.Add('E', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
-            replacements.Add('È', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
-            replacements.Add('É', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
-            replacements.Add('Ê', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
-            replacements.Add('Ë', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
-            replacements.Add('Ę', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
-            replacements.Add('Ė', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
-            replacements.Add('Ē', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
-            replacements.Add('e', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
-            replacements.Add('è', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
-            replacements.Add('é', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
-            replacements.Add('ê', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
-            replacements.Add('ë', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
-            replacements.Add('ę', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
-            replacements.Add('ė', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
-            replacements.Add('ē', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
-            replacements.Add('&', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
-            replacements.Add('€', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
-            replacements.Add('3', "[E*È*É*Ê*Ë*Ę*Ė*Ē*e*è*é*ê*ë*ę*ė*ē*&*€*3*]\\s*");
+            replacements.Add('E', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
+            replacements.Add('È', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
+            replacements.Add('É', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
+            replacements.Add('Ê', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
+            replacements.Add('Ë', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
+            replacements.Add('Ę', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
+            replacements.Add('Ė', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
+            replacements.Add('Ē', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
+            replacements.Add('e', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
+            replacements.Add('è', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
+            replacements.Add('é', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
+            replacements.Add('ê', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
+            replacements.Add('ë', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
+            replacements.Add('ę', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
+            replacements.Add('ė', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
+            replacements.Add('ē', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
+            replacements.Add('&', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
+            replacements.Add('€', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
+            replacements.Add('3', "[EÈÉÊËĘĖĒeèéêëęėē&€3]\\s*");
 
-            replacements.Add('I', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
-            replacements.Add('Ì', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
-            replacements.Add('Í', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
-            replacements.Add('Î', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
-            replacements.Add('Ï', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
-            replacements.Add('Į', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
-            replacements.Add('Ī', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
-            replacements.Add('i', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
-            replacements.Add('ì', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
-            replacements.Add('í', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
-            replacements.Add('î', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
-            replacements.Add('ï', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
-            replacements.Add('į', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
-            replacements.Add('ī', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*!*]\\s*");
-            replacements.Add('1', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*L*l*!*]\\s*");
-            replacements.Add('|', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*L*l*!*]\\s*");
-            replacements.Add('!', "[I*Ì*Í*Î*Ï*Į*Ī*i*ì*í*î*ï*į*ī*1*|*L*l*!*]\\s*");
+            replacements.Add('I', "[IÌÍÎÏĮĪiìíîïįī1|!]\\s*");
+            replacements.Add('Ì', "[IÌÍÎÏĮĪiìíîïįī1|!]\\s*");
+            replacements.Add('Í', "[IÌÍÎÏĮĪiìíîïįī1|!]\\s*");
+            replacements.Add('Î', "[IÌÍÎÏĮĪiìíîïįī1|!]\\s*");
+            replacements.Add('Ï', "[IÌÍÎÏĮĪiìíîïįī1|!]\\s*");
+            replacements.Add('Į', "[IÌÍÎÏĮĪiìíîïįī1|!]\\s*");
+            replacements.Add('Ī', "[IÌÍÎÏĮĪiìíîïįī1|!]\\s*");
+            replacements.Add('i', "[IÌÍÎÏĮĪiìíîïįī1|!]\\s*");
+            replacements.Add('ì', "[IÌÍÎÏĮĪiìíîïįī1|!]\\s*");
+            replacements.Add('í', "[IÌÍÎÏĮĪiìíîïįī1|!]\\s*");
+            replacements.Add('î', "[IÌÍÎÏĮĪiìíîïįī1|!]\\s*");
+            replacements.Add('ï', "[IÌÍÎÏĮĪiìíîïįī1|!]\\s*");
+            replacements.Add('į', "[IÌÍÎÏĮĪiìíîïįī1|!]\\s*");
+            replacements.Add('ī', "[IÌÍÎÏĮĪiìíîïįī1|!]\\s*");
+            replacements.Add('1', "[IÌÍÎÏĮĪiìíîïįī1|Ll!]\\s*");
+            replacements.Add('|', "[IÌÍÎÏĮĪiìíîïįī1|Ll!]\\s*");
+            replacements.Add('!', "[IÌÍÎÏĮĪiìíîïįī1|Ll!]\\s*");
 
-            replacements.Add('L', "[L*l*1*|*£*]\\s*");
-            replacements.Add('l', "[L*l*1*|*£*]\\s*");
-            replacements.Add('£', "[L*l*1*|*£*]\\s*");
+            replacements.Add('L', "[Ll1|£]\\s*");
+            replacements.Add('l', "[Ll1|£]\\s*");
+            replacements.Add('£', "[Ll1|£]\\s*");
 
-            replacements.Add('N', "[N*Ñ*n*ñ*]\\s*");
-            replacements.Add('Ñ', "[N*Ñ*n*ñ*]\\s*");
-            replacements.Add('n', "[N*Ñ*n*ñ*]\\s*");
-            replacements.Add('ñ', "[N*Ñ*n*ñ*]\\s*");
+            replacements.Add('N', "[NÑnñ]\\s*");
+            replacements.Add('Ñ', "[NÑnñ]\\s*");
+            replacements.Add('n', "[NÑnñ]\\s*");
+            replacements.Add('ñ', "[NÑnñ]\\s*");
 
-            replacements.Add('O', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('Ò', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('Ó', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('Ô', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('Ö', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('Õ', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('Œ', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('Ø', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('Ō', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('o', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('ò', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('ó', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('ô', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('ö', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('õ', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('œ', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('ø', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('ō', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('º', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
-            replacements.Add('0', "[O*Ò*Ó*Ô*Ö*Õ*Œ*Ø*Ō*o*ò*ó*ô*ö*õ*œ*ø*ō*º*0*]\\s*");
+            replacements.Add('O', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('Ò', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('Ó', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('Ô', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('Ö', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('Õ', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('Œ', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('Ø', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('Ō', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('o', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('ò', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('ó', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('ô', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('ö', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('õ', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('œ', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('ø', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('ō', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('º', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
+            replacements.Add('0', "[OÒÓÔÖÕŒØŌoòóôöõœøōº0]\\s*");
 
-            replacements.Add('S', "[S*Ś*Š*$*s*ß*ś*š*5*]\\s*");
-            replacements.Add('Ś', "[S*Ś*Š*$*s*ß*ś*š*5*]\\s*");
-            replacements.Add('Š', "[S*Ś*Š*$*s*ß*ś*š*5*]\\s*");
-            replacements.Add('$', "[S*Ś*Š*$*s*ß*ś*š*5*]\\s*");
-            replacements.Add('s', "[S*Ś*Š*$*s*ß*ś*š*5*]\\s*");
-            replacements.Add('ś', "[S*Ś*Š*$*s*ß*ś*š*5*]\\s*");
-            replacements.Add('š', "[S*Ś*Š*$*s*ß*ś*š*5*]\\s*");
-            replacements.Add('5', "[S*Ś*Š*$*s*ß*ś*š*5*]\\s*");
+            replacements.Add('S', "[SŚŠ$sßśš5]\\s*");
+            replacements.Add('Ś', "[SŚŠ$sßśš5]\\s*");
+            replacements.Add('Š', "[SŚŠ$sßśš5]\\s*");
+            replacements.Add('$', "[SŚŠ$sßśš5]\\s*");
+            replacements.Add('s', "[SŚŠ$sßśš5]\\s*");
+            replacements.Add('ś', "[SŚŠ$sßśš5]\\s*");
+            replacements.Add('š', "[SŚŠ$sßśš5]\\s*");
+            replacements.Add('5', "[SŚŠ$sßśš5]\\s*");
 
-            replacements.Add('t', "[T*t*7*]\\s*");
-            replacements.Add('T', "[T*t*7*]\\s*");
+            replacements.Add('t', "[Tt7]\\s*");
+            replacements.Add('T', "[Tt7]\\s*");
 
-            replacements.Add('U', "[U*Ù*Ú*Û*Ü*Ū*u*ù*ú*û*ü*ū*V*v*¥*]\\s*");
-            replacements.Add('Ù', "[U*Ù*Ú*Û*Ü*Ū*u*ù*ú*û*ü*ū*V*v*¥*]\\s*");
-            replacements.Add('Ú', "[U*Ù*Ú*Û*Ü*Ū*u*ù*ú*û*ü*ū*V*v*¥*]\\s*");
-            replacements.Add('Û', "[U*Ù*Ú*Û*Ü*Ū*u*ù*ú*û*ü*ū*V*v*¥*]\\s*");
-            replacements.Add('Ü', "[U*Ù*Ú*Û*Ü*Ū*u*ù*ú*û*ü*ū*V*v*¥*]\\s*");
-            replacements.Add('Ū', "[U*Ù*Ú*Û*Ü*Ū*u*ù*ú*û*ü*ū*V*v*¥*]\\s*");
-            replacements.Add('u', "[U*Ù*Ú*Û*Ü*Ū*u*ù*ú*û*ü*ū*V*v*¥*]\\s*");
-            replacements.Add('ù', "[U*Ù*Ú*Û*Ü*Ū*u*ù*ú*û*ü*ū*V*v*¥*]\\s*");
-            replacements.Add('ú', "[U*Ù*Ú*Û*Ü*Ū*u*ù*ú*û*ü*ū*V*v*¥*]\\s*");
-            replacements.Add('û', "[U*Ù*Ú*Û*Ü*Ū*u*ù*ú*û*ü*ū*V*v*¥*]\\s*");
-            replacements.Add('ü', "[U*Ù*Ú*Û*Ü*Ū*u*ù*ú*û*ü*ū*V*v*¥*]\\s*");
-            replacements.Add('ū', "[U*Ù*Ú*Û*Ü*Ū*u*ù*ú*û*ü*ū*V*v*¥*]\\s*");
+            replacements.Add('U', "[UÙÚÛÜŪuùúûüūVv¥]\\s*");
+            replacements.Add('Ù', "[UÙÚÛÜŪuùúûüūVv¥]\\s*");
+            replacements.Add('Ú', "[UÙÚÛÜŪuùúûüūVv¥]\\s*");
+            replacements.Add('Û', "[UÙÚÛÜŪuùúûüūVv¥]\\s*");
+            replacements.Add('Ü', "[UÙÚÛÜŪuùúûüūVv¥]\\s*");
+            replacements.Add('Ū', "[UÙÚÛÜŪuùúûüūVv¥]\\s*");
+            replacements.Add('u', "[UÙÚÛÜŪuùúûüūVv¥]\\s*");
+            replacements.Add('ù', "[UÙÚÛÜŪuùúûüūVv¥]\\s*");
+            replacements.Add('ú', "[UÙÚÛÜŪuùúûüūVv¥]\\s*");
+            replacements.Add('û', "[UÙÚÛÜŪuùúûüūVv¥]\\s*");
+            replacements.Add('ü', "[UÙÚÛÜŪuùúûüūVv¥]\\s*");
+            replacements.Add('ū', "[UÙÚÛÜŪuùúûüūVv¥]\\s*");
 
-            replacements.Add('V', "[U*Ù*Ú*Û*Ü*Ū*u*ù*ú*û*ü*ū*V*v*¥*]\\s*");
-            replacements.Add('v', "[U*Ù*Ú*Û*Ü*Ū*u*ù*ú*û*ü*ū*V*v*¥*]\\s*");
-            replacements.Add('¥', "[U*Ù*Ú*Û*Ü*Ū*u*ù*ú*û*ü*ū*V*v*¥*]\\s*");
+            replacements.Add('V', "[UÙÚÛÜŪuùúûüūVv¥]\\s*");
+            replacements.Add('v', "[UÙÚÛÜŪuùúûüūVv¥]\\s*");
+            replacements.Add('¥', "[UÙÚÛÜŪuùúûüūVv¥]\\s*");
 
-            replacements.Add('Z', "[Z*z*7*2*]\\s*");
-            replacements.Add('z', "[Z*z*7*2*]\\s*");
-            replacements.Add('7', "[Z*z*7*2*]\\s*");
-            replacements.Add('2', "[Z*z*7*2*]\\s*");
+            replacements.Add('Z', "[Zz72]\\s*");
+            replacements.Add('z', "[Zz72]\\s*");
+            replacements.Add('7', "[Zz72]\\s*");
+            replacements.Add('2', "[Zz72]\\s*");
         }
 
         private static string BuildBasicRegexForLetter(char letter)
         {
-            return "[" + letter.ToString().ToLowerInvariant() + "*"
-                + letter.ToString().ToUpperInvariant() + @"*]\s*";
+            string filteredLetter = letter.ToString()
+                .Replace("/", @"\/")
+                .Replace(".", @"\.")
+                .Replace("?", @"\?")
+                .Replace("[", @"\[")
+                .Replace("]", @"\]")
+                .Replace("*", @"\*");
+            
+            if (filteredLetter.ToLowerInvariant() == filteredLetter.ToUpperInvariant())
+            {
+                return "[" + filteredLetter + @"]\s*";
+            }
+            return "[" + filteredLetter.ToLowerInvariant()
+                       + filteredLetter.ToUpperInvariant() + @"]\s*";
         }
 
         public static bool BanWord(
