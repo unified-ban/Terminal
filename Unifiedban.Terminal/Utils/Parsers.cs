@@ -78,9 +78,9 @@ namespace Unifiedban.Terminal.Utils
 
             string username = callbackQuery.From.Username != null ? "@" + callbackQuery.From.Username : callbackQuery.From.FirstName;
             parsedText = parsedText.Replace("{{from_username}}", username);
-            parsedText = parsedText.Replace("{{from_first_name}}", callbackQuery.From.FirstName);
-            parsedText = parsedText.Replace("{{from_last_name}}", callbackQuery.From.LastName);
-            parsedText = parsedText.Replace("{{from_full_name}}", callbackQuery.From.FirstName + " " + callbackQuery.From.LastName);
+            parsedText = parsedText.Replace("{{first_name}}", callbackQuery.From.FirstName);
+            parsedText = parsedText.Replace("{{last_name}}", callbackQuery.From.LastName);
+            parsedText = parsedText.Replace("{{full_name}}", callbackQuery.From.FirstName + " " + callbackQuery.From.LastName);
             parsedText = parsedText.Replace("{{from_id}}", callbackQuery.From.Id.ToString());
             parsedText = parsedText.Replace("{{chat_title}}", callbackQuery.Message.Chat.Title);
             parsedText = parsedText.Replace("{{chat_id}}", callbackQuery.Message.Chat.Id.ToString());
