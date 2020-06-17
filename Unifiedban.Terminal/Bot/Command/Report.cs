@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Unifiedban.Models;
 
 namespace Unifiedban.Terminal.Bot.Command
 {
@@ -16,60 +17,61 @@ namespace Unifiedban.Terminal.Bot.Command
 
         public void Execute(Message message)
         {
-            Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
-
             DateTime last;
             lastReport.TryGetValue(message.Chat.Id, out last);
             if (last != null)
                 if ((DateTime.UtcNow - last).TotalSeconds < 30)
                     return;
 
+            string author = message.From.Username == null
+                ? message.From.FirstName + " " + message.From.LastName
+                : "@" + message.From.Username;
+            string logMessage = String.Format(
+                "*[Report]*\n" +
+                "A user has reported a message\n" +
+                "⚠ do not open links you don't know ⚠\n" +
+                "\nChat: `{0}`" +
+                "\nAuthor: `{1}`" +
+                "\nUserId: `{2}`" +
+                "\nOriginal message link: https://t.me/c/{3}/{4}\n" +
+                "\n\n*hash_code:* #UB{5}-{6}",
+                message.Chat.Title,
+                author,
+                message.From.Id,
+                message.Chat.Id,
+                message.MessageId,
+                message.Chat.Id.ToString().Replace("-", ""),
+                Guid.NewGuid());
+            
+            
+            MessageQueueManager.EnqueueLog(new ChatMessage()
+            {
+                ParseMode = ParseMode.Markdown,
+                Text = logMessage
+            });
+            
             if (!String.IsNullOrEmpty(message.Chat.Username))
             {
-
-                Manager.BotClient.SendTextMessageAsync(
-                    chatId: CacheData.ControlChatId,
-                    parseMode: ParseMode.Markdown,
-                    text: String.Format(
-                        "User *{0}:{1}* from group *{2}:[{3}]({4})* sent a /report\n\n" +
-                            message.Text.Remove(0, 7),
-                        message.From.Id,
-                        message.From.Username,
-                        message.Chat.Id,
-                        message.Chat.Title,
-                        "https://t.me/" + message.Chat.Username)
-                );
-
-                Manager.BotClient.SendTextMessageAsync(
-                        chatId: message.Chat.Id,
-                        parseMode: ParseMode.Markdown,
-                        text: String.Format(
-                            "The Operators have been advised about your call.\n" +
-                            "Wait of any of them to join your group.")
-                    );
+                MessageQueueManager.EnqueueMessage(
+                    new ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        Text = "The Operators have been advised about your call.\n" +
+                               "Wait of any of them to join your group."
+                    });
             }
             else
             {
-                Manager.BotClient.SendTextMessageAsync(
-                        chatId: CacheData.ControlChatId,
-                        parseMode: ParseMode.Markdown,
-                        text: String.Format(
-                            "User *{0}:{1}* from group *{2}:{3}* sent a /report.\n" +
-                            "The group is private. Check for him in our [support group](https://t.me/unifiedban_group).\n\n" +
-                                message.Text.Remove(0, 7),
-                            message.From.Id,
-                            message.From.Username,
-                            message.Chat.Id,
-                            message.Chat.Title)
-                    );
-
-                Manager.BotClient.SendTextMessageAsync(
-                        chatId: message.Chat.Id,
-                        parseMode: ParseMode.Markdown,
-                        text: String.Format(
-                            "The Operators have been advised of your report but your group is private.\n" +
-                            "Please join our [support group](https://t.me/unifiedban_group).")
-                    );
+                MessageQueueManager.EnqueueMessage(
+                    new ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        ParseMode = ParseMode.Markdown,
+                        Text = "The Operators have been advised of your report but your group is private.\n" +
+                               "Please join our [support group](https://t.me/unifiedban_group)."
+                    });
             }
         }
 
