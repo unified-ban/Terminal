@@ -3,26 +3,27 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>3.0.0-beta.40</Version>
+    <Version>3.0.0-beta.41</Version>
     <Authors>SubPixel for linux/hub</Authors>
     <Product>Unifiedban Terminal</Product>
     <Copyright>LinuxHub 2020</Copyright>
     <RepositoryUrl>https://github.com/unified-ban/Terminal</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
     <AssemblyVersion>3.0.0</AssemblyVersion>
-    <FileVersion>3.0.0.483</FileVersion>
+    <FileVersion>3.0.0.485</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="HangFire" Version="1.7.8" />
     <PackageReference Include="HangFire.SqlServer" Version="1.7.8" />
     <PackageReference Include="log4net" Version="2.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
-    <PackageReference Include="Telegram.Bot" Version="15.5.1" />
+    <PackageReference Include="Telegram.Bot" Version="15.7.0" />
   </ItemGroup>
 
   <ItemGroup>
