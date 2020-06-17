@@ -383,9 +383,11 @@ namespace Unifiedban.Terminal
             BusinessLogic.User.TrustFactorLogic tfl = new BusinessLogic.User.TrustFactorLogic();
             foreach (TrustFactor trustFactor in tfl.Get())
             {
-                CacheData.TrustFactors.Add(trustFactor.TelegramUserId, trustFactor);
+                if (!CacheData.TrustFactors.ContainsKey(trustFactor.TelegramUserId))
+                {
+                    CacheData.TrustFactors.Add(trustFactor.TelegramUserId, trustFactor);
+                }
             }
-
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
                 LoggerName = CacheData.LoggerName,
