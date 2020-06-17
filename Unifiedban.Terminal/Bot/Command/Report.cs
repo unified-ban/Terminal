@@ -33,12 +33,11 @@ namespace Unifiedban.Terminal.Bot.Command
                 "\nChat: `{0}`" +
                 "\nAuthor: `{1}`" +
                 "\nUserId: `{2}`" +
-                "\nOriginal message link: https://t.me/c/{3}/{4}\n" +
-                "\n\n*hash_code:* #UB{5}-{6}",
+                "\nOriginal message link: https://t.me/c/{4}/{3}\n" +
+                "\n\n*hash_code:* #UB{4}-{5}",
                 message.Chat.Title,
                 author,
                 message.From.Id,
-                message.Chat.Id,
                 message.MessageId,
                 message.Chat.Id.ToString().Replace("-", ""),
                 Guid.NewGuid());
