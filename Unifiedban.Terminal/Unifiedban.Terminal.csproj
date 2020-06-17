@@ -3,14 +3,14 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>3.0.0-beta.41</Version>
+    <Version>3.1.0-beta.1</Version>
     <Authors>SubPixel for linux/hub</Authors>
     <Product>Unifiedban Terminal</Product>
     <Copyright>LinuxHub 2020</Copyright>
     <RepositoryUrl>https://github.com/unified-ban/Terminal</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
-    <AssemblyVersion>3.0.0</AssemblyVersion>
-    <FileVersion>3.0.0.485</FileVersion>
+    <AssemblyVersion>3.1.0</AssemblyVersion>
+    <FileVersion>3.1.0.2</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
