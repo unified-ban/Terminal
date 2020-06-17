@@ -126,6 +126,12 @@ namespace Unifiedban.Terminal.Utils
         
         public static bool KickIfInBlacklist(Message message)
         {
+            if (message.Chat.Type == ChatType.Private ||
+                message.Chat.Type == ChatType.Channel)
+            {
+                return false;
+            }
+            
             if (CacheData.BannedUsers
                 .Where(x => x.TelegramUserId == message.From.Id).Count() > 0)
             {

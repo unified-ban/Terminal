@@ -162,6 +162,12 @@ namespace Unifiedban.Terminal.Bot
                 Functions.MigrateToChatId(e.Message);
             }
 
+            bool isPrivateChat = e.Message.Chat.Type == ChatType.Private ||
+                                 e.Message.Chat.Type == ChatType.Channel;
+            if (isPrivateChat)
+            {
+                MessageQueueManager.AddChatIfNotPresent(e.Message.Chat.Id);
+            }
             
             if (!String.IsNullOrEmpty(e.Message.Text) &&
                 !Utils.UserTools.KickIfInBlacklist(e.Message))
@@ -172,7 +178,7 @@ namespace Unifiedban.Terminal.Bot
                     isCommand = Command.Parser.Parse(e.Message).Result;
                 }
 
-                if (e.Message.ReplyToMessage != null && !isCommand)
+                if (e.Message.ReplyToMessage != null && !isCommand && !isPrivateChat)
                 {
                     if (e.Message.ReplyToMessage.From.Id == MyId)
                     {
@@ -182,9 +188,9 @@ namespace Unifiedban.Terminal.Bot
                 }
 
                 if (!Utils.ChatTools.HandleSupportSessionMsg(e.Message) && !isCommand &&
-                    e.Message.From.Id != 777000)  // Telegram's official updateServiceNotification
+                    e.Message.From.Id != 777000 && !isPrivateChat)  // Telegram's official updateServiceNotification
                 {
-                    Controls.Manager.DoCheck(e.Message);   
+                    Controls.Manager.DoCheck(e.Message);
                 }
             }
 

@@ -22,6 +22,12 @@ namespace Unifiedban.Terminal.Bot.Command
     {
         public void Execute(Message message)
         {
+            if (message.Chat.Type == ChatType.Private ||
+                message.Chat.Type == ChatType.Channel)
+            {
+                return;
+            }
+            
             Execute(message, false);
         }
 
