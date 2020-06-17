@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
+using Unifiedban.Models.Group;
 
 namespace Unifiedban.Terminal
 {
@@ -97,7 +98,7 @@ namespace Unifiedban.Terminal
                     Date = DateTime.Now,
                     Function = "Unifiedban.Terminal.MessageQueue.QueueTimer_Elapsed.Send",
                     Level = Models.SystemLog.Levels.Error,
-                    Message = ex.Message,
+                    Message = "ChatId: " + TelegramChatId + " - " + ex.Message,
                     UserId = -1
                 });
                 if(ex.InnerException != null)
@@ -107,7 +108,7 @@ namespace Unifiedban.Terminal
                         Date = DateTime.Now,
                         Function = "Unifiedban.Terminal.MessageQueue.QueueTimer_Elapsed.Send",
                         Level = Models.SystemLog.Levels.Error,
-                        Message = ex.InnerException.Message,
+                        Message = "ChatId: " + TelegramChatId + " - " + ex.InnerException.Message,
                         UserId = -1
                     });
             }
