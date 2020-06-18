@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -304,6 +304,20 @@ namespace Unifiedban.Terminal.Utils
             lock (blacklistLock)
             {
                 // Wait for unlock
+            }
+
+            if (CacheData.BannedUsers
+                .SingleOrDefault(x => x.TelegramUserId == userToBan) != null)
+            {
+                MessageQueueManager.EnqueueMessage(
+                    new ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        Text = CacheData.GetTranslation("en", "bb_command_alreadylisted")
+                    });
+
+                return;
             }
             
             try
