@@ -120,6 +120,8 @@ namespace Unifiedban.Terminal
         }
         private static void DisposeAll()
         {
+            CacheData.IsDisposing = true;
+            Bot.Manager.Dispose();
             if (backgroundJobServer != null)
             {
                 ClearHangfireJobs();
@@ -127,7 +129,6 @@ namespace Unifiedban.Terminal
             }
             Bot.MessageQueueManager.Dispose();
             Bot.CommandQueueManager.Dispose();
-            Bot.Manager.Dispose();
             Utils.ConfigTools.Dispose();
             Utils.UserTools.Dispose();
         }
