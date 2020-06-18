@@ -49,7 +49,7 @@ namespace Unifiedban.Terminal.Bot.Command
                         $"Used *CPU* is {Math.Round(GetCpuUsageForProcess().Result, 2)}%\n" +
                         $"*Database* status is {SQLStatus}\n" +
                         $"*Environment* is {env}\n" +
-                        $"*Messages since start:* {CacheData.HandledMessages}" +
+                        $"*Messages since start:* {CacheData.HandledMessages}\n" +
                         $"*Blacklist count:* {CacheData.BannedUsers.Count()}"
                 });
         }
