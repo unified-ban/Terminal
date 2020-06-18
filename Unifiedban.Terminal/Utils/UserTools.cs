@@ -51,10 +51,6 @@ namespace Unifiedban.Terminal.Utils
             TrustFactorLog.TrustFactorAction action,
             int actionTakenBy)
         {
-            lock (trustFactorLock)
-            {
-                // Wait for unlock
-            }
             int penality = 0;
             switch (action)
             {
@@ -73,25 +69,30 @@ namespace Unifiedban.Terminal.Utils
                     break;
             }
 
-            if (!CacheData.TrustFactors.ContainsKey(telegramUserId))
-            {
-                Models.User.TrustFactor newTrustFactor = tfl.Add(telegramUserId, -2);
-                if(newTrustFactor == null)
-                {
-                    Bot.Manager.BotClient.SendTextMessageAsync(
-                    chatId: CacheData.ControlChatId,
-                    parseMode: ParseMode.Markdown,
-                    text: String.Format(
-                        "ERROR: Impossible to record Trust Factor for user id {0} !!.",
-                        telegramUserId));
 
-                    return;
+            lock (trustFactorLock)
+            {
+                if (!CacheData.TrustFactors.ContainsKey(telegramUserId))
+                {
+                    TrustFactor newTrustFactor = tfl.Add(telegramUserId, -2);
+                    if (newTrustFactor == null)
+                    {
+                        Manager.BotClient.SendTextMessageAsync(
+                            chatId: CacheData.ControlChatId,
+                            parseMode: ParseMode.Markdown,
+                            text: String.Format(
+                                "ERROR: Impossible to record Trust Factor for user id {0} !!.",
+                                telegramUserId));
+
+                        return;
+                    }
+
+                    CacheData.TrustFactors.Add(telegramUserId, newTrustFactor);
                 }
-                CacheData.TrustFactors.Add(telegramUserId, newTrustFactor);
+
+                CacheData.TrustFactors[telegramUserId].Points += penality;
             }
 
-            CacheData.TrustFactors[telegramUserId].Points += penality;
-            
             MessageQueueManager.EnqueueLog(new ChatMessage()
             {
                 ParseMode = ParseMode.Markdown,
@@ -114,7 +115,7 @@ namespace Unifiedban.Terminal.Utils
                 Action = action,
                 DateTime =  DateTime.UtcNow,
                 TrustFactorId = CacheData.TrustFactors[telegramUserId].TrustFactorId,
-                ActionTakenBy = Bot.Manager.MyId
+                ActionTakenBy = Manager.MyId
             });
         }
         
@@ -297,6 +298,20 @@ namespace Unifiedban.Terminal.Utils
             lock (blacklistLock)
             {
                 // Wait for unlock
+            }
+
+            if (CacheData.BannedUsers
+                .SingleOrDefault(x => x.TelegramUserId == userToBan) != null)
+            {
+                MessageQueueManager.EnqueueMessage(
+                    new ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        Text = CacheData.GetTranslation("en", "bb_command_alreadylisted")
+                    });
+
+                return;
             }
             
             try
