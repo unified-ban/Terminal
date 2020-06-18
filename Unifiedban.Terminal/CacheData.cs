@@ -16,7 +16,6 @@ namespace Unifiedban.Terminal
         // [[ Program control ]]
         public static string LoggerName = "Unifiedban-Terminal";
         public static bool FatalError = false;
-        public static bool IsDisposing = false;
         public static IConfigurationRoot Configuration;
         public static DateTime StartupDateTimeUtc = DateTime.UtcNow;
         public static bool AnswerInvalidCommand = false;
