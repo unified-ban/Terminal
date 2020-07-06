@@ -17,7 +17,7 @@ namespace Unifiedban.Terminal.Bot.Command
     {
         public void Execute(Message message)
         {
-            if (!Utils.BotTools.IsUserOperator(message.From.Id, Models.Operator.Levels.Advanced))
+            if (!Utils.BotTools.IsUserOperator(message.From.Id, Models.Operator.Levels.Basic))
             {
                 MessageQueueManager.EnqueueMessage(
                     new Models.ChatMessage()
