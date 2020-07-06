@@ -133,6 +133,19 @@ namespace Unifiedban.Terminal.Utils
                 return false;
             }
             
+            bool blacklistEnabled = false;
+            ConfigurationParameter blacklistConfig = CacheData.GroupConfigs[message.Chat.Id]
+                .Where(x => x.ConfigurationParameterId == "Blacklist")
+                .FirstOrDefault();
+            if (blacklistConfig != null)
+                if (blacklistConfig.Value.ToLower() == "true")
+                    blacklistEnabled = true;
+
+            if (!blacklistEnabled)
+            {
+                return false;
+            }
+            
             if (CacheData.BannedUsers
                 .Where(x => x.TelegramUserId == message.From.Id).Count() > 0)
             {
