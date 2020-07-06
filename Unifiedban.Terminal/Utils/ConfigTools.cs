@@ -194,6 +194,30 @@ namespace Unifiedban.Terminal.Utils
 
                 HandleWsCommand(dashboardUserId, groupId, parameter, value);
             });
+            
+            connection.On<string, string, string, bool>("ToggleStatus", 
+                (dashboardUserId, groupId, parameter, value) =>
+                {
+                    if (CacheData.FatalError ||
+                        CacheData.IsDisposing)
+                    {
+                        return;
+                    }
+
+                    TelegramGroup group = CacheData.Groups.Values
+                        .SingleOrDefault(x => x.GroupId == groupId);
+                    if (group == null)
+                    {
+                        return;
+                    }
+
+                    if (!UserTools.CanHandleGroup(dashboardUserId, groupId))
+                    {
+                        return;
+                    }
+
+                    group.State = value ? TelegramGroup.Status.Active : TelegramGroup.Status.Inactive;
+                });
         }
 
         private static void HandleWsCommand(string dashboardUserId, string groupId, string parameter, string value)
@@ -207,6 +231,26 @@ namespace Unifiedban.Terminal.Utils
 
             if (!UserTools.CanHandleGroup(dashboardUserId, groupId))
             {
+                return;
+            }
+
+            if (parameter == "WelcomeText")
+            {
+                CacheData.Groups[group.TelegramChatId].WelcomeText = value;
+                return;
+            }
+            else if (parameter == "RulesText") 
+            {
+                CacheData.Groups[group.TelegramChatId].RulesText = value;
+                return;
+            }
+            else if (parameter == "ReportChatId")
+            {
+                if (!Int64.TryParse(value, out long reportChatId))
+                {
+                    return;
+                }
+                CacheData.Groups[group.TelegramChatId].ReportChatId = reportChatId;
                 return;
             }
 
