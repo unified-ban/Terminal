@@ -3,10 +3,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
+using Unifiedban.Models;
 
 namespace Unifiedban.Terminal.Bot.Command
 {
@@ -34,7 +33,15 @@ namespace Unifiedban.Terminal.Bot.Command
 #endif
                 return false;
             }
-
+            
+            await Task.Run(() => Utils.LogTools.AddOperationLog(new OperationLog()
+            {
+                UtcDate = DateTime.UtcNow,
+                GroupId = CacheData.Groups[message.Chat.Id].GroupId,
+                TelegramUserId = message.From.Id,
+                Action = command,
+                Parameters = command.Contains(" ") ? message.Text.Substring(command.Length + 1) : ""
+            }));
             await Task.Run(() => parsedCommand.Execute(message));
             return true;
         }

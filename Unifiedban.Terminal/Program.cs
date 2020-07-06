@@ -104,6 +104,7 @@ namespace Unifiedban.Terminal
             Utils.ConfigTools.Initialize();
             Utils.ChatTools.Initialize();
             Utils.UserTools.Initialize();
+            Utils.LogTools.Initialize();
 #if DEBUG
             TestArea.DoTest();
 #endif
@@ -131,6 +132,7 @@ namespace Unifiedban.Terminal
             Bot.CommandQueueManager.Dispose();
             Utils.ConfigTools.Dispose();
             Utils.UserTools.Dispose();
+            Utils.LogTools.Dispose();
         }
 
         static void InitializeHangfireServer()

@@ -39,7 +39,7 @@ namespace Unifiedban.Terminal.Utils
             RecurringJob.AddOrUpdate("LogTools_SyncSystemLog", () => SyncSystemLog(), "0/30 * * ? * *");
             RecurringJob.AddOrUpdate("LogTools_SyncActionLog", () => SyncActionLog(), "0/30 * * ? * *");
             RecurringJob.AddOrUpdate("LogTools_SyncTrustFactorLog", () => SyncTrustFactorLog(), "0/30 * * ? * *");
-            RecurringJob.AddOrUpdate("LogTools_SyncOperatorLog", () => SyncOperatorLog(), "0/30 * * ? * *");
+            RecurringJob.AddOrUpdate("LogTools_SyncOperationLog", () => SyncOperationLog(), "0/30 * * ? * *");
             RecurringJob.AddOrUpdate("LogTools_SyncSupportSessionLog", () => SyncSupportSessionLog(), "0/30 * * ? * *");
         }
 
@@ -48,7 +48,7 @@ namespace Unifiedban.Terminal.Utils
             SyncSystemLog();
             SyncActionLog();
             SyncTrustFactorLog();
-            SyncOperatorLog();
+            SyncOperationLog();
             SyncSupportSessionLog();
         }
         
@@ -69,10 +69,10 @@ namespace Unifiedban.Terminal.Utils
         public static void SyncActionLog()
         {
             List<ActionLog> logsToSync = new List<ActionLog>();
-            lock (systemLogLock)
+            lock (actionLogLock)
             {
                 logsToSync = new List<ActionLog>(actionLogs);
-                systemLogs.Clear();
+                actionLogs.Clear();
             }
             
             if (logsToSync.Count() != 0)
@@ -83,10 +83,10 @@ namespace Unifiedban.Terminal.Utils
         public static void SyncTrustFactorLog()
         {
             List<TrustFactorLog> logsToSync = new List<TrustFactorLog>();
-            lock (systemLogLock)
+            lock (trustFactorLogs)
             {
                 logsToSync = new List<TrustFactorLog>(trustFactorLogs);
-                systemLogs.Clear();
+                trustFactorLogs.Clear();
             }
             
             if (logsToSync.Count() != 0)
@@ -94,24 +94,27 @@ namespace Unifiedban.Terminal.Utils
                 tfll.Add(logsToSync, -2);
             }
         }
-        public static void SyncOperatorLog()
+        public static void SyncOperationLog()
         {
             List<OperationLog> logsToSync = new List<OperationLog>();
-            lock (systemLogLock)
+            lock (operatorLogLock)
             {
                 logsToSync = new List<OperationLog>(operationLogs);
-                systemLogs.Clear();
+                operationLogs.Clear();
             }
             
             if (logsToSync.Count() != 0)
             {
-                oll.Add(logsToSync, -2);
+                foreach (var log in logsToSync)
+                {
+                    oll.Add(log, -2);
+                }
             }
         }
         public static void SyncSupportSessionLog()
         {
             List<SupportSessionLog> logsToSync = new List<SupportSessionLog>();
-            lock (systemLogLock)
+            lock (supportSessionLogLock)
             {
                 logsToSync = new List<SupportSessionLog>(supportSessionLogs);
                 systemLogs.Clear();
@@ -132,28 +135,28 @@ namespace Unifiedban.Terminal.Utils
         }
         public static void AddActionLog(ActionLog log)
         {
-            lock (systemLogLock)
+            lock (actionLogLock)
             {
                 actionLogs.Add(log);
             }
         }
         public static void AddTrustFactorLog(TrustFactorLog log)
         {
-            lock (systemLogLock)
+            lock (trustFactorLogLock)
             {
                 trustFactorLogs.Add(log);
             }
         }
-        public static void AddOperatorLog(OperationLog log)
+        public static void AddOperationLog(OperationLog log)
         {
-            lock (systemLogLock)
+            lock (operationLogs)
             {
                 operationLogs.Add(log);
             }
         }
         public static void AddSupportSessionLog(SupportSessionLog log)
         {
-            lock (systemLogLock)
+            lock (supportSessionLogLock)
             {
                 supportSessionLogs.Add(log);
             }
