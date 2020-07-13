@@ -33,6 +33,13 @@ namespace Unifiedban.Terminal.Bot.Command
 #endif
                 return false;
             }
+
+            string parameters = message.Text.Contains(" ") ? "a- " + message.Text.Substring(command.Length + 1) : "";
+            
+            if (message.ReplyToMessage != null && !message.Text.Contains(" "))
+            {
+                parameters = " r- " + message.ReplyToMessage.MessageId.ToString();
+            }
             
             await Task.Run(() => Utils.LogTools.AddOperationLog(new OperationLog()
             {
@@ -40,7 +47,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 GroupId = CacheData.Groups[message.Chat.Id].GroupId,
                 TelegramUserId = message.From.Id,
                 Action = command,
-                Parameters = command.Contains(" ") ? message.Text.Substring(command.Length + 1) : ""
+                Parameters = parameters.Trim()
             }));
             await Task.Run(() => parsedCommand.Execute(message));
             return true;
