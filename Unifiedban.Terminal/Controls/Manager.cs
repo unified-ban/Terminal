@@ -45,7 +45,7 @@ namespace Unifiedban.Terminal.Controls
         {
             foreach (var plugin in CacheData.PreControlsPlugins)
             {
-                if (!plugin.Execute(message, MessageQueueManager.EnqueueMessage))
+                if (!plugin.Execute(message, MessageQueueManager.EnqueueMessage, Bot.Manager.BotClient))
                 {
                     return;
                 }
@@ -83,7 +83,7 @@ namespace Unifiedban.Terminal.Controls
             
             foreach (var plugin in CacheData.PostControlsPlugins)
             {
-                if (!plugin.Execute(message, MessageQueueManager.EnqueueMessage))
+                if (!plugin.Execute(message, MessageQueueManager.EnqueueMessage, Bot.Manager.BotClient))
                 {
                     return;
                 }
@@ -91,7 +91,7 @@ namespace Unifiedban.Terminal.Controls
             
             foreach (var plugin in CacheData.PreFiltersPlugins)
             {
-                if (!plugin.Execute(message, MessageQueueManager.EnqueueMessage))
+                if (!plugin.Execute(message, MessageQueueManager.EnqueueMessage, Bot.Manager.BotClient))
                 {
                     return;
                 }
@@ -128,7 +128,7 @@ namespace Unifiedban.Terminal.Controls
             
             foreach (var plugin in CacheData.PostFiltersPlugins)
             {
-                if (!plugin.Execute(message, MessageQueueManager.EnqueueMessage))
+                if (!plugin.Execute(message, MessageQueueManager.EnqueueMessage, Bot.Manager.BotClient))
                 {
                     return;
                 }

@@ -7,7 +7,9 @@ using Hangfire;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using Unifiedban.BusinessLogic.Group;
 using Unifiedban.Models;
+using Unifiedban.Models.Group;
 using Unifiedban.Models.User;
 using Unifiedban.Terminal.Bot;
 
@@ -20,6 +22,10 @@ namespace Unifiedban.Terminal.Utils
         static object trustFactorLock = new object();
         private static BusinessLogic.User.BannedLogic bl =
             new BusinessLogic.User.BannedLogic();
+        private static DashboardUserLogic dul =
+            new DashboardUserLogic();
+        private static DashboardPermissionLogic dpl =
+            new DashboardPermissionLogic();
         static object blacklistLock = new object();
         static List<Banned> newBans = new List<Banned>();
 
@@ -127,6 +133,19 @@ namespace Unifiedban.Terminal.Utils
                 return false;
             }
             
+            bool blacklistEnabled = false;
+            ConfigurationParameter blacklistConfig = CacheData.GroupConfigs[message.Chat.Id]
+                .Where(x => x.ConfigurationParameterId == "Blacklist")
+                .FirstOrDefault();
+            if (blacklistConfig != null)
+                if (blacklistConfig.Value.ToLower() == "true")
+                    blacklistEnabled = true;
+
+            if (!blacklistEnabled)
+            {
+                return false;
+            }
+            
             if (CacheData.BannedUsers
                 .Where(x => x.TelegramUserId == message.From.Id).Count() > 0)
             {
@@ -210,7 +229,7 @@ namespace Unifiedban.Terminal.Utils
                         
                         try
                         {
-                            Bot.Manager.BotClient.RestrictChatMemberAsync(
+                            Manager.BotClient.RestrictChatMemberAsync(
                                     message.Chat.Id,
                                     member.Id,
                                     new ChatPermissions()
@@ -225,9 +244,10 @@ namespace Unifiedban.Terminal.Utils
                                         CanSendPolls = false
                                     }
                                 );
-                            Bot.Manager.BotClient.KickChatMemberAsync(message.Chat.Id, member.Id);
+                            Manager.BotClient.KickChatMemberAsync(message.Chat.Id, member.Id,
+                                DateTime.UtcNow.AddMinutes(-5));
                             
-                            Bot.Manager.BotClient.SendTextMessageAsync(
+                            Manager.BotClient.SendTextMessageAsync(
                                 chatId: CacheData.ControlChatId,
                                 parseMode: ParseMode.Markdown,
                                 text: String.Format(
@@ -248,7 +268,7 @@ namespace Unifiedban.Terminal.Utils
                         catch (Exception ex)
                         {
                             Console.WriteLine(ex.Message);
-                            Bot.Manager.BotClient.SendTextMessageAsync(
+                            Manager.BotClient.SendTextMessageAsync(
                                 chatId: CacheData.ControlChatId,
                                 parseMode: ParseMode.Markdown,
                                 text: String.Format(
@@ -435,6 +455,22 @@ namespace Unifiedban.Terminal.Utils
                         Guid.NewGuid())
                 );
             }
+        }
+        public static bool CanHandleGroup(string dashboardUserId, string groupId)
+        {
+            DashboardUser du = dul.GetById(dashboardUserId);
+            if (du == null)
+            {
+                return false;
+            }
+
+            if (BotTools.IsUserOperator(du.TelegramUserId))
+            {
+                return true;
+            }
+
+            return dpl.GetGroups(dashboardUserId)
+                .SingleOrDefault(x => x.GroupId == groupId) != null;
         }
     }
 }

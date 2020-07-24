@@ -5,10 +5,14 @@
 using Hangfire;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Timers;
+using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.Configuration;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using Unifiedban.Models.Group;
 
 namespace Unifiedban.Terminal.Utils
 {
@@ -18,6 +22,9 @@ namespace Unifiedban.Terminal.Utils
             new BusinessLogic.Group.TelegramGroupLogic();
         static BusinessLogic.Group.NightScheduleLogic nsl =
             new BusinessLogic.Group.NightScheduleLogic();
+        
+        static Timer keepWSAlive;
+        static HubConnection connection;
 
         public static void Initialize()
         {
@@ -35,6 +42,17 @@ namespace Unifiedban.Terminal.Utils
                 Message = "Config Tools initialized",
                 UserId = -2
             });
+            
+            keepWSAlive = new Timer(1000 * 20);
+            keepWSAlive.Elapsed += KeepWSAliveOnElapsed;
+            keepWSAlive.AutoReset = true;
+
+            connectToHub();
+        }
+
+        private static void KeepWSAliveOnElapsed(object sender, ElapsedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         public static void Dispose()
@@ -43,6 +61,12 @@ namespace Unifiedban.Terminal.Utils
             SyncGroupsConfigToDatabase();
             SyncWelcomeAndRulesText();
             SyncNightScheduleToDatabase();
+            
+            keepWSAlive.Stop();
+            if (connection.State == HubConnectionState.Connected)
+            {
+                connection.StopAsync().Wait();
+            }
         }
 
         public static void SyncGroupsToDatabase()
@@ -105,7 +129,6 @@ namespace Unifiedban.Terminal.Utils
             }
         }
         
-
         public static bool UpdateRulesText(long groupId, string text)
         {
             try
@@ -142,6 +165,105 @@ namespace Unifiedban.Terminal.Utils
             {
                 nsl.Update(nightSchedule, -2);
             }
+        }
+
+        private static void connectToHub()
+        {
+            if (CacheData.FatalError ||
+                CacheData.IsDisposing)
+            {
+                return;
+            }
+            
+            connection = new HubConnectionBuilder()
+                .WithUrl(CacheData.Configuration["HubServerAddress"])
+                .WithAutomaticReconnect()
+                .Build();
+
+            connection.StartAsync().Wait();
+            connection.InvokeAsync("Identification", CacheData.Configuration["HubServerToken"]);
+
+            connection.On<string, string, string, string>("UpdateSetting", 
+                (dashboardUserId, groupId, parameter, value) =>
+            {
+                if (CacheData.FatalError ||
+                    CacheData.IsDisposing)
+                {
+                    return;
+                }
+
+                HandleWsCommand(dashboardUserId, groupId, parameter, value);
+            });
+            
+            connection.On<string, string, string, bool>("ToggleStatus", 
+                (dashboardUserId, groupId, parameter, value) =>
+                {
+                    if (CacheData.FatalError ||
+                        CacheData.IsDisposing)
+                    {
+                        return;
+                    }
+
+                    TelegramGroup group = CacheData.Groups.Values
+                        .SingleOrDefault(x => x.GroupId == groupId);
+                    if (group == null)
+                    {
+                        return;
+                    }
+
+                    if (!UserTools.CanHandleGroup(dashboardUserId, groupId))
+                    {
+                        return;
+                    }
+
+                    group.State = value ? TelegramGroup.Status.Active : TelegramGroup.Status.Inactive;
+                });
+        }
+
+        private static void HandleWsCommand(string dashboardUserId, string groupId, string parameter, string value)
+        {
+            TelegramGroup group = CacheData.Groups.Values
+                .SingleOrDefault(x => x.GroupId == groupId);
+            if (group == null)
+            {
+                return;
+            }
+
+            if (!UserTools.CanHandleGroup(dashboardUserId, groupId))
+            {
+                return;
+            }
+
+            if (parameter == "WelcomeText")
+            {
+                CacheData.Groups[group.TelegramChatId].WelcomeText = value;
+                return;
+            }
+            else if (parameter == "RulesText") 
+            {
+                CacheData.Groups[group.TelegramChatId].RulesText = value;
+                return;
+            }
+            else if (parameter == "ReportChatId")
+            {
+                if (!Int64.TryParse(value, out long reportChatId))
+                {
+                    return;
+                }
+                CacheData.Groups[group.TelegramChatId].ReportChatId = reportChatId;
+                return;
+            }
+
+            ConfigurationParameter config = CacheData.GroupConfigs[group.TelegramChatId]
+                .Where(x => x.ConfigurationParameterId == parameter)
+                .SingleOrDefault();
+            if (config == null)
+                return;
+
+            CacheData.GroupConfigs[group.TelegramChatId]
+                [CacheData.GroupConfigs[group.TelegramChatId]
+                    .IndexOf(config)]
+                .Value = value;
         }
     }
 }

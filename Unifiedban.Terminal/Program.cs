@@ -35,7 +35,7 @@ namespace Unifiedban.Terminal
             // Load configuration from file
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Environment.CurrentDirectory)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
             CacheData.Configuration = builder.Build();
             CacheData.LoggerName = CacheData.Configuration["LoggerName"];
 
@@ -100,6 +100,7 @@ namespace Unifiedban.Terminal
             Controls.Manager.Initialize();
             Bot.MessageQueueManager.Initialize();
             Bot.CommandQueueManager.Initialize();
+            Utils.LogTools.Initialize();
             Bot.Manager.Initialize(CacheData.Configuration["APIKEY"]);
             Utils.ConfigTools.Initialize();
             Utils.ChatTools.Initialize();
@@ -120,6 +121,8 @@ namespace Unifiedban.Terminal
         }
         private static void DisposeAll()
         {
+            CacheData.IsDisposing = true;
+            Bot.Manager.Dispose();
             if (backgroundJobServer != null)
             {
                 ClearHangfireJobs();
@@ -127,9 +130,9 @@ namespace Unifiedban.Terminal
             }
             Bot.MessageQueueManager.Dispose();
             Bot.CommandQueueManager.Dispose();
-            Bot.Manager.Dispose();
             Utils.ConfigTools.Dispose();
             Utils.UserTools.Dispose();
+            Utils.LogTools.Dispose();
         }
 
         static void InitializeHangfireServer()

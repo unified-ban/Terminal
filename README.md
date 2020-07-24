@@ -13,9 +13,9 @@ Follow the live development on [Twitch](https://www.twitch.tv/prometheus_studio/
 Support us on [Twitter](https://twitter.com/unifiedban/)
 
 ## Badges
-[![License Badge](https://img.shields.io/badge/license-MPL--2.0-blue)](https://github.com/unified-ban/Terminal/blob/master/LICENSE) ![Development Version](https://img.shields.io/badge/DevVersion-beta.43-blue) ![Stable Version](https://img.shields.io/badge/StableVersion-3.1.3-red)
+[![License Badge](https://img.shields.io/badge/license-MPL--2.0-blue)](https://github.com/unified-ban/Terminal/blob/master/LICENSE) ![Development Version](https://img.shields.io/badge/DevVersion-beta.43-blue) ![Development Version](https://img.shields.io/badge/StableVersion-3.1.3-red)
 
 # Sponsor
 unified/ban is a project by [Mirko Brombin](https://mirko.pm/) and [Prometheus Studio](https://www.twitch.tv/prometheus_studio/).\
 It is officially supported by [SubPixel](https://subpixel.it) and [JetBrains](https://www.jetbrains.com/?from=unifiedban)\
-<a href="https://www.jetbrains.com/?from=unifiedban"><img width="74" src="https://unifiedban.solutions/static/images/jetbrains-logos/jetbrains-variant-4.svg" /></a>
+<a href="https://www.jetbrains.com/?from=unifiedban"><img width="74" src="https://unifiedban.solutions/images/jetbrains-logos/jetbrains-variant-4.svg" /></a>

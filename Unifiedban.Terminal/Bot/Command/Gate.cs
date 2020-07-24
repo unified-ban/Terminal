@@ -102,34 +102,55 @@ namespace Unifiedban.Terminal.Bot.Command
                 .IndexOf(config)]
                 .Value = newStatus ? "true" : "false";
 
-            if (!CacheData.NightSchedules.ContainsKey(CacheData.Groups[message.Chat.Id].GroupId))
+            if (newStatus)
             {
-                MessageQueueManager.EnqueueMessage(
-                    new Models.ChatMessage()
-                    {
-                        Timestamp = DateTime.UtcNow,
-                        Chat = message.Chat,
-                        ParseMode = ParseMode.Markdown,
-                        Text = CacheData.GetTranslation("en", "command_gate_missing_schedule")
-                    });
-                return;
-            }
-            
-            Models.Group.NightSchedule nightSchedule = 
-                CacheData.NightSchedules[CacheData.Groups[message.Chat.Id].GroupId];
 
-            if(!nightSchedule.UtcStartDate.HasValue || !nightSchedule.UtcEndDate.HasValue)
-            {
-                MessageQueueManager.EnqueueMessage(
-                    new Models.ChatMessage()
-                    {
-                        Timestamp = DateTime.UtcNow,
-                        Chat = message.Chat,
-                        ParseMode = ParseMode.Markdown,
-                        Text = CacheData.GetTranslation("en", "command_gate_missing_schedule")
-                    });
-                return;
+                if (!CacheData.NightSchedules.ContainsKey(CacheData.Groups[message.Chat.Id].GroupId))
+                {
+                    MessageQueueManager.EnqueueMessage(
+                        new Models.ChatMessage()
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            Chat = message.Chat,
+                            ParseMode = ParseMode.Markdown,
+                            Text = CacheData.GetTranslation("en", "command_gate_missing_schedule")
+                        });
+                    return;
+                }
+
+                Models.Group.NightSchedule nightSchedule =
+                    CacheData.NightSchedules[CacheData.Groups[message.Chat.Id].GroupId];
+
+                if (!nightSchedule.UtcStartDate.HasValue || !nightSchedule.UtcEndDate.HasValue)
+                {
+                    MessageQueueManager.EnqueueMessage(
+                        new Models.ChatMessage()
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            Chat = message.Chat,
+                            ParseMode = ParseMode.Markdown,
+                            Text = CacheData.GetTranslation("en", "command_gate_missing_schedule")
+                        });
+                    return;
+                }
+
+                TimeSpan diffStartDays = DateTime.UtcNow.Date - nightSchedule.UtcStartDate.Value.Date;
+                if (diffStartDays.Days != 0)
+                {
+                    CacheData.NightSchedules[CacheData.Groups[message.Chat.Id].GroupId].UtcStartDate =
+                        CacheData.NightSchedules[CacheData.Groups[message.Chat.Id].GroupId].UtcStartDate.Value
+                            .Add(diffStartDays);
+                }
+                
+                TimeSpan diffEndDays = DateTime.UtcNow.Date - nightSchedule.UtcEndDate.Value.Date;
+                if (diffEndDays.Days != 0)
+                {
+                    CacheData.NightSchedules[CacheData.Groups[message.Chat.Id].GroupId].UtcEndDate =
+                        CacheData.NightSchedules[CacheData.Groups[message.Chat.Id].GroupId].UtcEndDate.Value
+                            .Add(diffEndDays);
+                }
             }
+
             CacheData.NightSchedules[CacheData.Groups[message.Chat.Id].GroupId]
                 .State = newStatus ? Models.Group.NightSchedule.Status.Programmed
                     : Models.Group.NightSchedule.Status.Deactivated;
