@@ -35,7 +35,7 @@ namespace Unifiedban.Terminal
             // Load configuration from file
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Environment.CurrentDirectory)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
             CacheData.Configuration = builder.Build();
             CacheData.LoggerName = CacheData.Configuration["LoggerName"];
 
@@ -100,11 +100,11 @@ namespace Unifiedban.Terminal
             Controls.Manager.Initialize();
             Bot.MessageQueueManager.Initialize();
             Bot.CommandQueueManager.Initialize();
+            Utils.LogTools.Initialize();
             Bot.Manager.Initialize(CacheData.Configuration["APIKEY"]);
             Utils.ConfigTools.Initialize();
             Utils.ChatTools.Initialize();
             Utils.UserTools.Initialize();
-            Utils.LogTools.Initialize();
 #if DEBUG
             TestArea.DoTest();
 #endif
