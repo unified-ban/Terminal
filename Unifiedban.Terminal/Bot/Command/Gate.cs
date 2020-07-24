@@ -134,20 +134,27 @@ namespace Unifiedban.Terminal.Bot.Command
                     return;
                 }
 
-                TimeSpan diffStartDays = DateTime.UtcNow.Date - nightSchedule.UtcStartDate.Value.Date;
-                if (diffStartDays.Days != 0)
+                TimeSpan diffStartDate = DateTime.UtcNow - nightSchedule.UtcStartDate.Value;
+                if (diffStartDate.Days > 0)
                 {
-                    CacheData.NightSchedules[CacheData.Groups[message.Chat.Id].GroupId].UtcStartDate =
-                        CacheData.NightSchedules[CacheData.Groups[message.Chat.Id].GroupId].UtcStartDate.Value
-                            .Add(diffStartDays);
+                    CacheData.NightSchedules[nightSchedule.GroupId].UtcStartDate =
+                        CacheData.NightSchedules[nightSchedule.GroupId].UtcStartDate.Value
+                            .AddDays(diffStartDate.Days);
                 }
-                
-                TimeSpan diffEndDays = DateTime.UtcNow.Date - nightSchedule.UtcEndDate.Value.Date;
-                if (diffEndDays.Days != 0)
+
+                TimeSpan diffEndDays = DateTime.UtcNow - nightSchedule.UtcEndDate.Value;
+                if (diffEndDays.Days > 0)
                 {
-                    CacheData.NightSchedules[CacheData.Groups[message.Chat.Id].GroupId].UtcEndDate =
-                        CacheData.NightSchedules[CacheData.Groups[message.Chat.Id].GroupId].UtcEndDate.Value
-                            .Add(diffEndDays);
+                    CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate =
+                        CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate.Value
+                            .AddDays(diffEndDays.Days);
+
+                    if (CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate.Value < DateTime.UtcNow)
+                    {
+                        CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate =
+                        CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate.Value
+                            .AddDays(1);
+                    }
                 }
             }
 

@@ -184,12 +184,13 @@ namespace Unifiedban.Terminal.Utils
 
                 if (_firstCycle)
                 {
-                    TimeSpan diffEndDays = DateTime.UtcNow.Date - nightSchedule.UtcEndDate.Value.Date;
-                    if (diffEndDays.Days != 0)
+                    TimeSpan diffStartDate = DateTime.UtcNow - nightSchedule.UtcStartDate.Value;
+                    if (diffStartDate.Days > 0)
                     {
-                        CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate =
-                            CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate.Value
-                                .Add(diffEndDays);
+                        CacheData.NightSchedules[nightSchedule.GroupId].UtcStartDate =
+                            CacheData.NightSchedules[nightSchedule.GroupId].UtcStartDate.Value
+                                .AddDays(diffStartDate.Days);
+                        continue;
                     }
                 }
 
@@ -233,6 +234,25 @@ namespace Unifiedban.Terminal.Utils
             {
                 if (CacheData.NightSchedules[nightSchedule.GroupId].State != Models.Group.NightSchedule.Status.Active)
                     continue;
+
+                if (_firstCycle)
+                {
+                    TimeSpan diffEndDays = DateTime.UtcNow - nightSchedule.UtcEndDate.Value;
+                    if (diffEndDays.Days > 0)
+                    {
+                        CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate =
+                            CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate.Value
+                                .AddDays(diffEndDays.Days);
+
+                        if (CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate.Value < DateTime.UtcNow.Date)
+                        {
+                            CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate =
+                            CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate.Value
+                                .AddDays(1);
+                        }
+                        continue;
+                    }
+                }
 
                 if (nightSchedule.UtcEndDate.Value <= DateTime.UtcNow)
                 {
