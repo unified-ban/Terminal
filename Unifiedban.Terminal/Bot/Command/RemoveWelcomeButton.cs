@@ -28,7 +28,7 @@ namespace Unifiedban.Terminal.Bot.Command
             }
 
             string[] arguments = message.Text.Split(" ");
-            if (arguments.Length != 2)
+            if (arguments.Length < 2)
             {
                 MessageQueueManager.EnqueueMessage(
                    new Models.ChatMessage()
@@ -43,7 +43,7 @@ namespace Unifiedban.Terminal.Bot.Command
 
             BusinessLogic.ButtonLogic buttonLogic = new BusinessLogic.ButtonLogic();
             Models.SystemLog.ErrorCodes removed = buttonLogic.Remove(CacheData.Groups[message.Chat.Id].GroupId,
-                arguments[1], -2);
+                message.Text.Remove(0, arguments[0].Length + 1), -2);
             if (removed == Models.SystemLog.ErrorCodes.Error)
             {
                 MessageQueueManager.EnqueueMessage(
