@@ -19,6 +19,7 @@ namespace Unifiedban.Terminal.Utils
     {
         static Dictionary<long, DateTime> lastOperatorSupportMsg = new Dictionary<long, DateTime>();
         static Dictionary<long, ChatPermissions> chatPermissionses = new Dictionary<long, ChatPermissions>();
+        private static bool _firstCycle = true;
         public static void Initialize()
         {
             RecurringJob.AddOrUpdate("ChatTools_CheckNightSchedule", () => CheckNightSchedule(), "0 * * ? * *");
@@ -171,6 +172,7 @@ namespace Unifiedban.Terminal.Utils
                     .ToList();
             CloseGroups(activeSchedules);
             OpenGroups(activeSchedules);
+            if(_firstCycle) _firstCycle = false;
         }
 
         private static void CloseGroups(List<Models.Group.NightSchedule> nightSchedules)
@@ -179,6 +181,17 @@ namespace Unifiedban.Terminal.Utils
             {
                 if (CacheData.NightSchedules[nightSchedule.GroupId].State != Models.Group.NightSchedule.Status.Programmed)
                     continue;
+
+                if (_firstCycle)
+                {
+                    TimeSpan diffEndDays = DateTime.UtcNow.Date - nightSchedule.UtcEndDate.Value.Date;
+                    if (diffEndDays.Days != 0)
+                    {
+                        CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate =
+                            CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate.Value
+                                .Add(diffEndDays);
+                    }
+                }
 
                 if(nightSchedule.UtcStartDate.Value <= DateTime.UtcNow)
                 {
