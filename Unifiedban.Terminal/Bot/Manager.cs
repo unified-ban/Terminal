@@ -66,15 +66,7 @@ namespace Unifiedban.Terminal.Bot
 
             BotClient.OnMessage += BotClient_OnMessage;
             BotClient.OnCallbackQuery += BotClient_OnCallbackQuery;
-            BotClient.StartReceiving();
-
-            BotClient.SendTextMessageAsync(
-                chatId: CacheData.ControlChatId,
-                parseMode: ParseMode.Markdown,
-                text: $"I'm here, Master.\n" +
-                    $"My *instance ID* is _{instanceId}_ " +
-                    $"and I'm running on *machine* _{currentHostname}_"
-            );
+            
             Console.Title = $"Unifiedban - Username: {me.Username} - Instance ID: {instanceId}";
 
 
@@ -87,6 +79,19 @@ namespace Unifiedban.Terminal.Bot
                 Message = "Bot Client initialized",
                 UserId = -2
             });
+        }
+
+        public static void StartReceiving()
+        {
+            BotClient.StartReceiving();
+
+            BotClient.SendTextMessageAsync(
+                chatId: CacheData.ControlChatId,
+                parseMode: ParseMode.Markdown,
+                text: $"I'm here, Master.\n" +
+                    $"My *instance ID* is _{instanceId}_ " +
+                    $"and I'm running on *machine* _{currentHostname}_"
+            );
         }
 
         public static void Dispose()

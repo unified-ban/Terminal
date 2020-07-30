@@ -95,16 +95,18 @@ namespace Unifiedban.Terminal
             BusinessLogic.OperatorLogic operatorLogic = new BusinessLogic.OperatorLogic();
             CacheData.Operators = new List<Models.Operator>(operatorLogic.Get());
 
+            Bot.Manager.Initialize(CacheData.Configuration["APIKEY"]);
             LoadCacheData();
             InitializeHangfireServer();
             Controls.Manager.Initialize();
             Bot.MessageQueueManager.Initialize();
             Bot.CommandQueueManager.Initialize();
             Utils.LogTools.Initialize();
-            Bot.Manager.Initialize(CacheData.Configuration["APIKEY"]);
             Utils.ConfigTools.Initialize();
             Utils.ChatTools.Initialize();
             Utils.UserTools.Initialize();
+
+            Bot.Manager.StartReceiving();
 #if DEBUG
             TestArea.DoTest();
 #endif
@@ -430,7 +432,36 @@ namespace Unifiedban.Terminal
                     {
                         if (type.BaseType == typeof(UBPlugin))
                         {
-                            Object o = Activator.CreateInstance(type);
+                            object o = null;
+
+                            ConstructorInfo? cWithAll = type.GetConstructor(new[] { typeof(Telegram.Bot.ITelegramBotClient),
+                                    typeof(string), typeof(string) });
+                            ConstructorInfo? cWithBotClient = type.GetConstructor(new[] { typeof(Telegram.Bot.ITelegramBotClient) });
+                            ConstructorInfo? cWithString = type.GetConstructor(new[] { typeof(string), typeof(string) });
+                            if (cWithAll != null)
+                            {
+                                ParameterInfo parameter = cWithAll.GetParameters()
+                                    .Where(x => x.Name == "hubServerAddress").SingleOrDefault();
+                                if (parameter != null)
+                                {
+                                    o = Activator.CreateInstance(type, Bot.Manager.BotClient,
+                                        CacheData.Configuration["HubServerAddress"], CacheData.Configuration["HubServerToken"]);
+                                }
+                            }
+                            else if (cWithBotClient != null)
+                            {
+                                o = Activator.CreateInstance(type, Bot.Manager.BotClient);
+                            }
+                            else if (cWithString != null)
+                            {
+                                o = Activator.CreateInstance(type, CacheData.Configuration["HubServerAddress"],
+                                    CacheData.Configuration["HubServerToken"]);
+                            }
+                            else
+                            {
+                                o = Activator.CreateInstance(type);
+                            }
+
                             UBPlugin plugin = (o as UBPlugin);
                             if (plugin == null)
                             {
