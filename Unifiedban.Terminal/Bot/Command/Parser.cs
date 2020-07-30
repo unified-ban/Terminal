@@ -40,15 +40,19 @@ namespace Unifiedban.Terminal.Bot.Command
             {
                 parameters = " r- " + message.ReplyToMessage.MessageId.ToString();
             }
-            
-            await Task.Run(() => Utils.LogTools.AddOperationLog(new OperationLog()
+
+            if (message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Group ||
+                message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Supergroup)
             {
-                UtcDate = DateTime.UtcNow,
-                GroupId = CacheData.Groups[message.Chat.Id].GroupId,
-                TelegramUserId = message.From.Id,
-                Action = command,
-                Parameters = parameters.Trim()
-            }));
+                await Task.Run(() => Utils.LogTools.AddOperationLog(new OperationLog()
+                {
+                    UtcDate = DateTime.UtcNow,
+                    GroupId = CacheData.Groups[message.Chat.Id].GroupId,
+                    TelegramUserId = message.From.Id,
+                    Action = command,
+                    Parameters = parameters.Trim()
+                }));
+            }
             await Task.Run(() => parsedCommand.Execute(message));
             return true;
         }
