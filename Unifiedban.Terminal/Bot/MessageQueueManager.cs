@@ -115,7 +115,9 @@ namespace Unifiedban.Terminal.Bot
                 || message.Chat.Type == ChatType.Supergroup)
             {
                 if (!GroupChats.ContainsKey(message.Chat.Id))
+                {
                     return;
+                }
                 GroupChats[message.Chat.Id]
                     .Queue
                     .Enqueue(message);
@@ -124,8 +126,10 @@ namespace Unifiedban.Terminal.Bot
                 || message.Chat.Type == ChatType.Channel)
             {
                 if (!PrivateChats.ContainsKey(message.Chat.Id))
-                    return;
-                PrivateChats[message.Chat.Id]
+                {
+                    PrivateChats.TryAdd(message.Chat.Id, new MessageQueue(message.Chat.Id, 60));
+                }
+                    PrivateChats[message.Chat.Id]
                     .Queue
                     .Enqueue(message);
             }
