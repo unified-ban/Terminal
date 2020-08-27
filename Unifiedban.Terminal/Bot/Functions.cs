@@ -360,11 +360,11 @@ namespace Unifiedban.Terminal.Bot
             if (updated == null)
                 return;
 
-            CacheData.Groups[message.Chat.Id].TelegramChatId = message.MigrateToChatId;
-            CacheData.Groups.Add(message.MigrateToChatId, CacheData.Groups[message.Chat.Id]);
-            CacheData.Groups.Remove(message.Chat.Id);
+            CacheData.Groups.Add(updated.TelegramChatId, updated);
             MessageQueueManager.AddGroupIfNotPresent(updated);
+            
             MessageQueueManager.RemoveGroupIfNotPresent(message.Chat.Id);
+            CacheData.Groups.Remove(message.Chat.Id);
         }
 
         public static void CacheUsername(Message message)
