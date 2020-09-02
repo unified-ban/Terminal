@@ -583,7 +583,7 @@ namespace Unifiedban.Terminal
                 });
             }
 
-            CacheData.FatalError = true;
+            //CacheData.FatalError = true;
             Console.ReadLine();
             Environment.Exit(0);
         }
