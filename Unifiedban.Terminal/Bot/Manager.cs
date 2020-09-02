@@ -183,8 +183,41 @@ namespace Unifiedban.Terminal.Bot
             {
                 MessageQueueManager.AddChatIfNotPresent(e.Message.Chat.Id);
             }
-            
-            if (!String.IsNullOrEmpty(e.Message.Text) &&
+
+            bool justAdded = false;
+            if (e.Message.NewChatMembers != null)
+            {
+                justAdded = e.Message.NewChatMembers.SingleOrDefault(x => x.Id == MyId) != null;
+            }
+
+            if (!justAdded && !isPrivateChat &&
+                !CacheData.Groups.ContainsKey(e.Message.Chat.Id))
+            {
+                string logMessage = String.Format(
+                    "*[Alert]*\n" +
+                    "Group *{0}* left due to missing group record in database.\n" +
+                    "⚠ do not open links you don't know ⚠\n" +
+                    "\nChat: `{1}`" +
+                    "\n\n*hash_code:* #UB{2}-{3}",
+                    e.Message.Chat.Title,
+                    e.Message.Chat.Id,
+                    e.Message.Chat.Id.ToString().Replace("-", ""),
+                    Guid.NewGuid());
+                MessageQueueManager.EnqueueLog(new Models.ChatMessage()
+                {
+                    ParseMode = ParseMode.Markdown,
+                    Text = logMessage
+                });
+
+                await BotClient.SendTextMessageAsync(e.Message.Chat.Id,
+                    "We're sorry but an error has occurred while retrieving this chat on our database.\n" +
+                    "Please add again the bot if you want to continue to use it.\n" +
+                    "For any doubt reach us in our support group @unifiedban_group");
+                await BotClient.LeaveChatAsync(e.Message.Chat.Id);
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(e.Message.Text) &&
                 !Utils.UserTools.KickIfInBlacklist(e.Message))
             {
                 bool isCommand = false;
