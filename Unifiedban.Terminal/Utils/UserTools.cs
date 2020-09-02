@@ -193,7 +193,29 @@ namespace Unifiedban.Terminal.Utils
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Data.Utils.Logging.AddLog(new SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "KickIfInBlacklist",
+                        Level = SystemLog.Levels.Error,
+                        Message = ex.Message,
+                        UserId = -1
+                    });
+
+                    if (ex.InnerException != null)
+                    {
+                        Data.Utils.Logging.AddLog(new SystemLog()
+                        {
+                            LoggerName = CacheData.LoggerName,
+                            Date = DateTime.Now,
+                            Function = "KickIfInBlacklist",
+                            Level = SystemLog.Levels.Error,
+                            Message = ex.Message,
+                            UserId = -1
+                        });
+                    }
+
                     Bot.Manager.BotClient.SendTextMessageAsync(
                         chatId: CacheData.ControlChatId,
                         parseMode: ParseMode.Markdown,
@@ -267,7 +289,29 @@ namespace Unifiedban.Terminal.Utils
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine(ex.Message);
+                            Data.Utils.Logging.AddLog(new SystemLog()
+                            {
+                                LoggerName = CacheData.LoggerName,
+                                Date = DateTime.Now,
+                                Function = "KickIfInBlacklist (2 args)",
+                                Level = SystemLog.Levels.Error,
+                                Message = ex.Message,
+                                UserId = -1
+                            });
+
+                            if (ex.InnerException != null)
+                            {
+                                Data.Utils.Logging.AddLog(new SystemLog()
+                                {
+                                    LoggerName = CacheData.LoggerName,
+                                    Date = DateTime.Now,
+                                    Function = "KickIfInBlacklist (2 args)",
+                                    Level = SystemLog.Levels.Error,
+                                    Message = ex.Message,
+                                    UserId = -1
+                                });
+                            }
+
                             Manager.BotClient.SendTextMessageAsync(
                                 chatId: CacheData.ControlChatId,
                                 parseMode: ParseMode.Markdown,

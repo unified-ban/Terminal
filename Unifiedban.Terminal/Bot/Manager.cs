@@ -90,7 +90,12 @@ namespace Unifiedban.Terminal.Bot
                 parseMode: ParseMode.Markdown,
                 text: $"I'm here, Master.\n" +
                     $"My *instance ID* is _{instanceId}_ " +
-                    $"and I'm running on *machine* _{currentHostname}_"
+                    $"and I'm running on *machine* _{currentHostname}_\n" +
+#if DEBUG
+                    $"- unified/ban BETA"
+#else
+                    $"- unified/ban"
+#endif
             );
         }
 
@@ -103,7 +108,12 @@ namespace Unifiedban.Terminal.Bot
                 text: $"I left, Master.\n" +
                     $"My *instance ID* is _{instanceId}_ " +
                     $"and I was running on *machine* _{currentHostname}_\n" +
-                    $"See you soon!"
+                    $"See you soon!\n" +
+#if DEBUG
+                    $"- unified/ban BETA"
+#else
+                    $"- unified/ban"
+#endif
             );
         }
 
@@ -173,8 +183,41 @@ namespace Unifiedban.Terminal.Bot
             {
                 MessageQueueManager.AddChatIfNotPresent(e.Message.Chat.Id);
             }
-            
-            if (!String.IsNullOrEmpty(e.Message.Text) &&
+
+            bool justAdded = false;
+            if (e.Message.NewChatMembers != null)
+            {
+                justAdded = e.Message.NewChatMembers.SingleOrDefault(x => x.Id == MyId) != null;
+            }
+
+            if (!justAdded && !isPrivateChat &&
+                !CacheData.Groups.ContainsKey(e.Message.Chat.Id))
+            {
+                string logMessage = String.Format(
+                    "*[Alert]*\n" +
+                    "Group *{0}* left due to missing group record in database.\n" +
+                    "⚠ do not open links you don't know ⚠\n" +
+                    "\nChat: `{1}`" +
+                    "\n\n*hash_code:* #UB{2}-{3}",
+                    e.Message.Chat.Title,
+                    e.Message.Chat.Id,
+                    e.Message.Chat.Id.ToString().Replace("-", ""),
+                    Guid.NewGuid());
+                MessageQueueManager.EnqueueLog(new Models.ChatMessage()
+                {
+                    ParseMode = ParseMode.Markdown,
+                    Text = logMessage
+                });
+
+                await BotClient.SendTextMessageAsync(e.Message.Chat.Id,
+                    "We're sorry but an error has occurred while retrieving this chat on our database.\n" +
+                    "Please add again the bot if you want to continue to use it.\n" +
+                    "For any doubt reach us in our support group @unifiedban_group");
+                await BotClient.LeaveChatAsync(e.Message.Chat.Id);
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(e.Message.Text) &&
                 !Utils.UserTools.KickIfInBlacklist(e.Message))
             {
                 bool isCommand = false;
@@ -198,16 +241,26 @@ namespace Unifiedban.Terminal.Bot
                     Controls.Manager.DoCheck(e.Message);
                 }
             }
-
             if (e.Message.NewChatMembers != null)
+            {
                 Functions.UserJoinedAction(e.Message);
+            }
             if (e.Message.LeftChatMember != null)
-                Functions.UserLeftAction(e.Message);                
+            {
+                Functions.UserLeftAction(e.Message);
+            }
 
             if (!String.IsNullOrEmpty(e.Message.MediaGroupId) ||
                 e.Message.Photo != null ||
                 e.Message.Document != null)
+            {
                 Controls.Manager.DoMediaCheck(e.Message);
+            }
+
+            if (!isPrivateChat && e.Message.NewChatTitle != null)
+            {
+                CacheData.Groups[e.Message.Chat.Id].Title = e.Message.NewChatTitle;
+            }
         }
     }
 }

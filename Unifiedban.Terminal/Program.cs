@@ -435,10 +435,27 @@ namespace Unifiedban.Terminal
                             object o = null;
 
                             ConstructorInfo? cWithAll = type.GetConstructor(new[] { typeof(Telegram.Bot.ITelegramBotClient),
+                                    typeof(string), typeof(string), typeof(string) });
+                            ConstructorInfo? cWithAllNoDb = type.GetConstructor(new[] { typeof(Telegram.Bot.ITelegramBotClient),
                                     typeof(string), typeof(string) });
                             ConstructorInfo? cWithBotClient = type.GetConstructor(new[] { typeof(Telegram.Bot.ITelegramBotClient) });
                             ConstructorInfo? cWithString = type.GetConstructor(new[] { typeof(string), typeof(string) });
                             if (cWithAll != null)
+                            {
+                                ParameterInfo parameter = cWithAll.GetParameters()
+                                    .Where(x => x.Name == "databaseConnectionString").SingleOrDefault();
+                                if (parameter != null)
+                                {
+                                    parameter = cWithAll.GetParameters()
+                                        .Where(x => x.Name == "hubServerAddress").SingleOrDefault();
+                                    if (parameter != null)
+                                    {
+                                        o = Activator.CreateInstance(type, Bot.Manager.BotClient, CacheData.Configuration["Database"],
+                                            CacheData.Configuration["HubServerAddress"], CacheData.Configuration["HubServerToken"]);
+                                    }
+                                }
+                            }
+                            else if (cWithAll != null)
                             {
                                 ParameterInfo parameter = cWithAll.GetParameters()
                                     .Where(x => x.Name == "hubServerAddress").SingleOrDefault();
@@ -583,7 +600,7 @@ namespace Unifiedban.Terminal
                 });
             }
 
-            CacheData.FatalError = true;
+            //CacheData.FatalError = true;
             Console.ReadLine();
             Environment.Exit(0);
         }

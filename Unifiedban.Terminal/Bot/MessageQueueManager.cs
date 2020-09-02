@@ -139,6 +139,10 @@ namespace Unifiedban.Terminal.Bot
             if (!isInitialized || isDisposing)
                 return;
 
+#if DEBUG
+            message.Text = message.Text.Replace("#UB", "UBB");
+#endif
+
             message.Chat = new Chat()
             {
                 Id = CacheData.ControlChatId,

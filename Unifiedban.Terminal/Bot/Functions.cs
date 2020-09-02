@@ -184,7 +184,7 @@ namespace Unifiedban.Terminal.Bot
                     }
                 }
 
-            if (rtlNameCheckEnabled)
+                if (rtlNameCheckEnabled)
                 {
                     Filters.FilterResult rtlCheck = RTLNameFilter.DoCheck(message,
                         member.FirstName + " " + member.LastName);
@@ -210,7 +210,28 @@ namespace Unifiedban.Terminal.Bot
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine(ex.Message);
+                            Data.Utils.Logging.AddLog(new SystemLog()
+                            {
+                                LoggerName = CacheData.LoggerName,
+                                Date = DateTime.Now,
+                                Function = "UserJoinedAction -> rtlNameCheckEnabled",
+                                Level = SystemLog.Levels.Error,
+                                Message = ex.Message,
+                                UserId = -1
+                            });
+
+                            if (ex.InnerException != null)
+                            {
+                                Data.Utils.Logging.AddLog(new SystemLog()
+                                {
+                                    LoggerName = CacheData.LoggerName,
+                                    Date = DateTime.Now,
+                                    Function = "UserJoinedAction -> rtlNameCheckEnabled",
+                                    Level = SystemLog.Levels.Error,
+                                    Message = ex.Message,
+                                    UserId = -1
+                                });
+                            }
                         }
 
                         continue;
@@ -343,7 +364,28 @@ namespace Unifiedban.Terminal.Bot
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Data.Utils.Logging.AddLog(new SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "UserJoinedAction",
+                        Level = SystemLog.Levels.Error,
+                        Message = ex.Message,
+                        UserId = -1
+                    });
+
+                    if(ex.InnerException != null)
+                    {
+                        Data.Utils.Logging.AddLog(new SystemLog()
+                        {
+                            LoggerName = CacheData.LoggerName,
+                            Date = DateTime.Now,
+                            Function = "UserJoinedAction",
+                            Level = SystemLog.Levels.Error,
+                            Message = ex.Message,
+                            UserId = -1
+                        });
+                    }
                 }
             }
         }
@@ -360,11 +402,11 @@ namespace Unifiedban.Terminal.Bot
             if (updated == null)
                 return;
 
-            CacheData.Groups[message.Chat.Id].TelegramChatId = message.MigrateToChatId;
-            CacheData.Groups.Add(message.MigrateToChatId, CacheData.Groups[message.Chat.Id]);
-            CacheData.Groups.Remove(message.Chat.Id);
+            CacheData.Groups.Add(updated.TelegramChatId, updated);
             MessageQueueManager.AddGroupIfNotPresent(updated);
+            
             MessageQueueManager.RemoveGroupIfNotPresent(message.Chat.Id);
+            CacheData.Groups.Remove(message.Chat.Id);
         }
 
         public static void CacheUsername(Message message)
