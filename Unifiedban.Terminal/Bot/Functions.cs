@@ -210,7 +210,28 @@ namespace Unifiedban.Terminal.Bot
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine(ex.Message);
+                            Data.Utils.Logging.AddLog(new SystemLog()
+                            {
+                                LoggerName = CacheData.LoggerName,
+                                Date = DateTime.Now,
+                                Function = "UserJoinedAction -> rtlNameCheckEnabled",
+                                Level = SystemLog.Levels.Error,
+                                Message = ex.Message,
+                                UserId = -1
+                            });
+
+                            if (ex.InnerException != null)
+                            {
+                                Data.Utils.Logging.AddLog(new SystemLog()
+                                {
+                                    LoggerName = CacheData.LoggerName,
+                                    Date = DateTime.Now,
+                                    Function = "UserJoinedAction -> rtlNameCheckEnabled",
+                                    Level = SystemLog.Levels.Error,
+                                    Message = ex.Message,
+                                    UserId = -1
+                                });
+                            }
                         }
 
                         continue;
@@ -343,7 +364,28 @@ namespace Unifiedban.Terminal.Bot
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Data.Utils.Logging.AddLog(new SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "UserJoinedAction",
+                        Level = SystemLog.Levels.Error,
+                        Message = ex.Message,
+                        UserId = -1
+                    });
+
+                    if(ex.InnerException != null)
+                    {
+                        Data.Utils.Logging.AddLog(new SystemLog()
+                        {
+                            LoggerName = CacheData.LoggerName,
+                            Date = DateTime.Now,
+                            Function = "UserJoinedAction",
+                            Level = SystemLog.Levels.Error,
+                            Message = ex.Message,
+                            UserId = -1
+                        });
+                    }
                 }
             }
         }
