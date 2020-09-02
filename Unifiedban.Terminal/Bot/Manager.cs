@@ -1,4 +1,4 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
+﻿/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -241,16 +241,26 @@ namespace Unifiedban.Terminal.Bot
                     Controls.Manager.DoCheck(e.Message);
                 }
             }
-
             if (e.Message.NewChatMembers != null)
+            {
                 Functions.UserJoinedAction(e.Message);
+            }
             if (e.Message.LeftChatMember != null)
-                Functions.UserLeftAction(e.Message);                
+            {
+                Functions.UserLeftAction(e.Message);
+            }
 
             if (!String.IsNullOrEmpty(e.Message.MediaGroupId) ||
                 e.Message.Photo != null ||
                 e.Message.Document != null)
+            {
                 Controls.Manager.DoMediaCheck(e.Message);
+            }
+
+            if (!isPrivateChat && e.Message.NewChatTitle != null)
+            {
+                CacheData.Groups[e.Message.Chat.Id].Title = e.Message.NewChatTitle;
+            }
         }
     }
 }
