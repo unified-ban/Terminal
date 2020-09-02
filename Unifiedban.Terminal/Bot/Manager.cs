@@ -1,4 +1,4 @@
-﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -90,7 +90,12 @@ namespace Unifiedban.Terminal.Bot
                 parseMode: ParseMode.Markdown,
                 text: $"I'm here, Master.\n" +
                     $"My *instance ID* is _{instanceId}_ " +
-                    $"and I'm running on *machine* _{currentHostname}_"
+                    $"and I'm running on *machine* _{currentHostname}_\n" +
+#if DEBUG
+                    $"- unified/ban BETA"
+#else
+                    $"- unified/ban"
+#endif
             );
         }
 
@@ -103,7 +108,12 @@ namespace Unifiedban.Terminal.Bot
                 text: $"I left, Master.\n" +
                     $"My *instance ID* is _{instanceId}_ " +
                     $"and I was running on *machine* _{currentHostname}_\n" +
-                    $"See you soon!"
+                    $"See you soon!\n" +
+#if DEBUG
+                    $"- unified/ban BETA"
+#else
+                    $"- unified/ban"
+#endif
             );
         }
 

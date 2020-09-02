@@ -184,7 +184,7 @@ namespace Unifiedban.Terminal.Bot
                     }
                 }
 
-            if (rtlNameCheckEnabled)
+                if (rtlNameCheckEnabled)
                 {
                     Filters.FilterResult rtlCheck = RTLNameFilter.DoCheck(message,
                         member.FirstName + " " + member.LastName);
