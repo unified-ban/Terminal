@@ -180,8 +180,57 @@ namespace Unifiedban.Terminal.Utils
                 .WithAutomaticReconnect()
                 .Build();
 
+            connection.Reconnected += connectionId =>
+            {
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "connectToHub()",
+                    Level = Models.SystemLog.Levels.Info,
+                    Message = "Reconnecting Hub Server",
+                    UserId = -1
+                });
+
+                connection.InvokeAsync("Identification", CacheData.Configuration["HubServerToken"]);
+
+                return Task.CompletedTask;
+            };
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "connectToHub()",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Connecting and autenticating to Hub Server",
+                UserId = -1
+            });
             connection.StartAsync().Wait();
             connection.InvokeAsync("Identification", CacheData.Configuration["HubServerToken"]);
+
+            connection.On<string, string>("MessageToBot",
+                (functionName, data) =>
+                {
+                    switch (functionName)
+                    {
+                        case "Identification":
+                            if (data == "KO")
+                            {
+                                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                                {
+                                    LoggerName = CacheData.LoggerName,
+                                    Date = DateTime.Now,
+                                    Function = "MessageToBot",
+                                    Level = Models.SystemLog.Levels.Error,
+                                    Message = "Hub Server answered KO on authentication",
+                                    UserId = -1
+                                });
+                                connection.DisposeAsync();
+                            }
+                            break;
+                    }
+                });
 
             connection.On<string, string, string, string>("UpdateSetting", 
                 (dashboardUserId, groupId, parameter, value) =>
