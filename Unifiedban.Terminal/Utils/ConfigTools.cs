@@ -6,6 +6,7 @@ using Hangfire;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -13,8 +14,9 @@ using Microsoft.Extensions.Configuration;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using Unifiedban.Models.Group;
+using Timer = System.Timers.Timer;
 
-namespace Unifiedban.Terminal.Utils
+ namespace Unifiedban.Terminal.Utils
 {
     public class ConfigTools
     {
@@ -177,8 +179,31 @@ namespace Unifiedban.Terminal.Utils
             
             connection = new HubConnectionBuilder()
                 .WithUrl(CacheData.Configuration["HubServerAddress"])
-                .WithAutomaticReconnect()
+                //.WithAutomaticReconnect()
                 .Build();
+
+            connection.Closed += exception =>
+            {
+                if (CacheData.FatalError ||
+                    CacheData.IsDisposing)
+                {
+                    return Task.CompletedTask;
+                }
+
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "connectToHub()",
+                    Level = Models.SystemLog.Levels.Info,
+                    Message = "Connection to Hub lost.",
+                    UserId = -1
+                });
+
+                Thread.Sleep(2000);
+                connectToHub();
+                return Task.CompletedTask;
+            };
 
             connection.Reconnected += connectionId =>
             {
@@ -227,6 +252,18 @@ namespace Unifiedban.Terminal.Utils
                                     UserId = -1
                                 });
                                 connection.DisposeAsync();
+                            }
+                            else
+                            {
+                                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                                {
+                                    LoggerName = CacheData.LoggerName,
+                                    Date = DateTime.Now,
+                                    Function = "MessageToBot",
+                                    Level = Models.SystemLog.Levels.Info,
+                                    Message = "Hub Server answered OK on authentication",
+                                    UserId = -1
+                                });
                             }
                             break;
                     }
@@ -300,6 +337,11 @@ namespace Unifiedban.Terminal.Utils
                     return;
                 }
                 CacheData.Groups[group.TelegramChatId].ReportChatId = reportChatId;
+                return;
+            }
+            else if (parameter == "SettingsLanguage")
+            {
+                CacheData.Groups[group.TelegramChatId].SettingsLanguage = value;
                 return;
             }
 
