@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Timers;
 using Telegram.Bot.Types;
 using Unifiedban.Plugin.Common;
 
@@ -21,6 +22,7 @@ namespace Unifiedban.Terminal
         public static DateTime StartupDateTimeUtc = DateTime.UtcNow;
         public static bool AnswerInvalidCommand = false;
         public static long ControlChatId = 0;
+        public static int CaptchaAutoKickTimer = 1;
 
         // [[ Instance data ]]
         public static List<Models.SysConfig> SysConfigs = new List<Models.SysConfig>();
@@ -60,6 +62,8 @@ namespace Unifiedban.Terminal
         public static List<long> ActiveSupport = new List<long>();
         public static Dictionary<long, List<int>> CurrentChatAdmins =
             new Dictionary<long, List<int>>();
+
+        public static List<Timer> CaptchaAutoKickTimers = new List<Timer>();
         
         public static List<long> BetaAuthChats = new List<long>();
 

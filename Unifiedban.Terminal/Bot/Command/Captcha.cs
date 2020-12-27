@@ -20,10 +20,17 @@ namespace Unifiedban.Terminal.Bot.Command
 
         public void Execute(CallbackQuery callbackQuery)
         {
-            long captchaId = Convert.ToInt64(callbackQuery.Data.Split(" ")[1]);
+            string[] args = callbackQuery.Data.Split(" ");
+            long captchaId = Convert.ToInt64(args[1]);
 
             if (captchaId != callbackQuery.From.Id)
                 return;
+
+            if (args.Length > 2)
+            {
+                var index = Convert.ToInt32(args[2]);
+                CacheData.CaptchaAutoKickTimers[index].Stop();
+            }
 
             Manager.BotClient.DeleteMessageAsync(
                 callbackQuery.Message.Chat.Id,

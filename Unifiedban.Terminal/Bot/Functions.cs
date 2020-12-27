@@ -11,6 +11,8 @@ using Telegram.Bot.Types.Enums;
 using Unifiedban.Models;
 using Unifiedban.Models.Group;
 using System.Threading.Tasks;
+using System.Timers;
+using Unifiedban.Terminal.Utils;
 
 namespace Unifiedban.Terminal.Bot
 {
@@ -294,22 +296,52 @@ namespace Unifiedban.Terminal.Bot
                                     CanSendPolls = false
                                 }
                             ).Wait();
+                        
+
+                        var timer = new Timer()
+                        {
+                            Interval = 1000 * 60 * CacheData.CaptchaAutoKickTimer,
+                            Enabled = true
+                        };
+                        CacheData.CaptchaAutoKickTimers.Add(timer);
 
                         string name = member.Username != null ? "@" + member.Username : member.FirstName;
-                        MessageQueueManager.EnqueueMessage(
-                            new Models.ChatMessage()
-                            {
-                                Timestamp = DateTime.UtcNow,
-                                Chat = message.Chat,
-                                ParseMode = ParseMode.Default,
-                                Text = $"Please {name} certify to be a human.\nIf you don't click this button you are not going to be unlocked.",
-                                ReplyMarkup = new InlineKeyboardMarkup(
-                                    InlineKeyboardButton.WithCallbackData(
-                                        CacheData.GetTranslation("en", "captcha_iamhuman", true),
-                                        $"/Captcha " + member.Id
+                        int imgSent = ChatTools.SendCaptchaImage(message.Chat, name, member.Id, CacheData.CaptchaAutoKickTimers.Count-1);
+
+                        if (imgSent == -1)
+                        {
+                            MessageQueueManager.EnqueueMessage(
+                                new Models.ChatMessage()
+                                {
+                                    Timestamp = DateTime.UtcNow,
+                                    Chat = message.Chat,
+                                    ParseMode = ParseMode.Default,
+                                    Text =
+                                        $"Please {name} certify to be a human.\nIf you don't click this button you are not going to be unlocked.",
+                                    ReplyMarkup = new InlineKeyboardMarkup(
+                                        InlineKeyboardButton.WithCallbackData(
+                                            CacheData.GetTranslation("en", "captcha_iamhuman", true),
+                                            $"/Captcha " + member.Id + " " + (CacheData.CaptchaAutoKickTimers.Count-1).ToString()
                                         )
-                                )
-                            });
+                                    ),
+                                    PostSentAction = ChatMessage.PostSentActions.Destroy,
+                                    AutoDestroyTimeInSeconds = (ushort)(60 * CacheData.CaptchaAutoKickTimer)
+                                });
+                        }
+                        
+                        
+                        CacheData.CaptchaAutoKickTimers[CacheData.CaptchaAutoKickTimers.Count-1].Elapsed += delegate(object sender, ElapsedEventArgs args)
+                        {
+                            Manager.BotClient.KickChatMemberAsync(message.Chat, member.Id);
+                            if (message.Chat.Type == ChatType.Supergroup)
+                                Manager.BotClient.UnbanChatMemberAsync(message.Chat.Id, member.Id);
+                            if (imgSent != -1)
+                            {
+                                Manager.BotClient.DeleteMessageAsync(message.Chat, imgSent);
+                            }
+                        };
+
+                        CacheData.CaptchaAutoKickTimers[CacheData.CaptchaAutoKickTimers.Count-1].Start();
 
                         continue;
                     }

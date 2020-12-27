@@ -1,4 +1,4 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
+﻿/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -263,6 +263,11 @@ namespace Unifiedban.Terminal
                 UserId = -2
             });
 
+            if (int.TryParse(CacheData.Configuration["CaptchaAutoKickTimer"], out int captchaAutoKickTimer))
+            {
+                CacheData.CaptchaAutoKickTimer = captchaAutoKickTimer;
+            }
+
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
                 LoggerName = CacheData.LoggerName,
@@ -392,6 +397,20 @@ namespace Unifiedban.Terminal
                     CacheData.TrustFactors.Add(trustFactor.TelegramUserId, trustFactor);
                 }
             }
+#if DEBUG
+            CacheData.BetaAuthChats.Add(-1001136742235);
+            CacheData.BetaAuthChats.Add(-1001097564956);
+            CacheData.BetaAuthChats.Add(-1001312334111);
+            CacheData.BetaAuthChats.Add(-1001315904034);
+            CacheData.BetaAuthChats.Add(-1001402005919);
+            CacheData.BetaAuthChats.Add(-1001392951343);
+            CacheData.BetaAuthChats.Add(-1001125553456);
+            CacheData.BetaAuthChats.Add(-1001324395059);
+            CacheData.BetaAuthChats.Add(-1001083786418);
+            CacheData.BetaAuthChats.Add(-1001272088139);
+            CacheData.BetaAuthChats.Add(-1001376622146);
+            CacheData.BetaAuthChats.Add(-1001219480338);
+#endif
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
                 LoggerName = CacheData.LoggerName,

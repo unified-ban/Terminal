@@ -5,11 +5,17 @@
 using Hangfire;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Threading.Tasks;
 using System.Timers;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.InputFiles;
+using Telegram.Bot.Types.ReplyMarkups;
 using Unifiedban.Models;
 using Unifiedban.Terminal.Bot;
 
@@ -301,6 +307,138 @@ namespace Unifiedban.Terminal.Utils
                         CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate.Value.AddDays(1);
                 }
             }
+        }
+
+        public static int SendCaptchaImage(ChatId chatId, string name, int memberId, int timerIndex)
+        {
+            Random rnd = new Random();
+
+            var num1 = rnd.Next(0, 11);
+            var num2 = rnd.Next(0, 11);
+            var operation = rnd.Next(1, 4);
+            var symbol = "+";
+            switch (operation)
+            {
+                case 1:
+                    symbol = "+";
+                    break;
+                case 2:
+                    symbol = "-";
+                    break;
+                case 3:
+                    symbol = "x";
+                    break;
+            }
+
+            var text = $"{num1} {symbol} {num2}";
+
+            var correctPosition = rnd.Next(1, 4);
+            var result = GetResult(num1, num2, symbol);
+            var img = ConvertTextToImage(text, "Indie Flower", 60, Color.AntiqueWhite, Color.Black, 512, 256);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                img.Save(ms, ImageFormat.Png);
+                ms.Position = 0;
+                try
+                {
+                    return Manager.BotClient.SendPhotoAsync(chatId, new InputOnlineFile(ms),
+                        caption: CacheData.GetTranslation("en", "captcha_iamhuman_img", true).Replace("{{name}}", name),
+                        parseMode: ParseMode.Markdown,
+                        replyMarkup: BuildCaptchaButtons(result, memberId, timerIndex)).Result.MessageId;
+                }
+                catch
+                {
+                    return -1;
+                }
+            }
+        }
+        
+        private static Bitmap ConvertTextToImage(string txt, string fontname, int fontsize, Color bgcolor, Color fcolor, int width, int Height)
+        {
+            Bitmap bmp = new Bitmap(width, Height);
+            using (Graphics graphics = Graphics.FromImage(bmp))
+            {
+
+                Font font = new Font(fontname, fontsize);
+                graphics.FillRectangle(new SolidBrush(bgcolor), 0, 0, bmp.Width, bmp.Height);
+                graphics.DrawString(txt, font, new SolidBrush(fcolor), 150, (256/2-60));
+                graphics.Flush();
+                font.Dispose();
+                graphics.Dispose();
+            }
+            return bmp;
+        }
+        
+        private static int GetResult(int num1, int num2, string symbol)
+        {
+            switch (symbol)
+            {
+                case "+":
+                    return num1 + num2;
+                case "-":
+                    return num1 - num2;
+                case "x":
+                    return num1 * num2;
+            }
+
+            return default;
+        }
+
+        private static string GetRandomEmoji()
+        {
+            string[] emojis = {
+	            "😄","😃","😀","😊","☺","😉","😍","😘","😚","😗","😙","😜","😝","😛","😳","😁","😔","😌","😒","😞","😣","😢","😂","😭","😪","😥","😰","😅","😓","😩","😫","😨","😱","😠","😡","😤","😖","😆","😋","😷","😎","😴","😵","😲","😟","😦","😧","😈","👿","😮","😬","😐","😕","😯","😶","😇","😏","😑","👲","👳","👮","👷","💂","👶","👦","👧","👨","👩","👴","👵","👱","👼","👸","😺","😸","😻","😽","😼","🙀","😿","😹","😾","👹","👺","🙈","🙉","🙊","💀","👽","💩","🔥","✨","🌟","💫","💥","💢","💦","💧","💤","💨","👂","👀","👃","👅","👄","👍","👎","👌","👊","✊","✌","👋","✋","👐","👆","👇","👉","👈","🙌","🙏","☝","👏","💪","🚶","🏃","💃","👫","👪","👬","👭","💏","💑","👯","🙆","🙅","💁","🙋","💆","💇","💅","👰","🙎","🙍","🙇","🎩","👑","👒","👟","👞","👡","👠","👢","👕","👔","👚","👗","🎽","👖","👘","👙","💼","👜","👝","👛","👓","🎀","🌂","💄","💛","💙","💜","💚","❤","💔","💗","💓","💕","💖","💞","💘","💌","💋","💍","💎","👤","👥","💬","👣","💭","🐶","🐺","🐱","🐭","🐹","🐰","🐸","🐯","🐨","🐻","🐷","🐽","🐮","🐗","🐵","🐒","🐴","🐑","🐘","🐼","🐧","🐦","🐤","🐥","🐣","🐔","🐍","🐢","🐛","🐝","🐜","🐞","🐌","🐙","🐚","🐠","🐟","🐬","🐳","🐋","🐄","🐏","🐀","🐃","🐅","🐇","🐉","🐎","🐐","🐓","🐕","🐖","🐁","🐂","🐲","🐡","🐊","🐫","🐪","🐆","🐈","🐩","🐾","💐","🌸","🌷","🍀","🌹","🌻","🌺","🍁","🍃","🍂","🌿","🌾","🍄","🌵","🌴","🌲","🌳","🌰","🌱","🌼","🌐","🌞","🌝","🌚","🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘","🌜","🌛","🌙","🌍","🌎","🌏","🌋","🌌","🌠","⭐","☀","⛅","☁","⚡","☔","❄","⛄","🌀","🌁","🌈","🌊","🎍","💝","🎎","🎒","🎓","🎏","🎆","🎇","🎐","🎑","🎃","👻","🎅","🎄","🎁","🎋","🎉","🎊","🎈","🎌","🔮","🎥","📷","📹","📼","💿","📀","💽","💾","💻","📱","☎","📞","📟","📠","📡","📺","📻","🔊","🔉","🔈","🔇","🔔","🔕","📢","📣","⏳","⌛","⏰","⌚","🔓","🔒","🔏","🔐","🔑","🔎","💡","🔦","🔆","🔅","🔌","🔋","🔍","🛁","🛀","🚿","🚽","🔧","🔩","🔨","🚪","🚬","💣","🔫","🔪","💊","💉","💰","💴","💵","💷","💶","💳","💸","📲","📧","📥","📤","✉","📩","📨","📯","📫","📪","📬","📭","📮","📦","📝","📄","📃","📑","📊","📈","📉","📜","📋","📅","📆","📇","📁","📂","✂","📌","📎","✒","✏","📏","📐","📕","📗","📘","📙","📓","📔","📒","📚","📖","🔖","📛","🔬","🔭","📰","🎨","🎬","🎤","🎧","🎼","🎵","🎶","🎹","🎻","🎺","🎷","🎸","👾","🎮","🃏","🎴","🀄","🎲","🎯","🏈","🏀","⚽","⚾","🎾","🎱","🏉","🎳","⛳","🚵","🚴","🏁","🏇","🏆","🎿","🏂","🏊","🏄","🎣","☕","🍵","🍶","🍼","🍺","🍻","🍸","🍹","🍷","🍴","🍕","🍔","🍟","🍗","🍖","🍝","🍛","🍤","🍱","🍣","🍥","🍙","🍘","🍚","🍜","🍲","🍢","🍡","🍳","🍞","🍩","🍮","🍦","🍨","🍧","🎂","🍰","🍪","🍫","🍬","🍭","🍯","🍎","🍏","🍊","🍋","🍒","🍇","🍉","🍓","🍑","🍈","🍌","🍐","🍍","🍠","🍆","🍅","🌽","🏠","🏡","🏫","🏢","🏣","🏥","🏦","🏪","🏩","🏨","💒","⛪","🏬","🏤","🌇","🌆","🏯","🏰","⛺","🏭","🗼","🗾","🗻","🌄","🌅","🌃","🗽","🌉","🎠","🎡","⛲","🎢","🚢","⛵","🚤","🚣","⚓","🚀","✈","💺","🚁","🚂","🚊","🚉","🚞","🚆","🚄","🚅","🚈","🚇","🚝","🚋","🚃","🚎","🚌","🚍","🚙","🚘","🚗","🚕","🚖","🚛","🚚","🚨","🚓","🚔","🚒","🚑","🚐","🚲","🚡","🚟","🚠","🚜","💈","🚏","🎫","🚦","🚥","⚠","🚧","🔰","⛽","🏮","🎰","♨","🗿","🎪","🎭","📍","🚩","⬆","⬇","⬅","➡","🔠","🔡","🔤","↗","↖","↘","↙","↔","↕","🔄","◀","▶","🔼","🔽","↩","↪","ℹ","⏪","⏩","⏫","⏬","⤵","⤴","🆗","🔀","🔁","🔂","🆕","🆙","🆒","🆓","🆖","📶","🎦","🈁","🈯","🈳","🈵","🈴","🈲","🉐","🈹","🈺","🈶","🈚","🚻","🚹","🚺","🚼","🚾","🚰","🚮","🅿","♿","🚭","🈷","🈸","🈂","Ⓜ","🛂","🛄","🛅","🛃","🉑","㊙","㊗","🆑","🆘","🆔","🚫","🔞","📵","🚯","🚱","🚳","🚷","🚸","⛔","✳","❇","❎","✅","✴","💟","🆚","📳","📴","🅰","🅱","🆎","🅾","💠","➿","♻","♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓","⛎","🔯","🏧","💹","💲","💱","©","®","™","〽","〰","🔝","🔚","🔙","🔛","🔜","❌","⭕","❗","❓","❕","❔","🔃","🕛","🕧","🕐","🕜","🕑","🕝","🕒","🕞","🕓","🕟","🕔","🕠","🕕","🕖","🕗","🕘","🕙","🕚","🕡","🕢","🕣","🕤","🕥","🕦","✖","➕","➖","➗","♠","♥","♣","♦","💮","💯","✔","☑","🔘","🔗","➰","🔱","🔲","🔳","◼","◻","◾","◽","▪","▫","🔺","⬜","⬛","⚫","⚪","🔴","🔵","🔻","🔶","🔷","🔸","🔹"
+            };
+
+            Random rnd = new Random();
+            var index = rnd.Next(0, emojis.Length);
+            return emojis[index];
+        }
+
+        private static InlineKeyboardMarkup BuildCaptchaButtons(int result, int memberId, int timerIndex)
+        {
+            Random rnd = new Random();
+            var correctPosition = rnd.Next(1, 4);
+
+            List<InlineKeyboardButton> buttons;
+            switch (correctPosition)
+            {
+                default:
+                    buttons = new List<InlineKeyboardButton>()
+                    {
+                        InlineKeyboardButton.WithCallbackData(
+                            result.ToString(),
+                            $"/Captcha " + memberId + " " + timerIndex
+                        ),
+                        InlineKeyboardButton.WithCallbackData(GetRandomEmoji()),
+                        InlineKeyboardButton.WithCallbackData(GetRandomEmoji())
+                    };
+                    break;
+                case 2:
+                    buttons = new List<InlineKeyboardButton>()
+                    {
+                        InlineKeyboardButton.WithCallbackData(GetRandomEmoji()),
+                        InlineKeyboardButton.WithCallbackData(
+                            result.ToString(),
+                            $"/Captcha " + memberId + " " + timerIndex
+                        ),
+                        InlineKeyboardButton.WithCallbackData(GetRandomEmoji())
+                    };
+                    break;
+                case 3:
+                    buttons = new List<InlineKeyboardButton>()
+                    {
+                        InlineKeyboardButton.WithCallbackData(GetRandomEmoji()),
+                        InlineKeyboardButton.WithCallbackData(GetRandomEmoji()),
+                        InlineKeyboardButton.WithCallbackData(
+                            result.ToString(),
+                            $"/Captcha " + memberId + " " + timerIndex
+                        )
+                    };
+                    break;
+            }
+
+            return new InlineKeyboardMarkup(buttons);
         }
     }
 }
