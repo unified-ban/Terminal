@@ -44,10 +44,10 @@ namespace Unifiedban.Terminal.Bot.Command
 
         private void deleteLastMessages(Message message, int amount = 1)
         {
-            int startMessage = message.ReplyToMessage != null ? message.ReplyToMessage.MessageId : message.MessageId - 1;
-            int nextMessage = message.ReplyToMessage != null ? message.ReplyToMessage.MessageId : message.MessageId - 1;
+            int startMessage = message.ReplyToMessage != null ? message.ReplyToMessage.MessageId : (message.MessageId - 1);
+            int nextMessage = message.ReplyToMessage != null ? message.ReplyToMessage.MessageId : (message.MessageId - 1);
 
-            while (nextMessage >= startMessage - amount)
+            while (nextMessage > startMessage - amount)
             {
                 Manager.BotClient.DeleteMessageAsync(message.Chat.Id, nextMessage);
                 nextMessage--;
