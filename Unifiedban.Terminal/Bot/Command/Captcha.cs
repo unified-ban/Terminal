@@ -40,6 +40,11 @@ namespace Unifiedban.Terminal.Bot.Command
                     callbackQuery.Message.Chat.Id,
                     callbackQuery.From.Id,
                     Manager.BotClient.GetChatAsync(callbackQuery.Message.Chat.Id).Result.Permissions);
+            
+            if (CacheData.CaptchaStrikes.ContainsKey(callbackQuery.From.Id))
+            {
+                CacheData.CaptchaStrikes.Remove(callbackQuery.From.Id);
+            }
 
             string name = callbackQuery.From.Username != null ? "@" + callbackQuery.From.Username : callbackQuery.From.FirstName;
 
@@ -86,7 +91,8 @@ namespace Unifiedban.Terminal.Bot.Command
                         Timestamp = DateTime.UtcNow,
                         Chat = callbackQuery.Message.Chat,
                         ParseMode = ParseMode.Markdown,
-                        Text = $"Thank you `{name}`!\nYou are now fully unlocked.",
+                        Text = CacheData.GetTranslation(CacheData.Groups[callbackQuery.Message.Chat.Id].SettingsLanguage, 
+                            "captcha_ok", true).Replace("{{name}}", name)
                     });
 
         }

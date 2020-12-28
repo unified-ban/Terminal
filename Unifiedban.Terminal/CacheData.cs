@@ -64,6 +64,7 @@ namespace Unifiedban.Terminal
             new Dictionary<long, List<int>>();
 
         public static List<Timer> CaptchaAutoKickTimers = new List<Timer>();
+        public static Dictionary<int, int> CaptchaStrikes = new Dictionary<int, int>();
         
         public static List<long> BetaAuthChats = new List<long>();
 

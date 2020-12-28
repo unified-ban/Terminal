@@ -150,9 +150,33 @@ namespace Unifiedban.Terminal.Bot
             };
             message.DisableWebPagePreview = true;
 
-            PrivateChats[CacheData.ControlChatId]
+            if (PrivateChats.ContainsKey(CacheData.ControlChatId))
+            {
+                PrivateChats[CacheData.ControlChatId]
                     .Queue
                     .Enqueue(message);
+            }
+            else
+            {
+#if DEBUG
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban.Terminal.Bot.MessageQueueManager.EnqueueLog",
+                    Level = Models.SystemLog.Levels.Warn,
+                    Message = $"ControlChat {CacheData.ControlChatId} is not in queue system. Fallback on direct send",
+                    UserId = -2
+                });
+#endif
+
+                Manager.BotClient.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text: message.Text,
+                    parseMode: message.ParseMode,
+                    disableWebPagePreview: true
+                );
+            }
         }
     }
 }

@@ -29,6 +29,7 @@ namespace Unifiedban.Terminal.Bot
         public const string ANNOUNCE = "ANNOUNCE";
         public const string LEAVE = "LEAVE";
         public const string CAPTCHA = "CAPTCHA";
+        public const string CAPTCHAERROR = "CAPTCHAERROR";
         public const string RULES = "RULES";
         public const string R = "R";
         public const string STATUS = "STATUS";
@@ -110,6 +111,7 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(LEAVE, new Command.Leave());
 
             CommandsList.Add(CAPTCHA, new Command.Captcha());
+            CommandsList.Add(CAPTCHAERROR, new Command.CaptchaError());
 
             CommandsList.Add(RULES, new Command.Rules());
             CommandsList.Add(R, new Command.Rules());

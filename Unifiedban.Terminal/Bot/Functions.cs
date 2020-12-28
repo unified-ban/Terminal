@@ -304,6 +304,7 @@ namespace Unifiedban.Terminal.Bot
                             Enabled = true
                         };
                         CacheData.CaptchaAutoKickTimers.Add(timer);
+                        int timerIndex = CacheData.CaptchaAutoKickTimers.Count - 1;
 
                         string name = member.Username != null ? "@" + member.Username : member.FirstName;
                         int imgSent = ChatTools.SendCaptchaImage(message.Chat, name, member.Id, CacheData.CaptchaAutoKickTimers.Count-1);
@@ -321,7 +322,7 @@ namespace Unifiedban.Terminal.Bot
                                     ReplyMarkup = new InlineKeyboardMarkup(
                                         InlineKeyboardButton.WithCallbackData(
                                             CacheData.GetTranslation("en", "captcha_iamhuman", true),
-                                            $"/Captcha " + member.Id + " " + (CacheData.CaptchaAutoKickTimers.Count-1).ToString()
+                                            $"/Captcha " + member.Id + " " + timerIndex.ToString()
                                         )
                                     ),
                                     PostSentAction = ChatMessage.PostSentActions.Destroy,
@@ -330,7 +331,7 @@ namespace Unifiedban.Terminal.Bot
                         }
                         
                         
-                        CacheData.CaptchaAutoKickTimers[CacheData.CaptchaAutoKickTimers.Count-1].Elapsed += delegate(object sender, ElapsedEventArgs args)
+                        CacheData.CaptchaAutoKickTimers[timerIndex].Elapsed += delegate(object sender, ElapsedEventArgs args)
                         {
                             Manager.BotClient.KickChatMemberAsync(message.Chat, member.Id);
                             if (message.Chat.Type == ChatType.Supergroup)
@@ -341,7 +342,7 @@ namespace Unifiedban.Terminal.Bot
                             }
                         };
 
-                        CacheData.CaptchaAutoKickTimers[CacheData.CaptchaAutoKickTimers.Count-1].Start();
+                        CacheData.CaptchaAutoKickTimers[timerIndex].Start();
 
                         continue;
                     }

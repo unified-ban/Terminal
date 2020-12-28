@@ -342,7 +342,8 @@ namespace Unifiedban.Terminal.Utils
                 try
                 {
                     return Manager.BotClient.SendPhotoAsync(chatId, new InputOnlineFile(ms),
-                        caption: CacheData.GetTranslation("en", "captcha_iamhuman_img", true).Replace("{{name}}", name),
+                        caption: CacheData.GetTranslation(CacheData.Groups[chatId.Identifier].SettingsLanguage,
+                            "captcha_iamhuman_img", true).Replace("{{name}}", name),
                         parseMode: ParseMode.Markdown,
                         replyMarkup: BuildCaptchaButtons(result, memberId, timerIndex)).Result.MessageId;
                 }
@@ -428,11 +429,11 @@ namespace Unifiedban.Terminal.Utils
                 case 3:
                     buttons = new List<InlineKeyboardButton>()
                     {
-                        InlineKeyboardButton.WithCallbackData(GetRandomEmoji()),
-                        InlineKeyboardButton.WithCallbackData(GetRandomEmoji()),
+                        InlineKeyboardButton.WithCallbackData(GetRandomEmoji(), $"/CaptchaError {memberId} {timerIndex}"),
+                        InlineKeyboardButton.WithCallbackData(GetRandomEmoji(), $"/CaptchaError {memberId} {timerIndex}"),
                         InlineKeyboardButton.WithCallbackData(
                             result.ToString(),
-                            $"/Captcha " + memberId + " " + timerIndex
+                            $"/Captcha {memberId} {timerIndex}"
                         )
                     };
                     break;
