@@ -495,10 +495,17 @@ namespace Unifiedban.Terminal.Controls
         {
             using (System.Net.WebClient client = new System.Net.WebClient())
             {
+                client.Headers.Add("Accept", " text/html, application/xhtml+xml, */*");
+                client.Headers.Add("Content-Type", "application/json;charset=UTF-8");
+                client.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36 Edg/87.0.664.66");
+                
                 string htmlCode = "";
                 try
                 {
                     htmlCode = client.DownloadString(siteUri);
+                    
+                    if (htmlCode.Contains("tgme_page_extra") && htmlCode.Contains("member"))
+                        return true;
                 }
                 catch
                 {
@@ -512,10 +519,7 @@ namespace Unifiedban.Terminal.Controls
                         UserId = -2
                     });
                 }
-
-                if (htmlCode.Contains("tgme_page_extra") && htmlCode.Contains("member"))
-                    return true;
-
+                
                 return false;
             }
         }
