@@ -97,7 +97,10 @@ namespace Unifiedban.Terminal.Bot.Command
             {
                 Manager.BotClient.KickChatMemberAsync(message.Chat.Id, userToKick);
                 if (message.Chat.Type == ChatType.Supergroup)
+                {
+                    System.Threading.Thread.Sleep(200);
                     Manager.BotClient.UnbanChatMemberAsync(message.Chat.Id, userToKick);
+                }
             }
             catch
             {
