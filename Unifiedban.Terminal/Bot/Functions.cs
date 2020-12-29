@@ -297,17 +297,10 @@ namespace Unifiedban.Terminal.Bot
                                 }
                             ).Wait();
                         
-
-                        var timer = new Timer()
-                        {
-                            Interval = 1000 * 60 * CacheData.CaptchaAutoKickTimer,
-                            Enabled = true
-                        };
-                        CacheData.CaptchaAutoKickTimers.Add(timer);
-                        int timerIndex = CacheData.CaptchaAutoKickTimers.Count - 1;
+                        string timerKey = $"{message.Chat.Id}:{member.Id}";
 
                         string name = member.Username != null ? "@" + member.Username : member.FirstName;
-                        int imgSent = ChatTools.SendCaptchaImage(message.Chat, name, member.Id, CacheData.CaptchaAutoKickTimers.Count-1);
+                        int imgSent = ChatTools.SendCaptchaImage(message.Chat, name, member.Id, timerKey);
 
                         if (imgSent == -1)
                         {
@@ -322,7 +315,7 @@ namespace Unifiedban.Terminal.Bot
                                     ReplyMarkup = new InlineKeyboardMarkup(
                                         InlineKeyboardButton.WithCallbackData(
                                             CacheData.GetTranslation("en", "captcha_iamhuman", true),
-                                            $"/Captcha " + member.Id + " " + timerIndex.ToString()
+                                            $"/Captcha " + member.Id + " " + timerKey
                                         )
                                     ),
                                     PostSentAction = ChatMessage.PostSentActions.Destroy,
@@ -330,19 +323,50 @@ namespace Unifiedban.Terminal.Bot
                                 });
                         }
                         
-                        
-                        CacheData.CaptchaAutoKickTimers[timerIndex].Elapsed += delegate(object sender, ElapsedEventArgs args)
+                        var timer = new Timer()
+                        {
+                            Interval = 1000 * 60 * CacheData.CaptchaAutoKickTimer,
+                            AutoReset = false
+                        };
+                        timer.Elapsed += delegate(object sender, ElapsedEventArgs args)
                         {
                             Manager.BotClient.KickChatMemberAsync(message.Chat, member.Id);
                             if (message.Chat.Type == ChatType.Supergroup)
+                            {
+                                System.Threading.Thread.Sleep(200);
                                 Manager.BotClient.UnbanChatMemberAsync(message.Chat.Id, member.Id);
+                            }
+
                             if (imgSent != -1)
                             {
                                 Manager.BotClient.DeleteMessageAsync(message.Chat, imgSent);
                             }
                         };
 
-                        CacheData.CaptchaAutoKickTimers[timerIndex].Start();
+                        if (CacheData.CaptchaAutoKickTimers.ContainsKey(timerKey))
+                        {
+                            if (!CacheData.CaptchaAutoKickTimers[timerKey].Enabled)
+                            {
+                                CacheData.CaptchaAutoKickTimers.TryRemove(timerKey, out var oldTimer);
+                            }
+                        }
+                        
+                        if (CacheData.CaptchaAutoKickTimers.TryAdd(timerKey, timer))
+                        {
+                            CacheData.CaptchaAutoKickTimers[timerKey].Start();
+                        }
+                        else
+                        {
+                            Data.Utils.Logging.AddLog(new Models.SystemLog()
+                            {
+                                LoggerName = CacheData.LoggerName,
+                                Date = DateTime.Now,
+                                Function = "Unifiedban Functions - User Join",
+                                Level = SystemLog.Levels.Warn,
+                                Message = "Error creating timer for auto captcha auto kick",
+                                UserId = -2
+                            });
+                        }
 
                         continue;
                     }

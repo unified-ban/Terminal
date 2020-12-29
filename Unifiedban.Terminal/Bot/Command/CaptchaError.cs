@@ -3,13 +3,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Types.Enums;
-using Unifiedban.Models;
-using Unifiedban.Models.Group;
 using Unifiedban.Terminal.Utils;
 
 
@@ -66,8 +61,11 @@ namespace Unifiedban.Terminal.Bot.Command
                 
                 if (args.Length > 2)
                 {
-                    var index = Convert.ToInt32(args[2]);
-                    CacheData.CaptchaAutoKickTimers[index].Stop();
+                    if (CacheData.CaptchaAutoKickTimers.ContainsKey(args[2]))
+                    {
+                        CacheData.CaptchaAutoKickTimers[args[2]].Stop();
+                        CacheData.CaptchaAutoKickTimers.TryRemove(args[2], out var timer);
+                    }
                 }
             }
         }

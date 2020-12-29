@@ -28,8 +28,11 @@ namespace Unifiedban.Terminal.Bot.Command
 
             if (args.Length > 2)
             {
-                var index = Convert.ToInt32(args[2]);
-                CacheData.CaptchaAutoKickTimers[index].Stop();
+                if (CacheData.CaptchaAutoKickTimers.ContainsKey(args[2]))
+                {
+                    CacheData.CaptchaAutoKickTimers[args[2]].Stop();
+                    CacheData.CaptchaAutoKickTimers.TryRemove(args[2], out var timer);
+                }
             }
 
             Manager.BotClient.DeleteMessageAsync(

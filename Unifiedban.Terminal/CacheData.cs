@@ -4,6 +4,7 @@
 
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using System.Timers;
@@ -63,7 +64,7 @@ namespace Unifiedban.Terminal
         public static Dictionary<long, List<int>> CurrentChatAdmins =
             new Dictionary<long, List<int>>();
 
-        public static List<Timer> CaptchaAutoKickTimers = new List<Timer>();
+        public static ConcurrentDictionary<string, Timer> CaptchaAutoKickTimers = new ConcurrentDictionary<string, Timer>();
         public static Dictionary<int, int> CaptchaStrikes = new Dictionary<int, int>();
         
         public static List<long> BetaAuthChats = new List<long>();

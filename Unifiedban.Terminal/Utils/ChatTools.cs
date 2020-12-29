@@ -309,7 +309,7 @@ namespace Unifiedban.Terminal.Utils
             }
         }
 
-        public static int SendCaptchaImage(ChatId chatId, string name, int memberId, int timerIndex)
+        public static int SendCaptchaImage(ChatId chatId, string name, int memberId, string timerKey)
         {
             Random rnd = new Random();
 
@@ -345,7 +345,7 @@ namespace Unifiedban.Terminal.Utils
                         caption: CacheData.GetTranslation(CacheData.Groups[chatId.Identifier].SettingsLanguage,
                             "captcha_iamhuman_img", true).Replace("{{name}}", name),
                         parseMode: ParseMode.Markdown,
-                        replyMarkup: BuildCaptchaButtons(result, memberId, timerIndex)).Result.MessageId;
+                        replyMarkup: BuildCaptchaButtons(result, memberId, timerKey)).Result.MessageId;
                 }
                 catch
                 {
@@ -396,7 +396,7 @@ namespace Unifiedban.Terminal.Utils
             return emojis[index];
         }
 
-        private static InlineKeyboardMarkup BuildCaptchaButtons(int result, int memberId, int timerIndex)
+        private static InlineKeyboardMarkup BuildCaptchaButtons(int result, int memberId, string timerKey)
         {
             Random rnd = new Random();
             var correctPosition = rnd.Next(1, 4);
@@ -409,7 +409,7 @@ namespace Unifiedban.Terminal.Utils
                     {
                         InlineKeyboardButton.WithCallbackData(
                             result.ToString(),
-                            $"/Captcha " + memberId + " " + timerIndex
+                            $"/Captcha {memberId} {timerKey}"
                         ),
                         InlineKeyboardButton.WithCallbackData(GetRandomEmoji()),
                         InlineKeyboardButton.WithCallbackData(GetRandomEmoji())
@@ -421,7 +421,7 @@ namespace Unifiedban.Terminal.Utils
                         InlineKeyboardButton.WithCallbackData(GetRandomEmoji()),
                         InlineKeyboardButton.WithCallbackData(
                             result.ToString(),
-                            $"/Captcha " + memberId + " " + timerIndex
+                            $"/Captcha {memberId} {timerKey}"
                         ),
                         InlineKeyboardButton.WithCallbackData(GetRandomEmoji())
                     };
@@ -429,11 +429,11 @@ namespace Unifiedban.Terminal.Utils
                 case 3:
                     buttons = new List<InlineKeyboardButton>()
                     {
-                        InlineKeyboardButton.WithCallbackData(GetRandomEmoji(), $"/CaptchaError {memberId} {timerIndex}"),
-                        InlineKeyboardButton.WithCallbackData(GetRandomEmoji(), $"/CaptchaError {memberId} {timerIndex}"),
+                        InlineKeyboardButton.WithCallbackData(GetRandomEmoji(), $"/CaptchaError {memberId} {timerKey}"),
+                        InlineKeyboardButton.WithCallbackData(GetRandomEmoji(), $"/CaptchaError {memberId} {timerKey}"),
                         InlineKeyboardButton.WithCallbackData(
                             result.ToString(),
-                            $"/Captcha {memberId} {timerIndex}"
+                            $"/Captcha {memberId} {timerKey}"
                         )
                     };
                     break;
