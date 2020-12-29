@@ -140,7 +140,7 @@ namespace Unifiedban.Terminal.Bot
                 return;
 
 #if DEBUG
-            message.Text = message.Text.Replace("#UB", "UBB");
+            message.Text = message.Text.Replace("#UB", "#UBB");
 #endif
 
             message.Chat = new Chat()
