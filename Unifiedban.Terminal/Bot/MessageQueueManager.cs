@@ -25,9 +25,22 @@ namespace Unifiedban.Terminal.Bot
         {
             if (CacheData.FatalError)
                 return;
+            
+            bool controlChatAdded = AddChatIfNotPresent(CacheData.ControlChatId);
+            if (!controlChatAdded)
+            {
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban MessageQueueManager Initialize",
+                    Level = Models.SystemLog.Levels.Warn,
+                    Message = $"Error adding ControlChat {CacheData.ControlChatId} to queue system",
+                    UserId = -2
+                });
+            }
 
             isInitialized = true;
-
 
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
