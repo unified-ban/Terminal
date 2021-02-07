@@ -339,7 +339,7 @@ namespace Unifiedban.Terminal.Bot
 
                             if (imgSent != -1)
                             {
-                                Manager.BotClient.DeleteMessageAsync(message.Chat, imgSent);
+                                Manager.BotClient.DeleteMessageAsync(message.Chat.Id, imgSent);
                             }
                         };
 
