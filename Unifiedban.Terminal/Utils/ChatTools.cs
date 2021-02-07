@@ -31,6 +31,10 @@ namespace Unifiedban.Terminal.Utils
             RecurringJob.AddOrUpdate("ChatTools_CheckNightSchedule", () => CheckNightSchedule(), "0 * * ? * *");
             RecurringJob.Trigger("ChatTools_CheckNightSchedule");
 
+
+            RecurringJob.AddOrUpdate("ChatTools_RenewInviteLinks", () => RenewInviteLinks(), "0 0/5 * ? * *");
+            RecurringJob.Trigger("ChatTools_RenewInviteLinks");
+
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
                 LoggerName = CacheData.LoggerName,
@@ -440,6 +444,17 @@ namespace Unifiedban.Terminal.Utils
             }
 
             return new InlineKeyboardMarkup(buttons);
+        }
+
+        public static async Task RenewInviteLinks()
+        {
+            foreach (var telegramGroup in CacheData.Groups.Values
+                .Where(x => x.InviteAlias != null))
+            {
+                CacheData.Groups[telegramGroup.TelegramChatId].InviteLink =
+                    await Manager.BotClient.ExportChatInviteLinkAsync(telegramGroup.TelegramChatId);
+                System.Threading.Thread.Sleep(100);
+            }
         }
     }
 }

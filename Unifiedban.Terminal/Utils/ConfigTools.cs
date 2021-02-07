@@ -344,6 +344,11 @@ using Timer = System.Timers.Timer;
                 CacheData.Groups[group.TelegramChatId].SettingsLanguage = value;
                 return;
             }
+            else if (parameter == "InviteAlias")
+            {
+                CacheData.Groups[group.TelegramChatId].InviteAlias = value;
+                return;
+            }
 
             ConfigurationParameter config = CacheData.GroupConfigs[group.TelegramChatId]
                 .Where(x => x.ConfigurationParameterId == parameter)

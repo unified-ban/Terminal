@@ -70,6 +70,8 @@ namespace Unifiedban.Terminal.Bot
         public const string ADDTOBLACKLIST = "ADDTOBLACKLIST";
         public const string WHITE = "WHITE";
         public const string GETTRUST = "GETTRUST";
+        public const string INVITE = "INVITE";
+        public const string ALIAS = "ALIAS";
 
         public const string TEST1 = "TEST1";
 
@@ -155,6 +157,8 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(ADDTOBLACKLIST, new Command.AddToBlacklist());
             CommandsList.Add(WHITE, new Command.RemoveFromBlacklist());
             CommandsList.Add(GETTRUST, new Command.GetTrustFactor());
+            CommandsList.Add(INVITE, new Command.Invite());
+            CommandsList.Add(ALIAS, new Command.Alias());
 
 #if DEBUG
             CommandsList.Add(TEST1, new Command.TestCommand());
