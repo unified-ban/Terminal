@@ -1,4 +1,4 @@
-﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -68,7 +68,7 @@ namespace Unifiedban.Terminal.Filters
                 text = text.Replace(match.Value, string.Empty);
 
             text = Regex.Replace(text, @"\uFE0F+", string.Empty); // remove all Control and non-printable chars
-            text = Regex.Replace(text, @"º|µ|¶|«|»|´|¿|¡|µ|¾|½|¼|¤|¹|²|³|¤|×|¨|°|÷|£|¢|’|ª|·|“|”", string.Empty); // whitelisted chars
+            text = Regex.Replace(text, @"º|µ|¶|«|»|´|¿|¡|µ|¾|½|¼|¤|¹|²|³|¤|×|¨|°|÷|£|¢|’|ª|·|“|”|？", string.Empty); // whitelisted chars
             return text;
         }
     }
