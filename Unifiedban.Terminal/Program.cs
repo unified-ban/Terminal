@@ -439,11 +439,21 @@ namespace Unifiedban.Terminal
 
         static void LoadPlugins()
         {
-            Directory.CreateDirectory(Environment.CurrentDirectory + @"\Plugins");
+            Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, "Plugins"));
             string[] assemblies = Directory
-                .GetFiles(Environment.CurrentDirectory + @"\Plugins", "Unifiedban.Plugin.*.dll");
+                .GetFiles(Path.Combine(Environment.CurrentDirectory, "Plugins"), "Unifiedban.Plugin.*.dll");
             foreach (var file in assemblies)
             {
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban Terminal Startup - LoadPlugins",
+                    Level = Models.SystemLog.Levels.Info,
+                    Message = $"Trying to load Plugin {file} ...",
+                    UserId = -1
+                });
+
                 try
                 { 
                     Assembly assembly = Assembly.LoadFrom(file);
@@ -462,11 +472,11 @@ namespace Unifiedban.Terminal
                             if (cWithAll != null)
                             {
                                 ParameterInfo parameter = cWithAll.GetParameters()
-                                    .Where(x => x.Name == "databaseConnectionString").SingleOrDefault();
+                                    .SingleOrDefault(x => x.Name == "databaseConnectionString");
                                 if (parameter != null)
                                 {
                                     parameter = cWithAll.GetParameters()
-                                        .Where(x => x.Name == "hubServerAddress").SingleOrDefault();
+                                        .SingleOrDefault(x => x.Name == "hubServerAddress");
                                     if (parameter != null)
                                     {
                                         o = Activator.CreateInstance(type, Bot.Manager.BotClient, CacheData.Configuration["Database"],
@@ -477,7 +487,7 @@ namespace Unifiedban.Terminal
                             else if (cWithAll != null)
                             {
                                 ParameterInfo parameter = cWithAll.GetParameters()
-                                    .Where(x => x.Name == "hubServerAddress").SingleOrDefault();
+                                    .SingleOrDefault(x => x.Name == "hubServerAddress");
                                 if (parameter != null)
                                 {
                                     o = Activator.CreateInstance(type, Bot.Manager.BotClient,
@@ -501,6 +511,15 @@ namespace Unifiedban.Terminal
                             UBPlugin plugin = (o as UBPlugin);
                             if (plugin == null)
                             {
+                                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                                {
+                                    LoggerName = CacheData.LoggerName,
+                                    Date = DateTime.Now,
+                                    Function = "Unifiedban Terminal Startup - LoadPlugins",
+                                    Level = Models.SystemLog.Levels.Warn,
+                                    Message = $"Error loading Plugin {file}",
+                                    UserId = -1
+                                });
                                 continue;
                             }
                             switch (plugin.ExecutionPhase)
