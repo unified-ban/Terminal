@@ -26,28 +26,38 @@ namespace Unifiedban.Terminal.Bot.Command
                        Timestamp = DateTime.UtcNow,
                        Chat = message.Chat,
                        ReplyToMessageId = message.MessageId,
-                       Text = CacheData.GetTranslation("en", "error_not_auth_command")
+                       Text = CacheData.GetTranslation(CacheData.Groups[message.Chat.Id].SettingsLanguage,
+                           "error_not_auth_command")
                    });
                 return;
             }
 
-            string[] hasMessage = message.Text.Split(" ");
-            if (hasMessage.Length == 2)
+            var hasMessage = message.Text.Split(" ");
+            if (hasMessage.Length != 2)
             {
-                if (hasMessage[1] == "close")
-                    ToggleGate(message, false);
-                else if (hasMessage[1] == "open")
-                    ToggleGate(message, true);
-                else
-                    MessageQueueManager.EnqueueMessage(
-                       new Models.ChatMessage()
-                       {
-                           Timestamp = DateTime.UtcNow,
-                           Chat = message.Chat,
-                           ReplyToMessageId = message.MessageId,
-                           Text = CacheData.GetTranslation("en", "error_gate_command_argument")
-                       });
                 return;
+            }
+
+            switch (hasMessage[1])
+            {
+                case "close":
+                    ToggleGate(message, false);
+                    break;
+                case "open":
+                    ToggleGate(message, true);
+                    break;
+                default:
+                    MessageQueueManager.EnqueueMessage(
+                        new Models.ChatMessage()
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            Chat = message.Chat,
+                            ReplyToMessageId = message.MessageId,
+                            Text = CacheData
+                                .GetTranslation(CacheData.Groups[message.Chat.Id].SettingsLanguage, 
+                                    "error_gate_command_argument")
+                        });
+                    break;
             }
         }
 
@@ -56,8 +66,7 @@ namespace Unifiedban.Terminal.Bot.Command
         public static void ToggleGate(Message message, bool newStatus)
         {
             Models.Group.ConfigurationParameter config = CacheData.GroupConfigs[message.Chat.Id]
-               .Where(x => x.ConfigurationParameterId == "Gate")
-               .SingleOrDefault();
+                .SingleOrDefault(x => x.ConfigurationParameterId == "Gate");
             if (config == null)
                 return;
 
@@ -85,15 +94,16 @@ namespace Unifiedban.Terminal.Bot.Command
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
-                    Text = $"The group is now {status}"
+                    Text = CacheData
+                        .GetTranslation(CacheData.Groups[message.Chat.Id].SettingsLanguage, 
+                            $"gate_command_{status}")
                 });
         }
 
         public static void ToggleSchedule(Message message, bool newStatus)
         {
-            Models.Group.ConfigurationParameter config = CacheData.GroupConfigs[message.Chat.Id]
-               .Where(x => x.ConfigurationParameterId == "GateSchedule")
-               .SingleOrDefault();
+            var config = CacheData.GroupConfigs[message.Chat.Id]
+               .SingleOrDefault(x => x.ConfigurationParameterId == "GateSchedule");
             if (config == null)
                 return;
 
@@ -113,12 +123,13 @@ namespace Unifiedban.Terminal.Bot.Command
                             Timestamp = DateTime.UtcNow,
                             Chat = message.Chat,
                             ParseMode = ParseMode.Markdown,
-                            Text = CacheData.GetTranslation("en", "command_gate_missing_schedule")
+                            Text = CacheData.GetTranslation(CacheData.Groups[message.Chat.Id].SettingsLanguage, 
+                                "command_gate_missing_schedule")
                         });
                     return;
                 }
 
-                Models.Group.NightSchedule nightSchedule =
+                var nightSchedule =
                     CacheData.NightSchedules[CacheData.Groups[message.Chat.Id].GroupId];
 
                 if (!nightSchedule.UtcStartDate.HasValue || !nightSchedule.UtcEndDate.HasValue)
@@ -129,25 +140,24 @@ namespace Unifiedban.Terminal.Bot.Command
                             Timestamp = DateTime.UtcNow,
                             Chat = message.Chat,
                             ParseMode = ParseMode.Markdown,
-                            Text = CacheData.GetTranslation("en", "command_gate_missing_schedule")
+                            Text = CacheData.GetTranslation(CacheData.Groups[message.Chat.Id].SettingsLanguage,
+                                "command_gate_missing_schedule")
                         });
                     return;
                 }
 
-                TimeSpan diffStartDate = DateTime.UtcNow - nightSchedule.UtcStartDate.Value;
+                var diffStartDate = DateTime.UtcNow - nightSchedule.UtcStartDate.Value;
                 if (diffStartDate.Days > 0)
                 {
                     CacheData.NightSchedules[nightSchedule.GroupId].UtcStartDate =
-                        CacheData.NightSchedules[nightSchedule.GroupId].UtcStartDate.Value
-                            .AddDays(diffStartDate.Days);
+                        CacheData.NightSchedules[nightSchedule.GroupId].UtcStartDate?.AddDays(diffStartDate.Days);
                 }
 
-                TimeSpan diffEndDays = DateTime.UtcNow - nightSchedule.UtcEndDate.Value;
+                var diffEndDays = DateTime.UtcNow - nightSchedule.UtcEndDate.Value;
                 if (diffEndDays.Days > 0)
                 {
                     CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate =
-                        CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate.Value
-                            .AddDays(diffEndDays.Days);
+                        CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate?.AddDays(diffEndDays.Days);
 
                     if (CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate.Value < DateTime.UtcNow)
                     {

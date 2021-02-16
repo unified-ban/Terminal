@@ -6,11 +6,13 @@ using Hangfire;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using Unifiedban.Models.Group;
@@ -20,13 +22,13 @@ using Timer = System.Timers.Timer;
 {
     public class ConfigTools
     {
-        static BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
+        static readonly BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
             new BusinessLogic.Group.TelegramGroupLogic();
-        static BusinessLogic.Group.NightScheduleLogic nsl =
+        static readonly BusinessLogic.Group.NightScheduleLogic nsl =
             new BusinessLogic.Group.NightScheduleLogic();
         
-        static Timer keepWSAlive;
-        static HubConnection connection;
+        static Timer _keepWsAlive;
+        static HubConnection _connection;
 
         public static void Initialize()
         {
@@ -45,16 +47,32 @@ using Timer = System.Timers.Timer;
                 UserId = -2
             });
             
-            keepWSAlive = new Timer(1000 * 20);
-            keepWSAlive.Elapsed += KeepWSAliveOnElapsed;
-            keepWSAlive.AutoReset = true;
+            _keepWsAlive = new Timer(1000 * 15);
+            _keepWsAlive.Elapsed += KeepWSAliveOnElapsed;
+            _keepWsAlive.AutoReset = true;
 
-            connectToHub();
+            ConnectToHub();
         }
 
         private static void KeepWSAliveOnElapsed(object sender, ElapsedEventArgs e)
         {
-            throw new NotImplementedException();
+            if (_connection.State != HubConnectionState.Connected)
+            {
+                _keepWsAlive.Stop();
+                return;
+            }
+            _connection.InvokeAsync("Echo", "Ping!");
+#if DEBUG
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "KeepWSAliveOnElapsed",
+                Level = Models.SystemLog.Levels.Debug,
+                Message = "Ping!",
+                UserId = -1
+            });
+#endif
         }
 
         public static void Dispose()
@@ -64,10 +82,10 @@ using Timer = System.Timers.Timer;
             SyncWelcomeAndRulesText();
             SyncNightScheduleToDatabase();
             
-            keepWSAlive.Stop();
-            if (connection.State == HubConnectionState.Connected)
+            _keepWsAlive.Stop();
+            if (_connection.State == HubConnectionState.Connected)
             {
-                connection.StopAsync().Wait();
+                _connection.StopAsync().Wait();
             }
         }
 
@@ -169,7 +187,7 @@ using Timer = System.Timers.Timer;
             }
         }
 
-        private static void connectToHub()
+        private static void ConnectToHub()
         {
             if (CacheData.FatalError ||
                 CacheData.IsDisposing)
@@ -177,13 +195,14 @@ using Timer = System.Timers.Timer;
                 return;
             }
             
-            connection = new HubConnectionBuilder()
+            _connection = new HubConnectionBuilder()
                 .WithUrl(CacheData.Configuration["HubServerAddress"])
-                //.WithAutomaticReconnect()
+                .WithAutomaticReconnect()
                 .Build();
 
-            connection.Closed += exception =>
+            _connection.Closed += exception =>
             {
+                _keepWsAlive.Stop();
                 if (CacheData.FatalError ||
                     CacheData.IsDisposing)
                 {
@@ -201,11 +220,11 @@ using Timer = System.Timers.Timer;
                 });
 
                 Thread.Sleep(2000);
-                connectToHub();
+                ConnectToHub();
                 return Task.CompletedTask;
             };
 
-            connection.Reconnected += connectionId =>
+            _connection.Reconnected += connectionId =>
             {
                 Data.Utils.Logging.AddLog(new Models.SystemLog()
                 {
@@ -217,7 +236,8 @@ using Timer = System.Timers.Timer;
                     UserId = -1
                 });
 
-                connection.InvokeAsync("Identification", CacheData.Configuration["HubServerToken"]);
+                _connection.InvokeAsync("Identification", CacheData.Configuration["HubServerToken"]);
+                _keepWsAlive.Start();
 
                 return Task.CompletedTask;
             };
@@ -231,10 +251,10 @@ using Timer = System.Timers.Timer;
                 Message = "Connecting and autenticating to Hub Server",
                 UserId = -1
             });
-            connection.StartAsync().Wait();
-            connection.InvokeAsync("Identification", CacheData.Configuration["HubServerToken"]);
+            _connection.StartAsync().Wait();
+            _connection.InvokeAsync("Identification", CacheData.Configuration["HubServerToken"]);
 
-            connection.On<string, string>("MessageToBot",
+            _connection.On<string, string>("MessageToBot",
                 (functionName, data) =>
                 {
                     switch (functionName)
@@ -251,7 +271,7 @@ using Timer = System.Timers.Timer;
                                     Message = "Hub Server answered KO on authentication",
                                     UserId = -1
                                 });
-                                connection.DisposeAsync();
+                                _connection.DisposeAsync();
                             }
                             else
                             {
@@ -264,12 +284,13 @@ using Timer = System.Timers.Timer;
                                     Message = "Hub Server answered OK on authentication",
                                     UserId = -1
                                 });
+                                _keepWsAlive.Start();
                             }
                             break;
                     }
                 });
 
-            connection.On<string, string, string, string>("UpdateSetting", 
+            _connection.On<string, string, string, string>("UpdateSetting", 
                 (dashboardUserId, groupId, parameter, value) =>
             {
                 if (CacheData.FatalError ||
@@ -281,7 +302,7 @@ using Timer = System.Timers.Timer;
                 HandleWsCommand(dashboardUserId, groupId, parameter, value);
             });
             
-            connection.On<string, string, string, bool>("ToggleStatus", 
+            _connection.On<string, string, string, bool>("ToggleStatus", 
                 (dashboardUserId, groupId, parameter, value) =>
                 {
                     if (CacheData.FatalError ||
@@ -308,7 +329,7 @@ using Timer = System.Timers.Timer;
 
         private static void HandleWsCommand(string dashboardUserId, string groupId, string parameter, string value)
         {
-            TelegramGroup group = CacheData.Groups.Values
+            var group = CacheData.Groups.Values
                 .SingleOrDefault(x => x.GroupId == groupId);
             if (group == null)
             {
@@ -320,39 +341,42 @@ using Timer = System.Timers.Timer;
                 return;
             }
 
-            if (parameter == "WelcomeText")
+            switch (parameter)
             {
-                CacheData.Groups[group.TelegramChatId].WelcomeText = value;
-                return;
-            }
-            else if (parameter == "RulesText") 
-            {
-                CacheData.Groups[group.TelegramChatId].RulesText = value;
-                return;
-            }
-            else if (parameter == "ReportChatId")
-            {
-                if (!Int64.TryParse(value, out long reportChatId))
+                case "WelcomeText":
+                    CacheData.Groups[group.TelegramChatId].WelcomeText = value;
+                    return;
+                case "RulesText":
+                    CacheData.Groups[group.TelegramChatId].RulesText = value;
+                    return;
+                case "ReportChatId":
                 {
+                    if (!long.TryParse(value, out var reportChatId))
+                    {
+                        return;
+                    }
+                    CacheData.Groups[group.TelegramChatId].ReportChatId = reportChatId;
                     return;
                 }
-                CacheData.Groups[group.TelegramChatId].ReportChatId = reportChatId;
-                return;
-            }
-            else if (parameter == "SettingsLanguage")
-            {
-                CacheData.Groups[group.TelegramChatId].SettingsLanguage = value;
-                return;
-            }
-            else if (parameter == "InviteAlias")
-            {
-                CacheData.Groups[group.TelegramChatId].InviteAlias = value;
-                return;
+                case "SettingsLanguage":
+                    CacheData.Groups[group.TelegramChatId].SettingsLanguage = value;
+                    return;
+                case "InviteAlias":
+                    CacheData.Groups[group.TelegramChatId].InviteAlias = value;
+                    return;
+                case "Gate":
+                    Bot.Command.Gate.ToggleGate(new Message()
+                    {
+                        Chat = new Chat()
+                        {
+                            Id = group.TelegramChatId
+                        }
+                    }, value.ToLower() == "true");
+                    return;
             }
 
-            ConfigurationParameter config = CacheData.GroupConfigs[group.TelegramChatId]
-                .Where(x => x.ConfigurationParameterId == parameter)
-                .SingleOrDefault();
+            var config = CacheData.GroupConfigs[group.TelegramChatId]
+                .SingleOrDefault(x => x.ConfigurationParameterId == parameter);
             if (config == null)
                 return;
 

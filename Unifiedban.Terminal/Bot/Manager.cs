@@ -86,7 +86,7 @@ namespace Unifiedban.Terminal.Bot
             BotClient.SendTextMessageAsync(
                 chatId: CacheData.ControlChatId,
                 parseMode: ParseMode.Markdown,
-                text: $"I'm here, Master.\n" +
+                text: $"I'm here, dude.\n" +
                     $"My *instance ID* is _{instanceId}_ " +
                     $"and I'm running on *machine* _{currentHostname}_\n" +
 #if DEBUG
@@ -103,7 +103,7 @@ namespace Unifiedban.Terminal.Bot
             BotClient.SendTextMessageAsync(
                 chatId: CacheData.ControlChatId,
                 parseMode: ParseMode.Markdown,
-                text: $"I left, Master.\n" +
+                text: $"I left, dude.\n" +
                     $"My *instance ID* is _{instanceId}_ " +
                     $"and I was running on *machine* _{currentHostname}_\n" +
                     $"See you soon!\n" +
