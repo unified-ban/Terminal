@@ -451,6 +451,7 @@ namespace Unifiedban.Terminal.Utils
             foreach (var telegramGroup in CacheData.Groups.Values
                 .Where(x => x.InviteAlias != null))
             {
+                if (string.IsNullOrEmpty(telegramGroup.InviteAlias)) continue;
                 CacheData.Groups[telegramGroup.TelegramChatId].InviteLink =
                     await Manager.BotClient.ExportChatInviteLinkAsync(telegramGroup.TelegramChatId);
                 System.Threading.Thread.Sleep(100);
