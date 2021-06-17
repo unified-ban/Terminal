@@ -18,5 +18,5 @@ Support us on [Twitter](https://twitter.com/unifiedban/)
 
 # Sponsor
 unified/ban is a project by [Mirko Brombin](https://mirko.pm/) and [Prometheus Studio](https://www.twitch.tv/prometheus_studio/).\
-It is officially supported by [SubPixel](https://subpixel.it) and [JetBrains](https://www.jetbrains.com/?from=unifiedban)\
-<a href="https://www.jetbrains.com/?from=unifiedban"><img width="74" src="https://unifiedban.solutions/images/jetbrains-logos/jetbrains-variant-4.svg" /></a>
+It is officially supported by [fabricators](https://fabricators.ltd) and [JetBrains](https://www.jetbrains.com/?from=unifiedban)\
+<a href="https://www.jetbrains.com/?from=unifiedban"><img width="74" src="https://unifiedban.solutions/static/images/jetbrains-logos/jetbrains.png" /></a>
