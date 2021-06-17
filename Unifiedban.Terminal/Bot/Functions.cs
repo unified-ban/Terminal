@@ -5,6 +5,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Threading;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Types.Enums;
@@ -13,6 +15,7 @@ using Unifiedban.Models.Group;
 using System.Threading.Tasks;
 using System.Timers;
 using Unifiedban.Terminal.Utils;
+using Timer = System.Timers.Timer;
 
 namespace Unifiedban.Terminal.Bot
 {
@@ -84,32 +87,6 @@ namespace Unifiedban.Terminal.Bot
                     Message = $"I have been added to Group {message.Chat.Title} ID {message.Chat.Id}",
                     UserId = -1
                 });
-                
-#if DEBUG
-                if (!CacheData.BetaAuthChats.Contains(message.Chat.Id))
-                {
-                    Manager.BotClient.SendTextMessageAsync(
-                        chatId: message.Chat.Id,
-                        text: "⚠️Error registering new group. Not authorized to Beta channel.\n" +
-                              "Join our support group to verify if you could join it: @unifiedban_group"
-                    );
-                    Manager.BotClient.SendTextMessageAsync(
-                        chatId: CacheData.ControlChatId,
-                        parseMode: ParseMode.Markdown,
-                        text: String.Format(
-                            "*[Log]*\n" +
-                            "⚠️Error registering new group. Not authorized to Beta channel.\n" +
-                            "\nChat: {0}" +
-                            "\nChatId: {1}" +
-                            "\n\n*hash_code:* #UB{2}-{3}",
-                            message.Chat.Title,
-                            message.Chat.Id,
-                            message.Chat.Id.ToString().Replace("-",""),
-                            Guid.NewGuid())
-                    );
-                    return;
-                }
-#endif
 
                 if (!CacheData.Groups.ContainsKey(message.Chat.Id))
                 {
@@ -248,10 +225,55 @@ namespace Unifiedban.Terminal.Bot
                         if (!plugin.Execute(message, member, MessageQueueManager.EnqueueMessage))
                         {
                             pluginCheckOk = false;
-                            Manager.BotClient.KickChatMemberAsync(message.Chat.Id, member.Id);
-                            if (message.Chat.Type == ChatType.Supergroup)
-                                Manager.BotClient.UnbanChatMemberAsync(message.Chat.Id, member.Id);
-                            break;
+                            try
+                            {
+                                Thread.Sleep(500);
+                                Manager.BotClient.KickChatMemberAsync(message.Chat.Id, member.Id);
+                                if (message.Chat.Type == ChatType.Supergroup)
+                                {
+                                    Thread.Sleep(500);
+                                    Manager.BotClient.UnbanChatMemberAsync(message.Chat.Id, member.Id);
+                                }
+
+                                break;
+                            }
+                            catch (Exception ex)
+                            {
+                                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                                {
+                                    LoggerName = CacheData.LoggerName,
+                                    Date = DateTime.Now,
+                                    Function = "Member joined",
+                                    Level = SystemLog.Levels.Error,
+                                    Message = "Error kicking user for failed pre-join check",
+                                    UserId = -2
+                                });
+                                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                                {
+                                    LoggerName = CacheData.LoggerName,
+                                    Date = DateTime.Now,
+                                    Function = "Member joined",
+                                    Level = SystemLog.Levels.Error,
+                                    Message = ex.Message,
+                                    UserId = -2
+                                });
+
+                                if (ex.InnerException != null)
+                                {
+
+                                    Data.Utils.Logging.AddLog(new Models.SystemLog()
+                                    {
+                                        LoggerName = CacheData.LoggerName,
+                                        Date = DateTime.Now,
+                                        Function = "Member joined",
+                                        Level = SystemLog.Levels.Error,
+                                        Message = ex.InnerException.Message,
+                                        UserId = -2
+                                    });
+                                }
+
+                                break;
+                            }
                         }
                     }
 
@@ -333,7 +355,7 @@ namespace Unifiedban.Terminal.Bot
                             Manager.BotClient.KickChatMemberAsync(message.Chat, member.Id);
                             if (message.Chat.Type == ChatType.Supergroup)
                             {
-                                System.Threading.Thread.Sleep(200);
+                                Thread.Sleep(500);
                                 Manager.BotClient.UnbanChatMemberAsync(message.Chat.Id, member.Id);
                             }
 
@@ -414,7 +436,11 @@ namespace Unifiedban.Terminal.Bot
                         {
                             Manager.BotClient.KickChatMemberAsync(message.Chat.Id, member.Id);
                             if (message.Chat.Type == ChatType.Supergroup)
+                            {
+                                Thread.Sleep(500);
                                 Manager.BotClient.UnbanChatMemberAsync(message.Chat.Id, member.Id);
+                            }
+
                             break;
                         }
                     }
@@ -452,18 +478,18 @@ namespace Unifiedban.Terminal.Bot
             if (!CacheData.Groups.ContainsKey(message.Chat.Id))
                 return;
 
-            BusinessLogic.Group.TelegramGroupLogic telegramGroupLogic =
+            var telegramGroupLogic =
                new BusinessLogic.Group.TelegramGroupLogic();
 
-            TelegramGroup updated = telegramGroupLogic.UpdateChatId(message.Chat.Id, message.MigrateToChatId, -2); // TODO - log operation
+            var updated = telegramGroupLogic.UpdateChatId(message.Chat.Id, message.MigrateToChatId, -2); // TODO - log operation
             if (updated == null)
                 return;
 
             CacheData.Groups.Add(updated.TelegramChatId, updated);
             MessageQueueManager.AddGroupIfNotPresent(updated);
             
-            MessageQueueManager.RemoveGroupIfNotPresent(message.Chat.Id);
-            CacheData.Groups.Remove(message.Chat.Id);
+            //MessageQueueManager.RemoveGroupIfNotPresent(message.Chat.Id);
+            //CacheData.Groups.Remove(message.Chat.Id);
         }
 
         public static void CacheUsername(Message message)

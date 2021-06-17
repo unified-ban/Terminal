@@ -173,6 +173,7 @@ namespace Unifiedban.Terminal.Bot
             if (e.Message.MigrateToChatId != 0)
             {
                 Functions.MigrateToChatId(e.Message);
+                e.Message.Chat.Id = e.Message.MigrateToChatId;
             }
 
             bool isPrivateChat = e.Message.Chat.Type == ChatType.Private ||
@@ -191,7 +192,7 @@ namespace Unifiedban.Terminal.Bot
             if (!justAdded && !isPrivateChat &&
                 !CacheData.Groups.ContainsKey(e.Message.Chat.Id))
             {
-                string logMessage = String.Format(
+                var logMessage = string.Format(
                     "*[Alert]*\n" +
                     "Group *{0}* left due to missing group record in database.\n" +
                     "⚠ do not open links you don't know ⚠\n" +
@@ -207,10 +208,26 @@ namespace Unifiedban.Terminal.Bot
                     Text = logMessage
                 });
 
-                await BotClient.SendTextMessageAsync(e.Message.Chat.Id,
-                    "We're sorry but an error has occurred while retrieving this chat on our database.\n" +
-                    "Please add again the bot if you want to continue to use it.\n" +
-                    "For any doubt reach us in our support group @unifiedban_group");
+                try
+                {
+                    await BotClient.SendTextMessageAsync(e.Message.Chat.Id,
+                        "We're sorry but an error has occurred while retrieving this chat on our database.\n" +
+                        "Please add again the bot if you want to continue to use it.\n" +
+                        "For any doubt reach us in our support group @unifiedban_group");
+                }
+                catch
+                {
+                    Data.Utils.Logging.AddLog(new Models.SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Unifiedban.Bot.Manager.BotClient_OnMessage",
+                        Level = Models.SystemLog.Levels.Warn,
+                        Message = "Can't send left notification due to missing permission.",
+                        UserId = -1
+                    });
+                }
+
                 await BotClient.LeaveChatAsync(e.Message.Chat.Id);
                 return;
             }
