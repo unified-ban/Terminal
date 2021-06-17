@@ -40,8 +40,15 @@ namespace Unifiedban.Terminal.Bot.Command
                 return;
             }
             
-            if(!isUpdate)
-                Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+            if (!isUpdate)
+            {
+                var canDeleteMessages = false;
+                var me = Manager.BotClient.GetChatMemberAsync(message.Chat.Id, Manager.MyId).Result;
+                if (me.CanDeleteMessages != null)
+                    canDeleteMessages = (bool)me.CanDeleteMessages;
+                if(canDeleteMessages)
+                    Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+            }
 
             string settingsLang = CacheData.Groups[message.Chat.Id].SettingsLanguage;
 

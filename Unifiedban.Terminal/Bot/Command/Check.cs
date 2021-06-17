@@ -15,8 +15,6 @@ namespace Unifiedban.Terminal.Bot.Command
     {
         public void Execute(Message message)
         {
-            Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
-
             if (!Utils.BotTools.IsUserOperator(message.From.Id) &&
                 !Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
             {
@@ -47,6 +45,8 @@ namespace Unifiedban.Terminal.Bot.Command
 
             if (canRestrictMembers && canDeleteMessages)
                 text = CacheData.SysConfigs.Single(x => x.SysConfigId == "CommandCheckOkText").Value;
+            if(canDeleteMessages)
+                Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
 
             text = text.Replace("{{has_ban_users}}", canRestrictMembers ? "{{true}}" : "{{false}}");
             text = text.Replace("{{has_delete_messages}}", canDeleteMessages ? "{{true}}" : "{{false}}");

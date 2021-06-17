@@ -12,6 +12,13 @@ namespace Unifiedban.Terminal.Bot.Command
     {
         public void Execute(Message message)
         {
+            var member = Manager.BotClient.GetChatMemberAsync(message.Chat.Id, message.From.Id).Result;
+
+            Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+
+            var canGenerateInvite = member.CanInviteUsers ?? false;
+            if (!canGenerateInvite) return;
+
             try
             {
                 var link = CacheData.Groups[message.Chat.Id].InviteLink ??
