@@ -71,7 +71,9 @@ namespace Unifiedban.Terminal.Bot
         public const string WHITE = "WHITE";
         public const string GETTRUST = "GETTRUST";
         public const string INVITE = "INVITE";
+        public const string PINVITE = "PINVITE";
         public const string ALIAS = "ALIAS";
+        public const string TSSRENEWLINKS = "TSSRENEWLINKS";
 
         public const string TEST1 = "TEST1";
 
@@ -158,7 +160,10 @@ namespace Unifiedban.Terminal.Bot
             CommandsList.Add(WHITE, new Command.RemoveFromBlacklist());
             CommandsList.Add(GETTRUST, new Command.GetTrustFactor());
             CommandsList.Add(INVITE, new Command.Invite());
+            CommandsList.Add(PINVITE, new Command.InviteToPrivate());
             CommandsList.Add(ALIAS, new Command.Alias());
+
+            CommandsList.Add(TSSRENEWLINKS, new Command.TSSRenewLinks());
 
 #if DEBUG
             CommandsList.Add(TEST1, new Command.TestCommand());
