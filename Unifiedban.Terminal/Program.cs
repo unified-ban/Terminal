@@ -107,9 +107,6 @@ namespace Unifiedban.Terminal
             Utils.UserTools.Initialize();
 
             Bot.Manager.StartReceiving();
-#if DEBUG
-            TestArea.DoTest();
-#endif
 
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
@@ -439,9 +436,20 @@ namespace Unifiedban.Terminal
 
         static void LoadPlugins()
         {
-            Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, "Plugins"));
+            string pluginsDir = Path.Combine(Environment.CurrentDirectory, "Plugins");
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal Startup - LoadPlugins",
+                Level = Models.SystemLog.Levels.Info,
+                Message = $"Plugins directory: {pluginsDir}",
+                UserId = -1
+            });
+
+            Directory.CreateDirectory(pluginsDir);
             string[] assemblies = Directory
-                .GetFiles(Path.Combine(Environment.CurrentDirectory, "Plugins"), "Unifiedban.Plugin.*.dll");
+                .GetFiles(pluginsDir, "Unifiedban.Plugin.*.dll");
             foreach (var file in assemblies)
             {
                 Data.Utils.Logging.AddLog(new Models.SystemLog()
