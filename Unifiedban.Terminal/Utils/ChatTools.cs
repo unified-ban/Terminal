@@ -33,7 +33,7 @@ namespace Unifiedban.Terminal.Utils
 
 
             RecurringJob.AddOrUpdate("ChatTools_RenewInviteLinks", () => RenewInviteLinks(), "0 0/5 * ? * *");
-            RecurringJob.Trigger("ChatTools_RenewInviteLinks");
+            //RecurringJob.Trigger("ChatTools_RenewInviteLinks");
 
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
@@ -351,8 +351,27 @@ namespace Unifiedban.Terminal.Utils
                         parseMode: ParseMode.Markdown,
                         replyMarkup: BuildCaptchaButtons(result, memberId, timerKey)).Result.MessageId;
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Data.Utils.Logging.AddLog(new Models.SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "ChatTools.SendCaptchaImage",
+                        Level = SystemLog.Levels.Error,
+                        Message = ex.Message,
+                        UserId = -1
+                    });
+                    if(ex.InnerException != null)
+                        Data.Utils.Logging.AddLog(new Models.SystemLog()
+                        {
+                            LoggerName = CacheData.LoggerName,
+                            Date = DateTime.Now,
+                            Function = "ChatTools.SendCaptchaImage",
+                            Level = SystemLog.Levels.Error,
+                            Message = ex.InnerException.Message,
+                            UserId = -1
+                        });
                     return -1;
                 }
             }
@@ -452,9 +471,14 @@ namespace Unifiedban.Terminal.Utils
                 .Where(x => x.InviteAlias != null))
             {
                 if (string.IsNullOrEmpty(telegramGroup.InviteAlias)) continue;
-                CacheData.Groups[telegramGroup.TelegramChatId].InviteLink =
-                    await Manager.BotClient.ExportChatInviteLinkAsync(telegramGroup.TelegramChatId);
-                System.Threading.Thread.Sleep(100);
+                var meInChat = await Manager.BotClient.GetChatMemberAsync(telegramGroup.TelegramChatId, Manager.MyId);
+                if (meInChat == null) continue;
+                if (meInChat.CanInviteUsers ?? false)
+                {
+                    CacheData.Groups[telegramGroup.TelegramChatId].InviteLink =
+                        await Manager.BotClient.ExportChatInviteLinkAsync(telegramGroup.TelegramChatId);
+                    System.Threading.Thread.Sleep(100);
+                }
             }
         }
     }
