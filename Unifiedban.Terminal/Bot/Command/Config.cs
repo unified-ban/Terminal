@@ -57,8 +57,8 @@ namespace Unifiedban.Terminal.Bot.Command
             int depthLevel = 0;
 
             configMenu.Add(new List<InlineKeyboardButton>());
-            configMenu[0].Add(InlineKeyboardButton.WithUrl("Instructions", "https://unifiedban.solutions/?p=faq#FAQ_configure_instructions"));
-            configMenu[0].Add(InlineKeyboardButton.WithUrl("Dashboard", "https://unifiedban.solutions/"));
+            configMenu[0].Add(InlineKeyboardButton.WithUrl("Instructions", "https://docs.unifiedban.solutions/docs/setup"));
+            configMenu[0].Add(InlineKeyboardButton.WithUrl("Dashboard", "https://dash.unifiedban.solutions/"));
             btnCount = 2;
 
             try
