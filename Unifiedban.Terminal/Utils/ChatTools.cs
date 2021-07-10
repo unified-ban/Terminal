@@ -473,10 +473,27 @@ namespace Unifiedban.Terminal.Utils
                 if (string.IsNullOrEmpty(telegramGroup.InviteAlias)) continue;
                 var meInChat = await Manager.BotClient.GetChatMemberAsync(telegramGroup.TelegramChatId, Manager.MyId);
                 if (meInChat == null) continue;
-                if (meInChat.CanInviteUsers ?? false)
+                if ((meInChat.IsMember ?? false) && 
+                    (meInChat.CanInviteUsers ?? false))
                 {
-                    CacheData.Groups[telegramGroup.TelegramChatId].InviteLink =
-                        await Manager.BotClient.ExportChatInviteLinkAsync(telegramGroup.TelegramChatId);
+                    try
+                    {
+                        CacheData.Groups[telegramGroup.TelegramChatId].InviteLink =
+                            await Manager.BotClient.ExportChatInviteLinkAsync(telegramGroup.TelegramChatId);
+                    }
+                    catch (Exception ex)
+                    {
+                        Data.Utils.Logging.AddLog(new SystemLog()
+                        {
+                            LoggerName = CacheData.LoggerName,
+                            Date = DateTime.Now,
+                            Function = "ChatTools.RenewInviteLinks",
+                            Level = SystemLog.Levels.Warn,
+                            Message = $"Error exporting new chat (id {telegramGroup.TelegramChatId}) invite link due to exception: {ex.Message}",
+                            UserId = -1
+                        });
+                    }
+
                     System.Threading.Thread.Sleep(100);
                 }
             }
