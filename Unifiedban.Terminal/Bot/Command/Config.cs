@@ -110,13 +110,13 @@ namespace Unifiedban.Terminal.Bot.Command
 
             configMenu.Add(new List<InlineKeyboardButton>());
             configMenu[depthLevel + 1].Add(InlineKeyboardButton.WithUrl("Ask for support", "https://t.me/unifiedban_group"));
-            configMenu[depthLevel + 1].Add(InlineKeyboardButton.WithUrl("FAQ", "https://unifiedban.solutions/?p=faq"));
+            configMenu[depthLevel + 1].Add(InlineKeyboardButton.WithUrl("Docs", "https://docs.unifiedban.solutions/docs/"));
 
             configMenu.Add(new List<InlineKeyboardButton>());
             bool dashboardStatus = getDashboardStatus(message);
             if (dashboardStatus || isOperator)
             {
-                configMenu[depthLevel + 2].Add(InlineKeyboardButton.WithUrl("Dashboard", "https://unifiedban.solutions/signin"));
+                configMenu[depthLevel + 2].Add(InlineKeyboardButton.WithUrl("Dashboard", "https://dash.unifiedban.solutions/"));
             }
             else
             {
