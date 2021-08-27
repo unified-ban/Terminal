@@ -1,4 +1,4 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
+﻿/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -349,6 +349,7 @@ namespace Unifiedban.Terminal.Utils
                         caption: CacheData.GetTranslation(CacheData.Groups[chatId.Identifier].SettingsLanguage,
                             "captcha_iamhuman_img", true).Replace("{{name}}", name),
                         parseMode: ParseMode.Markdown,
+                        disableNotification: true,
                         replyMarkup: BuildCaptchaButtons(result, memberId, timerKey)).Result.MessageId;
                 }
                 catch (Exception ex)

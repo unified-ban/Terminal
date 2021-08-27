@@ -95,7 +95,10 @@ namespace Unifiedban.Terminal.Bot.Command
                         Chat = callbackQuery.Message.Chat,
                         ParseMode = ParseMode.Markdown,
                         Text = CacheData.GetTranslation(CacheData.Groups[callbackQuery.Message.Chat.Id].SettingsLanguage, 
-                            "captcha_ok", true).Replace("{{name}}", name)
+                            "captcha_ok", true).Replace("{{name}}", name),
+                        DisableNotification = true,
+                        PostSentAction = ChatMessage.PostSentActions.Destroy,
+                        AutoDestroyTimeInSeconds = 60 * 2
                     });
 
         }
