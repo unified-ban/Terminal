@@ -1,4 +1,4 @@
-﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -470,32 +470,31 @@ namespace Unifiedban.Terminal.Utils
             foreach (var telegramGroup in CacheData.Groups.Values
                 .Where(x => x.InviteAlias != null))
             {
-                if (string.IsNullOrEmpty(telegramGroup.InviteAlias)) continue;
-                var meInChat = await Manager.BotClient.GetChatMemberAsync(telegramGroup.TelegramChatId, Manager.MyId);
-                if (meInChat == null) continue;
-                if ((meInChat.IsMember ?? false) && 
-                    (meInChat.CanInviteUsers ?? false))
+                try
                 {
-                    try
+                    if (string.IsNullOrEmpty(telegramGroup.InviteAlias)) continue;
+                    var meInChat = await Manager.BotClient.GetChatMemberAsync(telegramGroup.TelegramChatId, Manager.MyId);
+                    if (meInChat == null) continue;
+                    if ((meInChat.IsMember ?? false) &&
+                        (meInChat.CanInviteUsers ?? false))
                     {
                         CacheData.Groups[telegramGroup.TelegramChatId].InviteLink =
                             await Manager.BotClient.ExportChatInviteLinkAsync(telegramGroup.TelegramChatId);
                     }
-                    catch (Exception ex)
-                    {
-                        Data.Utils.Logging.AddLog(new SystemLog()
-                        {
-                            LoggerName = CacheData.LoggerName,
-                            Date = DateTime.Now,
-                            Function = "ChatTools.RenewInviteLinks",
-                            Level = SystemLog.Levels.Warn,
-                            Message = $"Error exporting new chat (id {telegramGroup.TelegramChatId}) invite link due to exception: {ex.Message}",
-                            UserId = -1
-                        });
-                    }
-
-                    System.Threading.Thread.Sleep(100);
                 }
+                catch (Exception ex)
+                {
+                    Data.Utils.Logging.AddLog(new SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "ChatTools.RenewInviteLinks",
+                        Level = SystemLog.Levels.Warn,
+                        Message = $"Error exporting new chat (id {telegramGroup.TelegramChatId}) invite link due to exception: {ex.Message}",
+                        UserId = -1
+                    });
+                }
+                System.Threading.Thread.Sleep(100);
             }
         }
     }
