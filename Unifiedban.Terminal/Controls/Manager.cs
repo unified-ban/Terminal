@@ -1,4 +1,4 @@
-﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -493,35 +493,33 @@ namespace Unifiedban.Terminal.Controls
 
         public static bool IsTelegramLink(string siteUri)
         {
-            using (System.Net.WebClient client = new System.Net.WebClient())
+            using WebClientWithTimeout client = new WebClientWithTimeout();
+            client.Headers.Add("Accept", " text/html, application/xhtml+xml, */*");
+            client.Headers.Add("Content-Type", "application/json;charset=UTF-8");
+            client.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36 Edg/87.0.664.66");
+                
+            var htmlCode = "";
+            try
             {
-                client.Headers.Add("Accept", " text/html, application/xhtml+xml, */*");
-                client.Headers.Add("Content-Type", "application/json;charset=UTF-8");
-                client.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36 Edg/87.0.664.66");
-                
-                string htmlCode = "";
-                try
-                {
-                    htmlCode = client.DownloadString(siteUri);
+                htmlCode = client.DownloadString(siteUri);
                     
-                    if (htmlCode.Contains("tgme_page_extra") && htmlCode.Contains("member"))
-                        return true;
-                }
-                catch
-                {
-                    Data.Utils.Logging.AddLog(new Models.SystemLog()
-                    {
-                        LoggerName = CacheData.LoggerName,
-                        Date = DateTime.Now,
-                        Function = "Unifiedban.Terminal.Controls.IsTelegramLink",
-                        Level = Models.SystemLog.Levels.Error,
-                        Message = "Error loading siteUri: " + siteUri,
-                        UserId = -2
-                    });
-                }
-                
-                return false;
+                if (htmlCode.Contains("tgme_page_extra") && htmlCode.Contains("member"))
+                    return true;
             }
+            catch (Exception ex)
+            {
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban.Terminal.Controls.Manager.IsTelegramLink",
+                    Level = Models.SystemLog.Levels.Debug,
+                    Message = $"Error loading siteUri: {siteUri}\n{ex.Message}",
+                    UserId = -2
+                });
+            }
+                
+            return false;
         }
     }
 
@@ -529,7 +527,7 @@ namespace Unifiedban.Terminal.Controls
     {
         protected override System.Net.WebRequest GetWebRequest(Uri address)
         {
-            System.Net.WebRequest wr = base.GetWebRequest(address);
+            var wr = base.GetWebRequest(address);
             wr.Timeout = 5000; // timeout in milliseconds (ms)
             return wr;
         }
