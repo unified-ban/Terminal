@@ -116,35 +116,39 @@ namespace Unifiedban.Terminal.Bot
 
             bool blacklistEnabled = false;
             ConfigurationParameter blacklistConfig = CacheData.GroupConfigs[message.Chat.Id]
-                .Where(x => x.ConfigurationParameterId == "Blacklist")
-                .FirstOrDefault();
+                .FirstOrDefault(x => x.ConfigurationParameterId == "Blacklist");
             if (blacklistConfig != null)
                 if (blacklistConfig.Value.ToLower() == "true")
                     blacklistEnabled = true;
             
             bool rtlNameCheckEnabled = false;
             ConfigurationParameter rtlNameCheckConfig = CacheData.GroupConfigs[message.Chat.Id]
-                .Where(x => x.ConfigurationParameterId == "RTLNameFilter")
-                .FirstOrDefault();
+                .FirstOrDefault(x => x.ConfigurationParameterId == "RTLNameFilter");
             if (rtlNameCheckConfig != null)
                 if (rtlNameCheckConfig.Value.ToLower() == "true")
                     rtlNameCheckEnabled = true;
 
             bool captchaEnabled = false;
             ConfigurationParameter captchaConfig = CacheData.GroupConfigs[message.Chat.Id]
-                .Where(x => x.ConfigurationParameterId == "Captcha")
-                .FirstOrDefault();
+                .FirstOrDefault(x => x.ConfigurationParameterId == "Captcha");
             if (captchaConfig != null)
                 if (captchaConfig.Value.ToLower() == "true")
                     captchaEnabled = true;
 
             bool welcomeMessageEnabled = false;
             ConfigurationParameter welcomeMessageConfig = CacheData.GroupConfigs[message.Chat.Id]
-                .Where(x => x.ConfigurationParameterId == "WelcomeMessage")
-                .FirstOrDefault();
+                .FirstOrDefault(x => x.ConfigurationParameterId == "WelcomeMessage");
             if (welcomeMessageConfig != null)
                 if (welcomeMessageConfig.Value.ToLower() == "true")
                     welcomeMessageEnabled = true;
+
+            var canRestrict = false;
+            var meInChat = Manager.BotClient.GetChatMemberAsync(message.Chat.Id, Manager.MyId).Result;
+            if (meInChat != null)
+            {
+                canRestrict = (meInChat.IsMember ?? false) &&
+                              (meInChat.CanRestrictMembers ?? false);
+            }
 
             foreach (User member in message.NewChatMembers)
             {
@@ -155,7 +159,7 @@ namespace Unifiedban.Terminal.Bot
                     continue;
                 }
 
-                if (blacklistEnabled)
+                if (blacklistEnabled && canRestrict)
                 {
                     if (Utils.UserTools.KickIfIsInBlacklist(message, member))
                     {
@@ -163,7 +167,7 @@ namespace Unifiedban.Terminal.Bot
                     }
                 }
 
-                if (rtlNameCheckEnabled)
+                if (rtlNameCheckEnabled && canRestrict)
                 {
                     Filters.FilterResult rtlCheck = RTLNameFilter.DoCheck(message,
                         member.FirstName + " " + member.LastName);
@@ -300,7 +304,7 @@ namespace Unifiedban.Terminal.Bot
                             );
                         }
                     }
-                    if (captchaEnabled && CacheData.Operators
+                    if (captchaEnabled && canRestrict && CacheData.Operators
                         .SingleOrDefault(x => x.TelegramUserId == member.Id) == null)
                     {
                         Manager.BotClient.RestrictChatMemberAsync(
