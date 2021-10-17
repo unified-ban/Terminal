@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 using System.Timers;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -29,6 +31,9 @@ using Timer = System.Timers.Timer;
         
         static Timer _keepWsAlive;
         static HubConnection _connection;
+        
+        private static IModel _channel;
+        private static IBasicProperties _properties;
 
         public static void Initialize()
         {
@@ -52,6 +57,8 @@ using Timer = System.Timers.Timer;
             _keepWsAlive.AutoReset = true;
 
             ConnectToHub();
+
+            LoadRabbitMQManager();
         }
 
         private static void KeepWSAliveOnElapsed(object sender, ElapsedEventArgs e)
@@ -87,6 +94,8 @@ using Timer = System.Timers.Timer;
             {
                 _connection.StopAsync().Wait();
             }
+            
+            if(_channel.IsOpen) _channel.Close();
         }
 
         public static void SyncGroupsToDatabase()
@@ -384,6 +393,104 @@ using Timer = System.Timers.Timer;
                 [CacheData.GroupConfigs[group.TelegramChatId]
                     .IndexOf(config)]
                 .Value = value;
+        }
+        
+        
+        static void LoadRabbitMQManager()
+        {
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "ConfigTools.LoadRabbitMQManager",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Creating RabbitMQ instance...",
+                UserId = -1
+            });
+            var factory = new ConnectionFactory();
+            factory.UserName = "ub";
+            factory.Password = "*****";
+            factory.VirtualHost = "/";
+            factory.HostName = "xxxx";
+            factory.Port = 0000;
+            factory.DispatchConsumersAsync = true;
+            
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "ConfigTools.LoadRabbitMQManager",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Connecting to RabbitMQ server...",
+                UserId = -1
+            });
+            var conn = factory.CreateConnection();
+            _channel = conn.CreateModel();
+            
+            _properties = _channel.CreateBasicProperties();
+            
+            /*
+            var tgConsumer = new AsyncEventingBasicConsumer(_channel);
+            tgConsumer.Received += ConsumerOnTgMessage;
+            
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "ConfigTools.LoadRabbitMQManager",
+                Level = Models.SystemLog.Levels.Info,
+                Message = "Start consuming ub3.commands queue...",
+                UserId = -1
+            });
+            _channel.BasicConsume("ub3.commands", false, tgConsumer);
+            */
+            
+        }
+        
+        private static async Task ConsumerOnTgMessage(object sender, BasicDeliverEventArgs ea)
+        {
+            var body = ea.Body.ToArray();
+            var str = System.Text.Encoding.Default.GetString(body);
+
+            if (!str.StartsWith("UB3|"))
+            {
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "ConfigTools.LoadRabbitMQManager",
+                    Level = Models.SystemLog.Levels.Warn,
+                    Message = "Malformed message received:\n" +
+                              $"{str}",
+                    UserId = -1
+                });
+                
+                _channel.BasicAck(ea.DeliveryTag, false);
+
+                await Task.Yield();
+                return;
+            }
+
+            var qMessage = str.Split("|");
+            if (qMessage.Length < 3)
+            {
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "ConfigTools.LoadRabbitMQManager",
+                    Level = Models.SystemLog.Levels.Warn,
+                    Message = "Malformed message received:\n" +
+                              $"{str}",
+                    UserId = -1
+                });
+                _channel.BasicAck(ea.DeliveryTag, false);
+
+                await Task.Yield();
+                return;
+            }
+
+            await Task.Yield();
         }
     }
 }
