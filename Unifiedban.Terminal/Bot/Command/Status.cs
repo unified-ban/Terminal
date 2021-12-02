@@ -11,6 +11,7 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using System.Threading.Tasks;
 using System.Linq;
+using Telegram.Bot;
 
 namespace Unifiedban.Terminal.Bot.Command
 {

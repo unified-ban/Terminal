@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -211,7 +212,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if(translationKey == null)
                 translationKey = translationLogic.AddKey(
                     replyMessage.Text.Trim(),
-                    replyMessage.From.Id);
+                    -1);
 
             if (translationKey == null)
             {
@@ -312,7 +313,7 @@ namespace Unifiedban.Terminal.Bot.Command
             BusinessLogic.TranslationLogic translationLogic = new BusinessLogic.TranslationLogic();
             Entry translationEntry = translationLogic.AddEntry(
                 languageId, keyId,
-                replyMessage.Text, replyMessage.From.Id);
+                replyMessage.Text, -1);
 
             if (translationEntry == null)
             {

@@ -28,7 +28,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 return;
             }
 
-            int userToUnban;
+            long userToUnban;
 
             if (message.ReplyToMessage == null)
             {
@@ -49,7 +49,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 }
                 else
                 {
-                    bool isValid = int.TryParse(message.Text.Split(" ")[1], out userToUnban);
+                    bool isValid = long.TryParse(message.Text.Split(" ")[1], out userToUnban);
                     if (!isValid)
                     {
                         MessageQueueManager.EnqueueMessage(

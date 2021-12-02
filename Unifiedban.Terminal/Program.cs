@@ -148,6 +148,7 @@ namespace Unifiedban.Terminal
 
             GlobalConfiguration.Configuration.UseSqlServerStorage(CacheData.Configuration["HFDatabase"], options);
             GlobalConfiguration.Configuration.UseLogProvider(new HFLogProvider());
+            GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute { Attempts = 1 });
 
             backgroundJobServer = new BackgroundJobServer();
             Data.Utils.Logging.AddLog(new Models.SystemLog()

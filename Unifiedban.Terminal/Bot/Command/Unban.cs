@@ -4,6 +4,7 @@
 
 using System;
 using System.Linq;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -26,9 +27,8 @@ namespace Unifiedban.Terminal.Bot.Command
                 return;
             }
 
-            if (Manager.BotClient.GetChatAdministratorsAsync(message.Chat.Id).Result
-                .Single(x => x.User.Id == message.From.Id)
-                .CanRestrictMembers == false)
+            var me = Manager.BotClient.GetChatMemberAsync(message.Chat.Id, Manager.MyId).Result;
+            if (me is ChatMemberAdministrator { CanRestrictMembers: false })
             {
                 MessageQueueManager.EnqueueMessage(
                     new Models.ChatMessage()
@@ -38,6 +38,22 @@ namespace Unifiedban.Terminal.Bot.Command
                         Text = CacheData.GetTranslation("en", "unban_command_error_adminPrivilege")
                     });
                 return;
+            }
+
+            if (Manager.BotClient.GetChatAdministratorsAsync(message.Chat.Id).Result
+                .Single(x => x.User.Id == message.From.Id) is ChatMemberAdministrator chatMemberAdministrator)
+            {
+                if (chatMemberAdministrator!.CanRestrictMembers)
+                {
+                    MessageQueueManager.EnqueueMessage(
+                        new Models.ChatMessage()
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            Chat = message.Chat,
+                            Text = CacheData.GetTranslation("en", "unban_command_error_adminPrivilege")
+                        });
+                    return;
+                }
             }
 
             if (message.Chat.Type != ChatType.Supergroup)
@@ -52,7 +68,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 return;
             }
 
-            int userId;
+            long userId;
 
             if (message.ReplyToMessage == null)
             {
@@ -73,7 +89,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 }
                 else
                 {
-                    bool isValid = int.TryParse(message.Text.Split(" ")[1], out userId);
+                    bool isValid = long.TryParse(message.Text.Split(" ")[1], out userId);
                     if (!isValid)
                     {
                         MessageQueueManager.EnqueueMessage(
@@ -92,6 +108,7 @@ namespace Unifiedban.Terminal.Bot.Command
 
             try
             {
+                
                 Manager.BotClient.UnbanChatMemberAsync(message.Chat.Id, userId);
                 MessageQueueManager.EnqueueMessage(
                     new Models.ChatMessage()

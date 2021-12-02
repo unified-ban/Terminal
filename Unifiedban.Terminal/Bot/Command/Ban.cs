@@ -5,6 +5,7 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Unifiedban.Terminal.Utils;
@@ -27,22 +28,40 @@ namespace Unifiedban.Terminal.Bot.Command
                     });
                 return;
             }
-
-            if (Manager.BotClient.GetChatAdministratorsAsync(message.Chat.Id).Result
-                .Single(x => x.User.Id == message.From.Id)
-                .CanRestrictMembers == false)
+            
+            var me = Manager.BotClient.GetChatMemberAsync(message.Chat.Id, Manager.MyId).Result;
+            if (me is ChatMemberAdministrator botAdministrator)
             {
-                MessageQueueManager.EnqueueMessage(
-                    new Models.ChatMessage()
-                    {
-                        Timestamp = DateTime.UtcNow,
-                        Chat = message.Chat,
-                        Text = CacheData.GetTranslation("en", "ban_command_error_adminPrivilege")
-                    });
-                return;
+                if (botAdministrator!.CanRestrictMembers)
+                {
+                    MessageQueueManager.EnqueueMessage(
+                        new Models.ChatMessage()
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            Chat = message.Chat,
+                            Text = CacheData.GetTranslation("en", "ban_command_error_adminPrivilege")
+                        });
+                    return;
+                }
             }
 
-            int userToKick;
+            if (Manager.BotClient.GetChatAdministratorsAsync(message.Chat.Id).Result
+                .Single(x => x.User.Id == message.From.Id) is ChatMemberAdministrator chatMemberAdministrator)
+            {
+                if (chatMemberAdministrator!.CanRestrictMembers)
+                {
+                    MessageQueueManager.EnqueueMessage(
+                        new Models.ChatMessage()
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            Chat = message.Chat,
+                            Text = CacheData.GetTranslation("en", "ban_command_error_adminPrivilege")
+                        });
+                    return;
+                }
+            }
+
+            long userToKick;
 
             if (message.ReplyToMessage == null)
             {
@@ -63,7 +82,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 }
                 else
                 {
-                    bool isValid = int.TryParse(message.Text.Split(" ")[1], out userToKick);
+                    bool isValid = long.TryParse(message.Text.Split(" ")[1], out userToKick);
                     if (!isValid)
                     {
                         MessageQueueManager.EnqueueMessage(

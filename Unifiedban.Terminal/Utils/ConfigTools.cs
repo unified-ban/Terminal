@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -408,10 +409,10 @@ using Timer = System.Timers.Timer;
                 UserId = -1
             });
             var factory = new ConnectionFactory();
-            factory.UserName = "ub";
-            factory.Password = "*****";
+            factory.UserName = "";
+            factory.Password = "";
             factory.VirtualHost = "/";
-            factory.HostName = "xxxx";
+            factory.HostName = "";
             factory.Port = 0000;
             factory.DispatchConsumersAsync = true;
             

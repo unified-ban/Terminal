@@ -14,6 +14,7 @@ using Unifiedban.Models;
 using Unifiedban.Models.Group;
 using System.Threading.Tasks;
 using System.Timers;
+using Telegram.Bot;
 using Unifiedban.Terminal.Utils;
 using Timer = System.Timers.Timer;
 
@@ -143,12 +144,9 @@ namespace Unifiedban.Terminal.Bot
                     welcomeMessageEnabled = true;
 
             var canRestrict = false;
-            var meInChat = Manager.BotClient.GetChatMemberAsync(message.Chat.Id, Manager.MyId).Result;
-            if (meInChat != null)
-            {
-                canRestrict = (meInChat.IsMember ?? false) &&
-                              (meInChat.CanRestrictMembers ?? false);
-            }
+            var me = Manager.BotClient.GetChatMemberAsync(message.Chat.Id, Manager.MyId).Result;
+            if (me is ChatMemberAdministrator botAdministrator)
+                canRestrict = botAdministrator.CanRestrictMembers;
 
             foreach (User member in message.NewChatMembers)
             {
@@ -335,7 +333,6 @@ namespace Unifiedban.Terminal.Bot
                                 {
                                     Timestamp = DateTime.UtcNow,
                                     Chat = message.Chat,
-                                    ParseMode = ParseMode.Default,
                                     Text =
                                         $"Please {name} certify to be a human.\nIf you don't click this button you are not going to be unlocked.",
                                     ReplyMarkup = new InlineKeyboardMarkup(
@@ -485,7 +482,7 @@ namespace Unifiedban.Terminal.Bot
             var telegramGroupLogic =
                new BusinessLogic.Group.TelegramGroupLogic();
 
-            var updated = telegramGroupLogic.UpdateChatId(message.Chat.Id, message.MigrateToChatId, -2); // TODO - log operation
+            var updated = telegramGroupLogic.UpdateChatId(message.Chat.Id, (long)message.MigrateToChatId, -2); // TODO - log operation
             if (updated == null)
                 return;
 

@@ -3,6 +3,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 using System;
+using System.Linq;
+using Telegram.Bot;
 using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
 using Unifiedban.Models;
@@ -13,12 +15,14 @@ namespace Unifiedban.Terminal.Bot.Command
     {
         public void Execute(Message message)
         {
-            var member = Manager.BotClient.GetChatMemberAsync(message.Chat.Id, message.From.Id).Result;
-
             Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+            
+            var me = Manager.BotClient.GetChatMemberAsync(message.Chat.Id, Manager.MyId).Result;
+            if (me is ChatMemberAdministrator { CanInviteUsers: false }) return;
 
-            var canGenerateInvite = member.CanInviteUsers ?? false;
-            if (!canGenerateInvite) return;
+            var memberAdmin = Manager.BotClient.GetChatAdministratorsAsync(message.Chat.Id).Result
+                .Single(x => x.User.Id == message.From.Id);
+            if (memberAdmin is ChatMemberAdministrator { CanInviteUsers: false }) return;
 
             try
             {

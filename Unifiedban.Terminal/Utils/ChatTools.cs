@@ -12,6 +12,7 @@ using System.Linq;
 using System.Reflection.Emit;
 using System.Threading.Tasks;
 using System.Timers;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InputFiles;
@@ -65,14 +66,16 @@ namespace Unifiedban.Terminal.Utils
             return false;
         }
 
-        public static List<int> GetChatAdminIds(long chatId)
+        public static List<long> GetChatAdminIds(long chatId)
         {
-            List<int> admins = new List<int>();
+            var admins = new List<long>();
             var administrators = Manager.BotClient.GetChatAdministratorsAsync(chatId).Result;
-            foreach (ChatMember member in administrators)
+            for (var index = 0; index < administrators.Length; index++)
             {
+                ChatMember member = administrators[index];
                 admins.Add(member.User.Id);
             }
+
             return admins;
         }
         
@@ -313,7 +316,7 @@ namespace Unifiedban.Terminal.Utils
             }
         }
 
-        public static int SendCaptchaImage(ChatId chatId, string name, int memberId, string timerKey)
+        public static int SendCaptchaImage(ChatId chatId, string name, long memberId, string timerKey)
         {
             Random rnd = new Random();
 
@@ -346,7 +349,7 @@ namespace Unifiedban.Terminal.Utils
                 try
                 {
                     return Manager.BotClient.SendPhotoAsync(chatId, new InputOnlineFile(ms),
-                        caption: CacheData.GetTranslation(CacheData.Groups[chatId.Identifier].SettingsLanguage,
+                        caption: CacheData.GetTranslation(CacheData.Groups[chatId.Identifier ?? 0].SettingsLanguage,
                             "captcha_iamhuman_img", true).Replace("{{name}}", name),
                         parseMode: ParseMode.Markdown,
                         disableNotification: true,
@@ -420,7 +423,7 @@ namespace Unifiedban.Terminal.Utils
             return emojis[index];
         }
 
-        private static InlineKeyboardMarkup BuildCaptchaButtons(int result, int memberId, string timerKey)
+        private static InlineKeyboardMarkup BuildCaptchaButtons(int result, long memberId, string timerKey)
         {
             Random rnd = new Random();
             var correctPosition = rnd.Next(1, 4);
@@ -475,9 +478,7 @@ namespace Unifiedban.Terminal.Utils
                 {
                     if (string.IsNullOrEmpty(telegramGroup.InviteAlias)) continue;
                     var meInChat = await Manager.BotClient.GetChatMemberAsync(telegramGroup.TelegramChatId, Manager.MyId);
-                    if (meInChat == null) continue;
-                    if ((meInChat.IsMember ?? false) &&
-                        (meInChat.CanInviteUsers ?? false))
+                    if (meInChat is ChatMemberAdministrator { CanInviteUsers: true })
                     {
                         CacheData.Groups[telegramGroup.TelegramChatId].InviteLink =
                             await Manager.BotClient.ExportChatInviteLinkAsync(telegramGroup.TelegramChatId);

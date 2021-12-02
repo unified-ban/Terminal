@@ -5,6 +5,7 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace Unifiedban.Terminal.Bot.Command

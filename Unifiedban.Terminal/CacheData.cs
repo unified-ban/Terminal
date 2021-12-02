@@ -56,16 +56,16 @@ namespace Unifiedban.Terminal
         public static List<Models.Filters.BadWord> BadWords = new List<Models.Filters.BadWord>();
         public static List<Utils.ImageHash> BannedImagesHash = new List<Utils.ImageHash>();
         
-        public static Dictionary<int, Models.User.TrustFactor> TrustFactors =
-            new Dictionary<int, Models.User.TrustFactor>();
-        public static Dictionary<string, int> Usernames = new Dictionary<string, int>();
+        public static Dictionary<long, Models.User.TrustFactor> TrustFactors =
+            new Dictionary<long, Models.User.TrustFactor>();
+        public static Dictionary<string, long> Usernames = new Dictionary<string, long>();
 
         public static List<long> ActiveSupport = new List<long>();
-        public static Dictionary<long, List<int>> CurrentChatAdmins =
-            new Dictionary<long, List<int>>();
+        public static Dictionary<long, List<long>> CurrentChatAdmins =
+            new Dictionary<long, List<long>>();
 
         public static ConcurrentDictionary<string, Timer> CaptchaAutoKickTimers = new ConcurrentDictionary<string, Timer>();
-        public static Dictionary<int, int> CaptchaStrikes = new Dictionary<int, int>();
+        public static Dictionary<long, int> CaptchaStrikes = new Dictionary<long, int>();
         
         public static List<long> BetaAuthChats = new List<long>();
 

@@ -9,6 +9,7 @@ using Telegram.Bot.Types.Enums;
 using System.Threading.Tasks;
 using System.Linq;
 using Hangfire;
+using Telegram.Bot;
 
 namespace Unifiedban.Terminal.Bot.Command
 {

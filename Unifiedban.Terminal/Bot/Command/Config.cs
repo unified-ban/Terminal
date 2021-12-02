@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Storage;
+using Telegram.Bot;
 using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -39,14 +40,11 @@ namespace Unifiedban.Terminal.Bot.Command
             {
                 return;
             }
-            
+
             if (!isUpdate)
             {
-                var canDeleteMessages = false;
                 var me = Manager.BotClient.GetChatMemberAsync(message.Chat.Id, Manager.MyId).Result;
-                if (me.CanDeleteMessages != null)
-                    canDeleteMessages = (bool)me.CanDeleteMessages;
-                if(canDeleteMessages)
+                if (me is ChatMemberAdministrator { CanDeleteMessages: true })
                     Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
             }
 
@@ -266,7 +264,7 @@ namespace Unifiedban.Terminal.Bot.Command
             }
         }
 
-        private List<List<InlineKeyboardButton>> buildLanguageSelectionMenu(int fromId)
+        private List<List<InlineKeyboardButton>> buildLanguageSelectionMenu(long fromId)
         {
             List<List<InlineKeyboardButton>> langMenu = new List<List<InlineKeyboardButton>>();
             int btnCount = 0;

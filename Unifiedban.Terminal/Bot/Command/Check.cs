@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -36,12 +37,12 @@ namespace Unifiedban.Terminal.Bot.Command
                 .Single(x => x.SysConfigId == "CommandCheckKoText").Value;
 
             var me = Manager.BotClient.GetChatMemberAsync(message.Chat.Id, Manager.MyId).Result;
-            if (me.CanRestrictMembers != null)
-                canRestrictMembers = (bool)me.CanRestrictMembers;
-            if (me.CanDeleteMessages != null)
-                canDeleteMessages = (bool)me.CanDeleteMessages;
-            if (me.CanPinMessages != null)
-                canPinMessages = (bool)me.CanPinMessages;
+            if (me is ChatMemberAdministrator chatMemberAdministrator)
+            {
+                canRestrictMembers = chatMemberAdministrator.CanRestrictMembers;
+                canDeleteMessages = chatMemberAdministrator.CanDeleteMessages;
+                canPinMessages = chatMemberAdministrator.CanPinMessages ?? false;
+            }
 
             if (canRestrictMembers && canDeleteMessages)
                 text = CacheData.SysConfigs.Single(x => x.SysConfigId == "CommandCheckOkText").Value;

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -18,7 +19,7 @@ namespace Unifiedban.Terminal.Bot.Command
             Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
 
             string dataMessage = "*[Report]*\nRequested information:\n\n";
-            int userId = 0;
+            long userId = 0;
             if (message.ReplyToMessage == null && message.ForwardFromMessageId == 0)
             {
                 string[] arguments = message.Text.Split(" ");
@@ -110,7 +111,7 @@ namespace Unifiedban.Terminal.Bot.Command
         private void TryGetFromId(Message message)
         {
             string user = message.Text.Split(" ")[1];
-            bool isValidId = int.TryParse(user, out int userId);
+            bool isValidId = long.TryParse(user, out long userId);
             bool isValidUsername = user.StartsWith("@");
             
             if (!isValidId && !isValidUsername)

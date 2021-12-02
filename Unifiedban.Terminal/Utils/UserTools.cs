@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Hangfire;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -53,9 +54,9 @@ namespace Unifiedban.Terminal.Utils
             return false;
         }
 
-        public static void AddPenalty(long chatId, int telegramUserId,
+        public static void AddPenalty(long chatId, long telegramUserId,
             TrustFactorLog.TrustFactorAction action,
-            int actionTakenBy)
+            long actionTakenBy)
         {
             int penality = 0;
             switch (action)
@@ -355,7 +356,7 @@ namespace Unifiedban.Terminal.Utils
             }
             bannedToSync.ForEach(x => bl.AddIfNotExist(x, -2));
         }
-        public static void AddUserToBlacklist(int operatorId, Message message,
+        public static void AddUserToBlacklist(long operatorId, Message message,
             int userToBan, Banned.BanReasons reason,
             string otherReason)
         {
@@ -437,7 +438,7 @@ namespace Unifiedban.Terminal.Utils
                     });
             }
         }
-        public static void RemoveUserFromBlacklist(Message message, int userToUnban)
+        public static void RemoveUserFromBlacklist(Message message, long userToUnban)
         {
             lock (blacklistLock)
             {

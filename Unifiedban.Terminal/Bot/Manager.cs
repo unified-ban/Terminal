@@ -5,9 +5,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Args;
+using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -19,9 +21,13 @@ namespace Unifiedban.Terminal.Bot
         static string APIKEY;
         static string instanceId = "";
         static string currentHostname = "";
-        public static int MyId = 0;
+        public static long MyId = 0;
         public static string Username { get; private set; }
-        public static ITelegramBotClient BotClient { get;  private set; }
+        public static TelegramBotClient BotClient { get;  private set; }
+
+        public static readonly CancellationTokenSource Cts = new();
+
+        private static QueuedUpdateReceiver _updateReceiver;
 
         public static void Initialize(string apikey)
         {
@@ -61,12 +67,8 @@ namespace Unifiedban.Terminal.Bot
                 Message = $"Hello, World! I am user {me.Id} and my name is {me.FirstName}.",
                 UserId = -1
             });
-
-            BotClient.OnMessage += BotClient_OnMessage;
-            BotClient.OnCallbackQuery += BotClient_OnCallbackQuery;
             
             Console.Title = $"Unifiedban - Username: {me.Username} - Instance ID: {instanceId}";
-
 
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
@@ -79,11 +81,9 @@ namespace Unifiedban.Terminal.Bot
             });
         }
 
-        public static void StartReceiving()
+        public static async void StartReceiving()
         {
-            BotClient.StartReceiving();
-
-            BotClient.SendTextMessageAsync(
+            await BotClient.SendTextMessageAsync(
                 chatId: CacheData.ControlChatId,
                 parseMode: ParseMode.Markdown,
                 text: $"I'm here, dude.\n" +
@@ -95,11 +95,33 @@ namespace Unifiedban.Terminal.Bot
                     $"- unified/ban"
 #endif
             );
+            
+            var receiverOptions = new ReceiverOptions
+            {
+                AllowedUpdates = { } // receive all update types
+            };
+
+            _updateReceiver = new QueuedUpdateReceiver(BotClient, receiverOptions);
+            try
+            {
+                await foreach (Update update in _updateReceiver.WithCancellation(Cts.Token))
+                {
+                    if (update.Message is not null)
+                        HandleUpdateAsync(update.Message);
+                    if (update.CallbackQuery is not null)
+                        HandleCallbackQuery(update.CallbackQuery);
+                }
+            }
+            catch (Exception ex)
+            {
+                // ignored
+                Console.WriteLine(ex.Message);
+            }
         }
 
         public static void Dispose()
         {
-            BotClient.StopReceiving();
+            Cts.Cancel();
             BotClient.SendTextMessageAsync(
                 chatId: CacheData.ControlChatId,
                 parseMode: ParseMode.Markdown,
@@ -115,14 +137,16 @@ namespace Unifiedban.Terminal.Bot
             );
         }
 
-        private static async void BotClient_OnCallbackQuery(object sender, CallbackQueryEventArgs e)
+        
+        
+        private static async Task HandleCallbackQuery(CallbackQuery callbackQuery)
         {
-            if (e.CallbackQuery.Message.Date < DateTime.Now.AddDays(-1))
+            if (callbackQuery.Message.Date < DateTime.Now.AddDays(-1))
                 return;
             
             await Task.Run(() => CacheData.IncrementHandledMessages());
 
-            if(CacheData.Groups[e.CallbackQuery.Message.Chat.Id].State != 
+            if(CacheData.Groups[callbackQuery.Message.Chat.Id].State != 
                 Models.Group.TelegramGroup.Status.Active) return;
 
             Data.Utils.Logging.AddLog(new Models.SystemLog()
@@ -135,28 +159,26 @@ namespace Unifiedban.Terminal.Bot
                 UserId = -1
             });
 
-            if (!String.IsNullOrEmpty(e.CallbackQuery.Data))
+            if (!String.IsNullOrEmpty(callbackQuery.Data))
             {
-                if (e.CallbackQuery.Data.StartsWith('/'))
-                    await Task.Run(() => Command.Parser.Parse(e.CallbackQuery));
+                if (callbackQuery.Data.StartsWith('/'))
+                    await Task.Run(() => Command.Parser.Parse(callbackQuery));
             }
 
             return;
         }
-        private static async void BotClient_OnMessage(object sender, MessageEventArgs e)
+        
+        private static async Task HandleUpdateAsync(Message message)
         {
-            if (e == null)
-                return;
-
-            if (e.Message.Date < DateTime.Now.AddDays(-1))
+            if (message.Date < DateTime.Now.AddDays(-1))
                 return;
             
             await Task.Run(() => CacheData.IncrementHandledMessages());
             
-            if(CacheData.Groups.Keys.Contains(e.Message.Chat.Id))
-                if (CacheData.Groups[e.Message.Chat.Id].State !=
+            if(CacheData.Groups.Keys.Contains(message.Chat.Id))
+                if (CacheData.Groups[message.Chat.Id].State !=
                     Models.Group.TelegramGroup.Status.Active &&
-                    e.Message.Text != "/enable") return;
+                    message.Text != "/enable") return;
 
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
@@ -168,29 +190,29 @@ namespace Unifiedban.Terminal.Bot
                 UserId = -1
             });
 
-            await Task.Run(() => Functions.CacheUsername(e.Message));
+            await Task.Run(() => Functions.CacheUsername(message));
 
-            if (e.Message.MigrateToChatId != 0)
+            if (message.MigrateToChatId is not null)
             {
-                Functions.MigrateToChatId(e.Message);
-                e.Message.Chat.Id = e.Message.MigrateToChatId;
+                Functions.MigrateToChatId(message);
+                message.Chat.Id = (long)message.MigrateToChatId;
             }
 
-            bool isPrivateChat = e.Message.Chat.Type == ChatType.Private ||
-                                 e.Message.Chat.Type == ChatType.Channel;
+            bool isPrivateChat = message.Chat.Type == ChatType.Private ||
+                                 message.Chat.Type == ChatType.Channel;
             if (isPrivateChat)
             {
-                MessageQueueManager.AddChatIfNotPresent(e.Message.Chat.Id);
+                MessageQueueManager.AddChatIfNotPresent(message.Chat.Id);
             }
 
             bool justAdded = false;
-            if (e.Message.NewChatMembers != null)
+            if (message.NewChatMembers != null)
             {
-                justAdded = e.Message.NewChatMembers.SingleOrDefault(x => x.Id == MyId) != null;
+                justAdded = message.NewChatMembers.SingleOrDefault(x => x.Id == MyId) != null;
             }
 
             if (!justAdded && !isPrivateChat &&
-                !CacheData.Groups.ContainsKey(e.Message.Chat.Id))
+                !CacheData.Groups.ContainsKey(message.Chat.Id))
             {
                 var logMessage = string.Format(
                     "*[Alert]*\n" +
@@ -198,9 +220,9 @@ namespace Unifiedban.Terminal.Bot
                     "⚠ do not open links you don't know ⚠\n" +
                     "\nChat: `{1}`" +
                     "\n\n*hash_code:* #UB{2}-{3}",
-                    e.Message.Chat.Title,
-                    e.Message.Chat.Id,
-                    e.Message.Chat.Id.ToString().Replace("-", ""),
+                    message.Chat.Title,
+                    message.Chat.Id,
+                    message.Chat.Id.ToString().Replace("-", ""),
                     Guid.NewGuid());
                 MessageQueueManager.EnqueueLog(new Models.ChatMessage()
                 {
@@ -210,7 +232,7 @@ namespace Unifiedban.Terminal.Bot
 
                 try
                 {
-                    await BotClient.SendTextMessageAsync(e.Message.Chat.Id,
+                    await BotClient.SendTextMessageAsync(message.Chat.Id,
                         "We're sorry but an error has occurred while retrieving this chat on our database.\n" +
                         "Please add again the bot if you want to continue to use it.\n" +
                         "For any doubt reach us in our support group @unifiedban_group");
@@ -228,53 +250,53 @@ namespace Unifiedban.Terminal.Bot
                     });
                 }
 
-                await BotClient.LeaveChatAsync(e.Message.Chat.Id);
+                await BotClient.LeaveChatAsync(message.Chat.Id);
                 return;
             }
 
-            if (!string.IsNullOrEmpty(e.Message.Text) &&
-                !Utils.UserTools.KickIfInBlacklist(e.Message))
+            if (!string.IsNullOrEmpty(message.Text) &&
+                !Utils.UserTools.KickIfInBlacklist(message))
             {
                 bool isCommand = false;
-                if (e.Message.Text.StartsWith('/'))
+                if (message.Text.StartsWith('/'))
                 {
-                    isCommand = Command.Parser.Parse(e.Message).Result;
+                    isCommand = Command.Parser.Parse(message).Result;
                 }
 
-                if (e.Message.ReplyToMessage != null && !isCommand && !isPrivateChat)
+                if (message.ReplyToMessage != null && !isCommand && !isPrivateChat)
                 {
-                    if (e.Message.ReplyToMessage.From.Id == MyId)
+                    if (message.ReplyToMessage.From.Id == MyId)
                     {
-                        CommandQueueManager.ReplyMessage(e.Message);
+                        CommandQueueManager.ReplyMessage(message);
                         return;
                     }
                 }
 
-                if (!Utils.ChatTools.HandleSupportSessionMsg(e.Message) && !isCommand &&
-                    e.Message.From.Id != 777000 && !isPrivateChat)  // Telegram's official updateServiceNotification
+                if (!Utils.ChatTools.HandleSupportSessionMsg(message) && !isCommand &&
+                    message.From.Id != 777000 && !isPrivateChat)  // Telegram's official updateServiceNotification
                 {
-                    Controls.Manager.DoCheck(e.Message);
+                    Controls.Manager.DoCheck(message);
                 }
             }
-            if (e.Message.NewChatMembers != null)
+            if (message.NewChatMembers != null)
             {
-                Functions.UserJoinedAction(e.Message);
+                Functions.UserJoinedAction(message);
             }
-            if (e.Message.LeftChatMember != null)
+            if (message.LeftChatMember != null)
             {
-                Functions.UserLeftAction(e.Message);
-            }
-
-            if (!String.IsNullOrEmpty(e.Message.MediaGroupId) ||
-                e.Message.Photo != null ||
-                e.Message.Document != null)
-            {
-                Controls.Manager.DoMediaCheck(e.Message);
+                Functions.UserLeftAction(message);
             }
 
-            if (!isPrivateChat && e.Message.NewChatTitle != null)
+            if (!String.IsNullOrEmpty(message.MediaGroupId) ||
+                message.Photo != null ||
+                message.Document != null)
             {
-                CacheData.Groups[e.Message.Chat.Id].Title = e.Message.NewChatTitle;
+                Controls.Manager.DoMediaCheck(message);
+            }
+
+            if (!isPrivateChat && message.NewChatTitle != null)
+            {
+                CacheData.Groups[message.Chat.Id].Title = message.NewChatTitle;
             }
         }
     }

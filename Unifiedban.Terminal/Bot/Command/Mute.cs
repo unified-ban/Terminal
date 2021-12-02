@@ -4,6 +4,7 @@
 
 using System;
 using System.Linq;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Unifiedban.Terminal.Utils;
@@ -30,7 +31,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 return;
             }
 
-            int userId;
+            long userId;
 
             if (message.ReplyToMessage == null)
             {
@@ -51,7 +52,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 }
                 else
                 {
-                    bool isValid = int.TryParse(message.Text.Split(" ")[1], out userId);
+                    bool isValid = long.TryParse(message.Text.Split(" ")[1], out userId);
                     if (!isValid)
                     {
                         MessageQueueManager.EnqueueMessage(

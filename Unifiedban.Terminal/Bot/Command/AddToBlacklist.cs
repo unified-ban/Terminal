@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -29,7 +30,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 return;
             }
 
-            int userToBan;
+            long userToBan;
 
             if (message.ReplyToMessage == null)
             {
@@ -50,7 +51,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 }
                 else
                 {
-                    bool isValid = int.TryParse(message.Text.Split(" ")[1], out userToBan);
+                    bool isValid = long.TryParse(message.Text.Split(" ")[1], out userToBan);
                     if (!isValid)
                     {
                         MessageQueueManager.EnqueueMessage(

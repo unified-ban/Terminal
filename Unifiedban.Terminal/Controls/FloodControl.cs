@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -18,14 +19,14 @@ namespace Unifiedban.Terminal.Controls
 {
     public class FloodControl : IControl
     {
-        static ConcurrentDictionary<long, Dictionary<int, Flood>> FloodCounter =
-            new ConcurrentDictionary<long, Dictionary<int, Flood>>();
-        static ConcurrentDictionary<int, DateTime> limitedUsers =
-            new ConcurrentDictionary<int, DateTime>();
+        static ConcurrentDictionary<long, Dictionary<long, Flood>> FloodCounter =
+            new ConcurrentDictionary<long, Dictionary<long, Flood>>();
+        static ConcurrentDictionary<long, DateTime> limitedUsers =
+            new ConcurrentDictionary<long, DateTime>();
 
         struct Flood
         {
-            public int UserId { get; set; }
+            public long UserId { get; set; }
             public int Messages { get; set; }
             public DateTime LastMessage { get; set; }
         }
@@ -59,9 +60,9 @@ namespace Unifiedban.Terminal.Controls
                         Result = IControl.ControlResultType.skipped
                     };
 
-            Dictionary<int, Flood> floodCounter = FloodCounter.GetValueOrDefault(message.Chat.Id);
+            Dictionary<long, Flood> floodCounter = FloodCounter.GetValueOrDefault(message.Chat.Id);
             if (floodCounter == null)
-                FloodCounter.TryAdd(message.Chat.Id, new Dictionary<int, Flood>());
+                FloodCounter.TryAdd(message.Chat.Id, new Dictionary<long, Flood>());
 
             if (!FloodCounter[message.Chat.Id].TryGetValue(message.From.Id, out Flood currentValue))
                 FloodCounter[message.Chat.Id].Add(message.From.Id, new Flood()
