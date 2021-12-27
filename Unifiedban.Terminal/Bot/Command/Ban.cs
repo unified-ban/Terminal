@@ -16,8 +16,9 @@ namespace Unifiedban.Terminal.Bot.Command
     {
         public void Execute(Message message)
         {
-            if (!BotTools.IsUserOperator(message.From.Id, Models.Operator.Levels.Basic) &&
-                !ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
+            var sender = message.SenderChat?.Id ?? message.From?.Id ?? 0;
+            var isOperator = BotTools.IsUserOperator(sender, Models.Operator.Levels.Basic);
+            if (!isOperator && !ChatTools.IsUserAdmin(message.Chat.Id, sender))
             {
                 MessageQueueManager.EnqueueMessage(
                     new Models.ChatMessage()
@@ -30,25 +31,23 @@ namespace Unifiedban.Terminal.Bot.Command
             }
             
             var me = Manager.BotClient.GetChatMemberAsync(message.Chat.Id, Manager.MyId).Result;
-            if (me is ChatMemberAdministrator botAdministrator)
+            if (me is ChatMemberAdministrator { CanRestrictMembers: false })
             {
-                if (botAdministrator!.CanRestrictMembers)
-                {
-                    MessageQueueManager.EnqueueMessage(
-                        new Models.ChatMessage()
-                        {
-                            Timestamp = DateTime.UtcNow,
-                            Chat = message.Chat,
-                            Text = CacheData.GetTranslation("en", "ban_command_error_adminPrivilege")
-                        });
-                    return;
-                }
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        Text = CacheData.GetTranslation("en", "ban_command_error_adminPrivilege")
+                    });
+                return;
             }
 
             if (Manager.BotClient.GetChatAdministratorsAsync(message.Chat.Id).Result
-                .Single(x => x.User.Id == message.From.Id) is ChatMemberAdministrator chatMemberAdministrator)
+                .Single(x => x.User.Id == sender) is ChatMemberAdministrator chatMemberAdministrator && 
+                !isOperator)
             {
-                if (chatMemberAdministrator!.CanRestrictMembers)
+                if (!chatMemberAdministrator!.CanRestrictMembers)
                 {
                     MessageQueueManager.EnqueueMessage(
                         new Models.ChatMessage()
@@ -97,7 +96,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 }
             }
             else
-                userToKick = message.ReplyToMessage.From.Id;
+                userToKick = message.ReplyToMessage!.SenderChat?.Id ?? message.ReplyToMessage.From!.Id;
             
             if (userToKick == 777000) // Telegram's official updateServiceNotification
             {
@@ -112,7 +111,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 return;
             }
 
-            if (BotTools.IsUserOperator(userToKick))
+            /*if (BotTools.IsUserOperator(userToKick))
             {
                 MessageQueueManager.EnqueueMessage(
                     new Models.ChatMessage()
@@ -123,12 +122,12 @@ namespace Unifiedban.Terminal.Bot.Command
                     });
 
                 return;
-            }
+            }*/
             
             try
             {
-                Manager.BotClient.KickChatMemberAsync(message.Chat.Id, userToKick,
-                    DateTime.UtcNow.AddMinutes(-5));
+                Manager.BotClient.BanChatMemberAsync(message.Chat.Id, userToKick,
+                    DateTime.UtcNow.AddSeconds(10));
                 MessageQueueManager.EnqueueMessage(
                     new Models.ChatMessage()
                     {

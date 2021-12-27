@@ -7,6 +7,7 @@ using System.Linq;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Unifiedban.Terminal.Utils;
 
 namespace Unifiedban.Terminal.Bot.Command
 {
@@ -14,8 +15,9 @@ namespace Unifiedban.Terminal.Bot.Command
     {
         public void Execute(Message message)
         {
-            if (!Utils.BotTools.IsUserOperator(message.From.Id, Models.Operator.Levels.Basic) &&
-                !Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
+            var sender = message.SenderChat?.Id ?? message.From?.Id ?? 0;
+            var isOperator = BotTools.IsUserOperator(sender, Models.Operator.Levels.Basic);
+            if (!isOperator && !ChatTools.IsUserAdmin(message.Chat.Id, sender))
             {
                 MessageQueueManager.EnqueueMessage(
                     new Models.ChatMessage()
@@ -41,9 +43,10 @@ namespace Unifiedban.Terminal.Bot.Command
             }
 
             if (Manager.BotClient.GetChatAdministratorsAsync(message.Chat.Id).Result
-                .Single(x => x.User.Id == message.From.Id) is ChatMemberAdministrator chatMemberAdministrator)
+                .Single(x => x.User.Id == sender) is ChatMemberAdministrator chatMemberAdministrator &&
+                !isOperator)
             {
-                if (chatMemberAdministrator!.CanRestrictMembers)
+                if (!chatMemberAdministrator!.CanRestrictMembers)
                 {
                     MessageQueueManager.EnqueueMessage(
                         new Models.ChatMessage()
@@ -104,7 +107,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 }
             }
             else
-                userId = message.ReplyToMessage.From.Id;
+                userId = message.ReplyToMessage!.SenderChat?.Id ?? message.ReplyToMessage.From!.Id;
 
             try
             {
