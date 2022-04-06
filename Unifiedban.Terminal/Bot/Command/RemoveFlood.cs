@@ -22,7 +22,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 return;
             }
 
-            bool parsed = int.TryParse(callbackQuery.Data.Split(" ")[1], out int userId);
+            bool parsed = long.TryParse(callbackQuery.Data.Split(" ")[1], out long userId);
             if (!parsed)
                 return;
 
