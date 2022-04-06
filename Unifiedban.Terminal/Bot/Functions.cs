@@ -628,5 +628,64 @@ namespace Unifiedban.Terminal.Bot
                 }
             }
         }
+
+        private static void EnableDashboardForOwnerAndAdder(Chat chat)
+        {
+            var admins = Manager.BotClient.GetChatAdministratorsAsync(chat!).Result;
+            var creator = admins.FirstOrDefault(x => x.Status == ChatMemberStatus.Creator);
+            if (creator is null) return;
+            
+            DashboardUserLogic dul = new DashboardUserLogic();
+            DashboardUser user = dul.GetByTelegramUserId(creator.User.Id);
+            
+            if (user == null)
+            {
+                string profilePic = "";
+                var photos = Manager.BotClient.GetUserProfilePhotosAsync(creator.User.Id).Result;
+                if (photos.TotalCount > 0)
+                {
+                    profilePic = photos.Photos[0][0].FileId;
+                }
+
+                user = dul.Add(creator.User.Id,
+                    creator.User.FirstName + " " + creator.User.LastName,
+                    profilePic, -2);
+                if (user == null)
+                {
+                    MessageQueueManager.EnqueueMessage(
+                        new Models.ChatMessage()
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            Chat = chat,
+                            ParseMode = ParseMode.Markdown,
+                            Text = "*[Report]*\n" +
+                                   "Error enabling dashboard!"
+                        });
+                    return;
+                }
+            }
+            
+            DashboardPermissionLogic dpl = new DashboardPermissionLogic();
+            DashboardPermission permission =  dpl.GetByUserId(user.DashboardUserId,
+                CacheData.Groups[chat.Id].GroupId);
+
+            if (permission == null)
+            {
+                if (dpl.Add(CacheData.Groups[chat.Id].GroupId,
+                    user.DashboardUserId, DashboardPermission.Status.Active,
+                    -2) == null)
+                {
+                    MessageQueueManager.EnqueueMessage(
+                        new Models.ChatMessage()
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            Chat = chat,
+                            ParseMode = ParseMode.Markdown,
+                            Text = "*[Report]*\n" +
+                                   "Error enabling dashboard!"
+                        });
+                }
+            }
+        }
     }
 }
