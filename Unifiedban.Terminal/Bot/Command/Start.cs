@@ -19,30 +19,10 @@ namespace Unifiedban.Terminal.Bot.Command
         {
             if (message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Private
                 || message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Channel) {
-                if (MessageQueueManager.AddChatIfNotPresent(message.Chat.Id))
-                {
-                    Models.SysConfig startMessage = CacheData.SysConfigs
-                            .SingleOrDefault(x => x.SysConfigId == "StartMessage");
-                    if (startMessage == null)
-                    {
-                        Manager.BotClient.SendTextMessageAsync(
-                            chatId: message.Chat.Id,
-                            text: $"Your chat {message.Chat.Title} has been added successfully!"
-                        );
-                        return;
-                    }
-
-                    Manager.BotClient.SendTextMessageAsync(
-                        chatId: message.Chat.Id,
-                        parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
-                        text: Utils.Parsers.VariablesParser(startMessage.Value, message)
-                    );
-                    return;
-                }
 
                 Manager.BotClient.SendTextMessageAsync(
                         chatId: message.Chat.Id,
-                        text: $"Error adding chat {message.Chat.Title}! Please contact our support"
+                        text: $"This bot works only in groups. Add it to a group and will auto-start."
                     );
                 return;
             }

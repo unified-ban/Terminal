@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Quartz;
 using Unifiedban.BusinessLogic;
 using Unifiedban.Models;
 
@@ -36,11 +37,23 @@ namespace Unifiedban.Terminal.Utils
 
         public static void Initialize()
         {
-            RecurringJob.AddOrUpdate("LogTools_SyncSystemLog", () => SyncSystemLog(), "0/30 * * ? * *");
-            RecurringJob.AddOrUpdate("LogTools_SyncActionLog", () => SyncActionLog(), "0/30 * * ? * *");
-            RecurringJob.AddOrUpdate("LogTools_SyncTrustFactorLog", () => SyncTrustFactorLog(), "0/30 * * ? * *");
-            RecurringJob.AddOrUpdate("LogTools_SyncOperationLog", () => SyncOperationLog(), "0/30 * * ? * *");
-            RecurringJob.AddOrUpdate("LogTools_SyncSupportSessionLog", () => SyncSupportSessionLog(), "0/30 * * ? * *");
+            // RecurringJob.AddOrUpdate("LogTools_SyncSystemLog", () => SyncSystemLog(), "0/30 * * ? * *");
+            // RecurringJob.AddOrUpdate("LogTools_SyncActionLog", () => SyncActionLog(), "0/30 * * ? * *");
+            // RecurringJob.AddOrUpdate("LogTools_SyncTrustFactorLog", () => SyncTrustFactorLog(), "0/30 * * ? * *");
+            // RecurringJob.AddOrUpdate("LogTools_SyncOperationLog", () => SyncOperationLog(), "0/30 * * ? * *");
+            // RecurringJob.AddOrUpdate("LogTools_SyncSupportSessionLog", () => SyncSupportSessionLog(), "0/30 * * ? * *");
+            
+            var syncLogJob = JobBuilder.Create<Jobs.LogsJob>()
+                .WithIdentity("syncLogJob", "logs")
+                .Build();
+            var syncLogJobTrigger = TriggerBuilder.Create()
+                .WithIdentity("syncLogJobTrigger", "logs")
+                .StartNow()
+                .WithSimpleSchedule(x => x
+                    .WithIntervalInSeconds(30)
+                    .RepeatForever())
+                .Build();
+            Program.Scheduler?.ScheduleJob(syncLogJob, syncLogJobTrigger).Wait();
         }
 
         public static void Dispose()
@@ -52,7 +65,7 @@ namespace Unifiedban.Terminal.Utils
             SyncSupportSessionLog();
         }
         
-        public static void SyncSystemLog()
+        internal static void SyncSystemLog()
         {
             List<SystemLog> logsToSync = new List<SystemLog>();
             lock (systemLogLock)
@@ -66,7 +79,7 @@ namespace Unifiedban.Terminal.Utils
                 sll.Add(logsToSync, -2);
             }
         }
-        public static void SyncActionLog()
+        internal static void SyncActionLog()
         {
             List<ActionLog> logsToSync = new List<ActionLog>();
             lock (actionLogLock)
@@ -80,7 +93,7 @@ namespace Unifiedban.Terminal.Utils
                 all.Add(logsToSync, -2);
             }
         }
-        public static void SyncTrustFactorLog()
+        internal static void SyncTrustFactorLog()
         {
             List<TrustFactorLog> logsToSync = new List<TrustFactorLog>();
             lock (trustFactorLogs)
@@ -94,7 +107,7 @@ namespace Unifiedban.Terminal.Utils
                 tfll.Add(logsToSync, -2);
             }
         }
-        public static void SyncOperationLog()
+        internal static void SyncOperationLog()
         {
             List<OperationLog> logsToSync = new List<OperationLog>();
             lock (operatorLogLock)
@@ -111,7 +124,7 @@ namespace Unifiedban.Terminal.Utils
                 }
             }
         }
-        public static void SyncSupportSessionLog()
+        internal static void SyncSupportSessionLog()
         {
             List<SupportSessionLog> logsToSync = new List<SupportSessionLog>();
             lock (supportSessionLogLock)

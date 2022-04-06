@@ -34,6 +34,7 @@ namespace Unifiedban.Terminal.Bot.Command
 
         public void Execute(Message message, bool isUpdate = false)
         {
+            
             bool isOperator = Utils.BotTools.IsUserOperator(message.From.Id);
             if (!isOperator &&
                 !Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
@@ -55,7 +56,7 @@ namespace Unifiedban.Terminal.Bot.Command
             int depthLevel = 0;
 
             configMenu.Add(new List<InlineKeyboardButton>());
-            configMenu[0].Add(InlineKeyboardButton.WithUrl("Instructions", "https://docs.unifiedban.solutions/docs/setup"));
+            configMenu[0].Add(InlineKeyboardButton.WithUrl("Instructions", "https://docs.fabricators.ltd/docs/unifiedban/"));
             configMenu[0].Add(InlineKeyboardButton.WithUrl("Dashboard", "https://dash.unifiedban.solutions/"));
             btnCount = 2;
 
@@ -108,7 +109,7 @@ namespace Unifiedban.Terminal.Bot.Command
 
             configMenu.Add(new List<InlineKeyboardButton>());
             configMenu[depthLevel + 1].Add(InlineKeyboardButton.WithUrl("Ask for support", "https://t.me/unifiedban_group"));
-            configMenu[depthLevel + 1].Add(InlineKeyboardButton.WithUrl("Docs", "https://docs.unifiedban.solutions/docs/"));
+            configMenu[depthLevel + 1].Add(InlineKeyboardButton.WithUrl("Docs", "https://docs.fabricators.ltd/docs/unifiedban/"));
 
             configMenu.Add(new List<InlineKeyboardButton>());
             bool dashboardStatus = getDashboardStatus(message);

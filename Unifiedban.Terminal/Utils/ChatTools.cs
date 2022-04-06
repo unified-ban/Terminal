@@ -1,24 +1,27 @@
-﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+﻿
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-using Hangfire;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Reflection.Emit;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
+using Quartz;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
+using Unifiedban.Data.Utils;
 using Unifiedban.Models;
+using Unifiedban.Models.Group;
 using Unifiedban.Terminal.Bot;
+using Unifiedban.Terminal.Jobs;
 
 namespace Unifiedban.Terminal.Utils
 {
@@ -29,19 +32,30 @@ namespace Unifiedban.Terminal.Utils
         private static bool _firstCycle = true;
         public static void Initialize()
         {
-            RecurringJob.AddOrUpdate("ChatTools_CheckNightSchedule", () => CheckNightSchedule(), "0 * * ? * *");
-            RecurringJob.Trigger("ChatTools_CheckNightSchedule");
-
-
-            RecurringJob.AddOrUpdate("ChatTools_RenewInviteLinks", () => RenewInviteLinks(), "0 0/5 * ? * *");
+            // RecurringJob.AddOrUpdate("ChatTools_CheckNightSchedule", () => CheckNightSchedule(), "0 * * ? * *");
+            // RecurringJob.Trigger("ChatTools_CheckNightSchedule");
+            
+            // RecurringJob.AddOrUpdate("ChatTools_RenewInviteLinks", () => RenewInviteLinks(), "0 0/5 * ? * *");
             //RecurringJob.Trigger("ChatTools_RenewInviteLinks");
 
-            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            var chatToolsJob = JobBuilder.Create<ChatToolsJob>()
+                .WithIdentity("chatToolsJob", "chatTools")
+                .Build();
+            var chatToolsJobTrigger = TriggerBuilder.Create()
+                .WithIdentity("chatToolsJobTrigger", "chatTools")
+                .StartNow()
+                .WithSimpleSchedule(x => x
+                    .WithIntervalInSeconds(30)
+                    .RepeatForever())
+                .Build();
+            Program.Scheduler?.ScheduleJob(chatToolsJob, chatToolsJobTrigger).Wait();
+            
+            Logging.AddLog(new SystemLog
             {
                 LoggerName = CacheData.LoggerName,
                 Date = DateTime.Now,
                 Function = "Unifiedban Terminal Startup",
-                Level = Models.SystemLog.Levels.Info,
+                Level = SystemLog.Levels.Info,
                 Message = "Chat Tools initialized",
                 UserId = -2
             });
@@ -51,7 +65,7 @@ namespace Unifiedban.Terminal.Utils
         {
             try
             {
-                var administrators = Bot.Manager.BotClient.GetChatAdministratorsAsync(chatId).Result;
+                var administrators = Manager.BotClient.GetChatAdministratorsAsync(chatId).Result;
                 foreach (ChatMember member in administrators)
                 {
                     if (member.User.Id == userId)
@@ -95,7 +109,7 @@ namespace Unifiedban.Terminal.Utils
             {
                 isFromOperator = true;
                 Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
-                ChatMessage newMsg = new ChatMessage()
+                ChatMessage newMsg = new ChatMessage
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
@@ -112,7 +126,7 @@ namespace Unifiedban.Terminal.Utils
             var timeDifference = DateTime.UtcNow - lastOperatorSupportMsg[message.Chat.Id];
             if (timeDifference.Minutes >= 3 && timeDifference.Minutes < 5)
             {
-                ChatMessage newMsg = new ChatMessage()
+                ChatMessage newMsg = new ChatMessage
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
@@ -125,7 +139,7 @@ namespace Unifiedban.Terminal.Utils
             }
             if (timeDifference.Minutes >= 5)
             {
-                ChatMessage newMsg = new ChatMessage()
+                ChatMessage newMsg = new ChatMessage
                 {
                     Timestamp = DateTime.UtcNow,
                     Chat = message.Chat,
@@ -137,7 +151,7 @@ namespace Unifiedban.Terminal.Utils
                 CacheData.ActiveSupport.Remove(message.Chat.Id);
                 CacheData.CurrentChatAdmins.Remove(message.Chat.Id);
                 
-                MessageQueueManager.EnqueueLog(new ChatMessage()
+                MessageQueueManager.EnqueueLog(new ChatMessage
                 {
                     ParseMode = ParseMode.Markdown,
                     Text = String.Format(
@@ -160,14 +174,14 @@ namespace Unifiedban.Terminal.Utils
 
         private static void RecordSupportSessionMessage(Message message)
         {
-            Models.SupportSessionLog.SenderType senderType = Models.SupportSessionLog.SenderType.User;
+            SupportSessionLog.SenderType senderType = SupportSessionLog.SenderType.User;
             if (BotTools.IsUserOperator(message.From.Id))
-                senderType = Models.SupportSessionLog.SenderType.Operator;
+                senderType = SupportSessionLog.SenderType.Operator;
             else if (CacheData.CurrentChatAdmins[message.Chat.Id]
                     .Contains(message.From.Id))
-                senderType = Models.SupportSessionLog.SenderType.Admin;
+                senderType = SupportSessionLog.SenderType.Admin;
 
-            LogTools.AddSupportSessionLog(new Models.SupportSessionLog()
+            LogTools.AddSupportSessionLog(new SupportSessionLog
             {
                 GroupId = CacheData.Groups[message.Chat.Id].GroupId,
                 SenderId = message.From.Id,
@@ -177,22 +191,22 @@ namespace Unifiedban.Terminal.Utils
             });
         }
 
-        public static void CheckNightSchedule()
+        internal static void CheckNightSchedule()
         {
-            List<Models.Group.NightSchedule> activeSchedules =
+            List<NightSchedule> activeSchedules =
                 CacheData.NightSchedules.Values
-                    .Where(x => x.State != Models.Group.NightSchedule.Status.Deactivated)
+                    .Where(x => x.State != NightSchedule.Status.Deactivated)
                     .ToList();
             CloseGroups(activeSchedules);
             OpenGroups(activeSchedules);
             if(_firstCycle) _firstCycle = false;
         }
 
-        private static void CloseGroups(List<Models.Group.NightSchedule> nightSchedules)
+        private static void CloseGroups(List<NightSchedule> nightSchedules)
         {
-            foreach(Models.Group.NightSchedule nightSchedule in nightSchedules)
+            foreach(NightSchedule nightSchedule in nightSchedules)
             {
-                if (CacheData.NightSchedules[nightSchedule.GroupId].State != Models.Group.NightSchedule.Status.Programmed)
+                if (CacheData.NightSchedules[nightSchedule.GroupId].State != NightSchedule.Status.Programmed)
                     continue;
 
                 if (_firstCycle)
@@ -209,14 +223,14 @@ namespace Unifiedban.Terminal.Utils
 
                 if(nightSchedule.UtcStartDate.Value <= DateTime.UtcNow)
                 {
-                    CacheData.NightSchedules[nightSchedule.GroupId].State = Models.Group.NightSchedule.Status.Active;
+                    CacheData.NightSchedules[nightSchedule.GroupId].State = NightSchedule.Status.Active;
                     long chatId = CacheData.Groups.Values
                         .Single(x => x.GroupId == nightSchedule.GroupId).TelegramChatId;
                     
                     chatPermissionses[chatId] = Manager.BotClient.GetChatAsync(chatId).Result.Permissions;
 
                     Manager.BotClient.SetChatPermissionsAsync(chatId,
-                        new ChatPermissions()
+                        new ChatPermissions
                         {
                             CanSendMessages = false,
                             CanAddWebPagePreviews = false,
@@ -229,11 +243,11 @@ namespace Unifiedban.Terminal.Utils
                         });
 
                     MessageQueueManager.EnqueueMessage(
-                        new ChatMessage()
+                        new ChatMessage
                         {
                             Timestamp = DateTime.UtcNow,
-                            Chat = new Chat() { Id = chatId, Type = ChatType.Supergroup },
-                            Text = $"The group is now closed as per Night Schedule settings."
+                            Chat = new Chat { Id = chatId, Type = ChatType.Supergroup },
+                            Text = "The group is now closed as per Night Schedule settings."
                         });
                     CacheData.NightSchedules[nightSchedule.GroupId].UtcStartDate =
                         CacheData.NightSchedules[nightSchedule.GroupId].UtcStartDate.Value.AddDays(1);
@@ -241,11 +255,11 @@ namespace Unifiedban.Terminal.Utils
             }
         }
 
-        private static void OpenGroups(List<Models.Group.NightSchedule> nightSchedules)
+        private static void OpenGroups(List<NightSchedule> nightSchedules)
         {
-            foreach (Models.Group.NightSchedule nightSchedule in nightSchedules)
+            foreach (NightSchedule nightSchedule in nightSchedules)
             {
-                if (CacheData.NightSchedules[nightSchedule.GroupId].State != Models.Group.NightSchedule.Status.Active)
+                if (CacheData.NightSchedules[nightSchedule.GroupId].State != NightSchedule.Status.Active)
                     continue;
 
                 if (_firstCycle)
@@ -269,7 +283,7 @@ namespace Unifiedban.Terminal.Utils
 
                 if (nightSchedule.UtcEndDate.Value <= DateTime.UtcNow)
                 {
-                    CacheData.NightSchedules[nightSchedule.GroupId].State = Models.Group.NightSchedule.Status.Programmed;
+                    CacheData.NightSchedules[nightSchedule.GroupId].State = NightSchedule.Status.Programmed;
 
                     long chatId = CacheData.Groups.Values
                         .Single(x => x.GroupId == nightSchedule.GroupId).TelegramChatId;
@@ -282,15 +296,15 @@ namespace Unifiedban.Terminal.Utils
                     else
                     {
                         MessageQueueManager.EnqueueMessage(
-                            new ChatMessage()
+                            new ChatMessage
                             {
                                 Timestamp = DateTime.UtcNow,
-                                Chat = new Chat() { Id = chatId, Type = ChatType.Supergroup },
+                                Chat = new Chat { Id = chatId, Type = ChatType.Supergroup },
                                 Text = "*[Report]*\nImpossible to find previous permissions set.\n" +
                                        "Using default value (all true except CanChangeInfo)."
                             });
                         Manager.BotClient.SetChatPermissionsAsync(chatId,
-                            new ChatPermissions()
+                            new ChatPermissions
                             {
                                 CanSendMessages = true,
                                 CanAddWebPagePreviews = true,
@@ -304,11 +318,11 @@ namespace Unifiedban.Terminal.Utils
                     }
 
                     MessageQueueManager.EnqueueMessage(
-                        new ChatMessage()
+                        new ChatMessage
                         {
                             Timestamp = DateTime.UtcNow,
-                            Chat = new Chat() { Id = chatId, Type = ChatType.Supergroup },
-                            Text = $"The group is now open as per Night Schedule settings."
+                            Chat = new Chat { Id = chatId, Type = ChatType.Supergroup },
+                            Text = "The group is now open as per Night Schedule settings."
                         });
                     CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate =
                         CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate.Value.AddDays(1);
@@ -357,7 +371,7 @@ namespace Unifiedban.Terminal.Utils
                 }
                 catch (Exception ex)
                 {
-                    Data.Utils.Logging.AddLog(new Models.SystemLog()
+                    Logging.AddLog(new SystemLog
                     {
                         LoggerName = CacheData.LoggerName,
                         Date = DateTime.Now,
@@ -367,7 +381,7 @@ namespace Unifiedban.Terminal.Utils
                         UserId = -1
                     });
                     if(ex.InnerException != null)
-                        Data.Utils.Logging.AddLog(new Models.SystemLog()
+                        Logging.AddLog(new SystemLog
                         {
                             LoggerName = CacheData.LoggerName,
                             Date = DateTime.Now,
@@ -432,7 +446,7 @@ namespace Unifiedban.Terminal.Utils
             switch (correctPosition)
             {
                 default:
-                    buttons = new List<InlineKeyboardButton>()
+                    buttons = new List<InlineKeyboardButton>
                     {
                         InlineKeyboardButton.WithCallbackData(
                             result.ToString(),
@@ -443,7 +457,7 @@ namespace Unifiedban.Terminal.Utils
                     };
                     break;
                 case 2:
-                    buttons = new List<InlineKeyboardButton>()
+                    buttons = new List<InlineKeyboardButton>
                     {
                         InlineKeyboardButton.WithCallbackData(GetRandomEmoji()),
                         InlineKeyboardButton.WithCallbackData(
@@ -454,7 +468,7 @@ namespace Unifiedban.Terminal.Utils
                     };
                     break;
                 case 3:
-                    buttons = new List<InlineKeyboardButton>()
+                    buttons = new List<InlineKeyboardButton>
                     {
                         InlineKeyboardButton.WithCallbackData(GetRandomEmoji(), $"/CaptchaError {memberId} {timerKey}"),
                         InlineKeyboardButton.WithCallbackData(GetRandomEmoji(), $"/CaptchaError {memberId} {timerKey}"),
@@ -469,10 +483,10 @@ namespace Unifiedban.Terminal.Utils
             return new InlineKeyboardMarkup(buttons);
         }
 
-        public static async Task RenewInviteLinks()
+        internal static async Task RenewInviteLinks()
         {
             foreach (var telegramGroup in CacheData.Groups.Values
-                .Where(x => x.InviteAlias != null))
+                .Where(x => x.State == TelegramGroup.Status.Active && x.InviteAlias != null))
             {
                 try
                 {
@@ -486,7 +500,7 @@ namespace Unifiedban.Terminal.Utils
                 }
                 catch (Exception ex)
                 {
-                    Data.Utils.Logging.AddLog(new SystemLog()
+                    Logging.AddLog(new SystemLog
                     {
                         LoggerName = CacheData.LoggerName,
                         Date = DateTime.Now,
@@ -495,8 +509,22 @@ namespace Unifiedban.Terminal.Utils
                         Message = $"Error exporting new chat (id {telegramGroup.TelegramChatId}) invite link due to exception: {ex.Message}",
                         UserId = -1
                     });
+
+                    if (ex.Message.Contains("chat not found"))
+                    {
+                        CacheData.Groups[telegramGroup.TelegramChatId].State = TelegramGroup.Status.Inactive;
+                        Logging.AddLog(new SystemLog
+                        {
+                            LoggerName = CacheData.LoggerName,
+                            Date = DateTime.Now,
+                            Function = "ChatTools.RenewInviteLinks",
+                            Level = SystemLog.Levels.Info,
+                            Message = $"Chat id {telegramGroup.TelegramChatId} disabled. Looks like we're not there anymore.",
+                            UserId = -1
+                        });
+                    }
                 }
-                System.Threading.Thread.Sleep(100);
+                Thread.Sleep(100);
             }
         }
     }

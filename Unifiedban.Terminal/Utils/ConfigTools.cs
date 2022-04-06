@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
+using Quartz;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Telegram.Bot;
@@ -38,11 +39,23 @@ using Timer = System.Timers.Timer;
 
         public static void Initialize()
         {
-            RecurringJob.AddOrUpdate("ConfigTools_SyncGroupsConfigToDatabase", () => SyncGroupsConfigToDatabase(), "0/30 * * ? * *");
-            RecurringJob.AddOrUpdate("ConfigTools_SyncWelcomeAndRulesText", () => SyncWelcomeAndRulesText(), "0/30 * * ? * *");
-            RecurringJob.AddOrUpdate("ConfigTools_SyncGroupsToDatabase", () => SyncGroupsToDatabase(), "0/30 * * ? * *");
-            RecurringJob.AddOrUpdate("ConfigTools_SyncNightScheduleToDatabase", () => SyncNightScheduleToDatabase(), "0/30 * * ? * *");
+            // RecurringJob.AddOrUpdate("ConfigTools_SyncGroupsConfigToDatabase", () => SyncGroupsConfigToDatabase(), "0/30 * * ? * *");
+            // RecurringJob.AddOrUpdate("ConfigTools_SyncWelcomeAndRulesText", () => SyncWelcomeAndRulesText(), "0/30 * * ? * *");
+            // RecurringJob.AddOrUpdate("ConfigTools_SyncGroupsToDatabase", () => SyncGroupsToDatabase(), "0/30 * * ? * *");
+            // RecurringJob.AddOrUpdate("ConfigTools_SyncNightScheduleToDatabase", () => SyncNightScheduleToDatabase(), "0/30 * * ? * *");
 
+            var configToolsJob = JobBuilder.Create<Jobs.ConfigToolsJob>()
+                .WithIdentity("configToolsJob", "configTools")
+                .Build();
+            var configToolsJobTrigger = TriggerBuilder.Create()
+                .WithIdentity("configToolsJobTrigger", "configTools")
+                .StartNow()
+                .WithSimpleSchedule(x => x
+                    .WithIntervalInSeconds(30)
+                    .RepeatForever())
+                .Build();
+            Program.Scheduler?.ScheduleJob(configToolsJob, configToolsJobTrigger).Wait();
+            
             Data.Utils.Logging.AddLog(new Models.SystemLog()
             {
                 LoggerName = CacheData.LoggerName,
@@ -99,7 +112,7 @@ using Timer = System.Timers.Timer;
             if(_channel.IsOpen) _channel.Close();
         }
 
-        public static void SyncGroupsToDatabase()
+        internal static void SyncGroupsToDatabase()
         {
             foreach (long group in CacheData.Groups.Keys)
                 telegramGroupLogic.Update(
@@ -107,7 +120,7 @@ using Timer = System.Timers.Timer;
                     -2);
         }
 
-        public static void SyncGroupsConfigToDatabase()
+        internal static void SyncGroupsConfigToDatabase()
         {
             foreach (long group in CacheData.GroupConfigs.Keys)
                 telegramGroupLogic.UpdateConfiguration(
@@ -116,7 +129,7 @@ using Timer = System.Timers.Timer;
                     -2);
         }
 
-        public static void SyncWelcomeAndRulesText()
+        internal static void SyncWelcomeAndRulesText()
         {
             foreach (long group in CacheData.Groups.Keys)
             {
@@ -189,7 +202,7 @@ using Timer = System.Timers.Timer;
             }
         }
 
-        public static void SyncNightScheduleToDatabase()
+        internal static void SyncNightScheduleToDatabase()
         {
             foreach (Models.Group.NightSchedule nightSchedule in CacheData.NightSchedules.Values)
             {
@@ -409,11 +422,11 @@ using Timer = System.Timers.Timer;
                 UserId = -1
             });
             var factory = new ConnectionFactory();
-            factory.UserName = "";
-            factory.Password = "";
+            factory.UserName = "fabs";
+            factory.Password = "***REMOVED***";
             factory.VirtualHost = "/";
-            factory.HostName = "";
-            factory.Port = 0000;
+            factory.HostName = "10.0.0.4";
+            factory.Port = 5672;
             factory.DispatchConsumersAsync = true;
             
             Data.Utils.Logging.AddLog(new Models.SystemLog()

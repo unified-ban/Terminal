@@ -98,7 +98,7 @@ namespace Unifiedban.Terminal.Bot
                         }
                         break;
                     case "SetRulesText":
-                        if (String.IsNullOrEmpty(message.Text))
+                        if (string.IsNullOrEmpty(message.Text))
                             break;
                         if(Utils.ConfigTools.UpdateRulesText(message.Chat.Id, message.Text))
                         {
@@ -107,17 +107,17 @@ namespace Unifiedban.Terminal.Bot
                         }
                         break;
                     case "Feedback":
-                        if (String.IsNullOrEmpty(message.Text))
+                        if (string.IsNullOrEmpty(message.Text))
                             break;
                         DenqueueMessage(commandMessage);
                         Utils.BotTools.RecordFeedback(message);
                         break;
                     case "AddUserToBlacklist":
-                        if (String.IsNullOrEmpty(message.Text))
+                        if (string.IsNullOrEmpty(message.Text))
                             break;
                         DenqueueMessage(commandMessage);
                         Utils.UserTools.AddUserToBlacklist(message.From.Id, message,
-                            Convert.ToInt32(commandMessage.Value), Models.User.Banned.BanReasons.Other,
+                            Convert.ToInt64(commandMessage.Value), Models.User.Banned.BanReasons.Other,
                             message.Text);
                         break;
                 }

@@ -9,6 +9,7 @@ using Telegram.Bot.Types.Enums;
 using System.Threading.Tasks;
 using System.Linq;
 using Hangfire;
+using Quartz;
 using Telegram.Bot;
 
 namespace Unifiedban.Terminal.Bot.Command
@@ -26,7 +27,8 @@ namespace Unifiedban.Terminal.Bot.Command
                 return;
             }
 
-            RecurringJob.Trigger("ChatTools_RenewInviteLinks");
+            //RecurringJob.Trigger("ChatTools_RenewInviteLinks");
+            Program.Scheduler?.TriggerJob(new JobKey("ChatTools_RenewInviteLinks"));
         }
 
         public void Execute(CallbackQuery callbackQuery)

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Hangfire;
+using Quartz;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -32,8 +33,20 @@ namespace Unifiedban.Terminal.Utils
 
         public static void Initialize()
         {
-            RecurringJob.AddOrUpdate("UserTools_SyncTrustFactor", () => SyncTrustFactor(), "0/30 * * ? * *");
-            RecurringJob.AddOrUpdate("UserTools_SyncBlacklist", () => SyncBlacklist(), "0/30 * * ? * *");
+            // RecurringJob.AddOrUpdate("UserTools_SyncTrustFactor", () => SyncTrustFactor(), "0/30 * * ? * *");
+            // RecurringJob.AddOrUpdate("UserTools_SyncBlacklist", () => SyncBlacklist(), "0/30 * * ? * *");
+            
+            var userToolsJob = JobBuilder.Create<Jobs.UserToolsJob>()
+                .WithIdentity("userToolsJob", "userTools")
+                .Build();
+            var userToolsJobTrigger = TriggerBuilder.Create()
+                .WithIdentity("userToolsJobTrigger", "userTools")
+                .StartNow()
+                .WithSimpleSchedule(x => x
+                    .WithIntervalInSeconds(30)
+                    .RepeatForever())
+                .Build();
+            Program.Scheduler?.ScheduleJob(userToolsJob, userToolsJobTrigger).Wait();
         }
 
         public static void Dispose()
@@ -337,7 +350,7 @@ namespace Unifiedban.Terminal.Utils
             return false;
         }
 
-        public static void SyncTrustFactor()
+        internal static void SyncTrustFactor()
         {
             List<TrustFactor> tfToSync = new List<TrustFactor>();
             lock (trustFactorLock)
@@ -346,7 +359,7 @@ namespace Unifiedban.Terminal.Utils
             }
             tfToSync.ForEach(x => tfl.Update(x, -2));
         }
-        public static void SyncBlacklist()
+        internal static void SyncBlacklist()
         {
             List<Banned> bannedToSync = new List<Banned>();
             lock (blacklistLock)
@@ -357,7 +370,7 @@ namespace Unifiedban.Terminal.Utils
             bannedToSync.ForEach(x => bl.AddIfNotExist(x, -2));
         }
         public static void AddUserToBlacklist(long operatorId, Message message,
-            int userToBan, Banned.BanReasons reason,
+            long userToBan, Banned.BanReasons reason,
             string otherReason)
         {
             lock (blacklistLock)
@@ -381,10 +394,8 @@ namespace Unifiedban.Terminal.Utils
             
             try
             {
-                Manager.BotClient.KickChatMemberAsync(message.Chat.Id, userToBan);
-                
-                BusinessLogic.User.BannedLogic bl = new BusinessLogic.User.BannedLogic();
-                Banned banned = bl.Add(userToBan, reason, -2);
+                var bl = new BusinessLogic.User.BannedLogic();
+                var banned = bl.Add(userToBan, reason, -2);
                 if(banned == null)
                 {
                     MessageQueueManager.EnqueueMessage(
@@ -396,6 +407,13 @@ namespace Unifiedban.Terminal.Utils
                         });
 
                     return;
+                }
+
+                if (!string.IsNullOrWhiteSpace(otherReason))
+                {
+                    var actionLogic = new BusinessLogic.ActionLogLogic();
+                    actionLogic.Add("AddToBlacklist", null,
+                        $"TelegramUserId {userToBan} with reason {otherReason}", -1);
                 }
                 
                 MessageQueueManager.EnqueueMessage(
@@ -426,6 +444,8 @@ namespace Unifiedban.Terminal.Utils
                         message.Chat.Id.ToString().Replace("-",""),
                         Guid.NewGuid())
                 );
+                
+                Manager.BotClient.KickChatMemberAsync(message.Chat.Id, userToBan);
             }
             catch
             {

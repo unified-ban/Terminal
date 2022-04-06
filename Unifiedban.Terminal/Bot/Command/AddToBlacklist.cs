@@ -127,29 +127,21 @@ namespace Unifiedban.Terminal.Bot.Command
                 return;
             }
 
-            string[] arguments = callbackQuery.Data.Split(" ");
-            int userToBan = Convert.ToInt32(arguments[1]);
-            Models.User.Banned.BanReasons reason = Models.User.Banned.BanReasons.Other;
+            var arguments = callbackQuery.Data.Split(" ");
+            var userToBan = Convert.ToInt64(arguments[1]);
 
-            switch (arguments[2])
+            var reason = arguments[2] switch
             {
-                case "spam":
-                    reason = Models.User.Banned.BanReasons.Spam;
-                    break;
-                case "scam":
-                    reason = Models.User.Banned.BanReasons.Scam;
-                    break;
-                case "harassment":
-                    reason = Models.User.Banned.BanReasons.Harassment;
-                    break;
-                case "other":
-                    reason = Models.User.Banned.BanReasons.Other;
-                    break;
-            }
+                "spam" => Models.User.Banned.BanReasons.Spam,
+                "scam" => Models.User.Banned.BanReasons.Scam,
+                "harassment" => Models.User.Banned.BanReasons.Harassment,
+                "other" => Models.User.Banned.BanReasons.Other,
+                _ => Models.User.Banned.BanReasons.Other
+            };
 
             if (reason == Models.User.Banned.BanReasons.Other)
             {
-                CommandMessage commandMessage = new CommandMessage()
+                var commandMessage = new CommandMessage()
                 {
                     Command = "AddUserToBlacklist",
                     Value = userToBan.ToString(),
