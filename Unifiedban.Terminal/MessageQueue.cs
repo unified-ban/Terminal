@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
 using Telegram.Bot;
+using Unifiedban.Models;
 using Unifiedban.Models.Group;
 
 namespace Unifiedban.Terminal
@@ -59,9 +60,7 @@ namespace Unifiedban.Terminal
             }
 
             // Take next message from the queue and send it
-            Models.ChatMessage msgToSend = Queue.Dequeue();
-            if (msgToSend == null)
-                return;
+            var msgToSend = Queue.Dequeue();
             try
             {
                 Telegram.Bot.Types.Message sent = Bot.Manager.BotClient.SendTextMessageAsync(
@@ -112,6 +111,33 @@ namespace Unifiedban.Terminal
                         Message = "ChatId: " + TelegramChatId + " - " + ex.InnerException.Message,
                         UserId = -1
                     });
+                
+                if (ex.Message.Contains("chat not found") ||
+                    ex.Message.Contains("chat was deleted") ||
+                    ex.Message.Contains("bot was kicked"))
+                {
+                    var log = new SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Unifiedban.Terminal.MessageQueue.QueueTimer_Elapsed.Send",
+                        Level = Models.SystemLog.Levels.Error,
+                        Message = $"Disabling chat id: {TelegramChatId}",
+                        UserId = -1
+                    };
+                    Data.Utils.Logging.AddLog(log);
+                    //Utils.LogTools.AddSystemLog(log);
+                    Utils.LogTools.AddActionLog(new ActionLog
+                    {
+                        ActionTypeId = "autoDisable",
+                        GroupId = CacheData.Groups[TelegramChatId].GroupId,
+                        Parameters = ex.Message,
+                        UtcDate = DateTime.UtcNow
+                    });
+                    
+                    CacheData.Groups[TelegramChatId].State = TelegramGroup.Status.Inactive;
+                    Queue.Clear();
+                }
             }
 
             // Reset counter and time if we waited previously

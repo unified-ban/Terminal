@@ -123,7 +123,7 @@ namespace Unifiedban.Terminal
                 UserId = -2
             });
         }
-        private static void DisposeAll()
+        internal static void DisposeAll()
         {
             CacheData.IsDisposing = true;
             Scheduler?.Shutdown();

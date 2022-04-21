@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Quartz;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -206,6 +207,11 @@ namespace Unifiedban.Terminal.Utils
         {
             foreach(NightSchedule nightSchedule in nightSchedules)
             {
+                var chatId = CacheData.Groups.Values
+                    .Single(x => x.GroupId == nightSchedule.GroupId).TelegramChatId;
+                
+                if(CacheData.Groups[chatId].State != TelegramGroup.Status.Active)
+                    continue;
                 if (CacheData.NightSchedules[nightSchedule.GroupId].State != NightSchedule.Status.Programmed)
                     continue;
 
@@ -223,34 +229,81 @@ namespace Unifiedban.Terminal.Utils
 
                 if(nightSchedule.UtcStartDate.Value <= DateTime.UtcNow)
                 {
-                    CacheData.NightSchedules[nightSchedule.GroupId].State = NightSchedule.Status.Active;
-                    long chatId = CacheData.Groups.Values
-                        .Single(x => x.GroupId == nightSchedule.GroupId).TelegramChatId;
+                    try
+                    {
+                        CacheData.NightSchedules[nightSchedule.GroupId].State = NightSchedule.Status.Active;
+                        chatPermissionses[chatId] = Manager.BotClient.GetChatAsync(chatId).Result.Permissions;
+
+                        Manager.BotClient.SetChatPermissionsAsync(chatId,
+                            new ChatPermissions
+                            {
+                                CanSendMessages = false,
+                                CanAddWebPagePreviews = false,
+                                CanChangeInfo = false,
+                                CanInviteUsers = false,
+                                CanPinMessages = false,
+                                CanSendMediaMessages = false,
+                                CanSendOtherMessages = false,
+                                CanSendPolls = false
+                            });
+
+                        MessageQueueManager.EnqueueMessage(
+                            new ChatMessage
+                            {
+                                Timestamp = DateTime.UtcNow,
+                                Chat = new Chat {Id = chatId, Type = ChatType.Supergroup},
+                                Text = "The group is now closed as per Night Schedule settings."
+                            });
+                        CacheData.NightSchedules[nightSchedule.GroupId].UtcStartDate =
+                            CacheData.NightSchedules[nightSchedule.GroupId].UtcStartDate.Value.AddDays(1);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logging.AddLog(new SystemLog
+                        {
+                            LoggerName = CacheData.LoggerName,
+                            Date = DateTime.Now,
+                            Function = "Utils.ChatTools.CloseGroups",
+                            Level = SystemLog.Levels.Error,
+                            Message = $"Exception on ChatId: {chatId}",
+                            UserId = -2
+                        });
+                        Logging.AddLog(new SystemLog
+                        {
+                            LoggerName = CacheData.LoggerName,
+                            Date = DateTime.Now,
+                            Function = "Utils.ChatTools.CloseGroups",
+                            Level = SystemLog.Levels.Error,
+                            Message = $"{ex.Message}\n{ex.InnerException?.Message}",
+                            UserId = -2
+                        });
+                        
+                        if (ex.Message.Contains("chat not found") ||
+                            ex.Message.Contains("chat was deleted") ||
+                            ex.Message.Contains("bot was kicked"))
+                        {
+                            var log = new SystemLog()
+                            {
+                                LoggerName = CacheData.LoggerName,
+                                Date = DateTime.Now,
+                                Function = "Utils.ChatTools.CloseGroups",
+                                Level = SystemLog.Levels.Error,
+                                Message = $"Disabling GroupId: {nightSchedule.GroupId} - {chatId}",
+                                UserId = -1
+                            };
+                            Logging.AddLog(log);
+                            // LogTools.AddSystemLog(log);
+                            LogTools.AddActionLog(new ActionLog
+                            {
+                                ActionTypeId = "autoDisable",
+                                GroupId = nightSchedule.GroupId,
+                                Parameters = ex.Message,
+                                UtcDate = DateTime.UtcNow
+                            });
                     
-                    chatPermissionses[chatId] = Manager.BotClient.GetChatAsync(chatId).Result.Permissions;
-
-                    Manager.BotClient.SetChatPermissionsAsync(chatId,
-                        new ChatPermissions
-                        {
-                            CanSendMessages = false,
-                            CanAddWebPagePreviews = false,
-                            CanChangeInfo = false,
-                            CanInviteUsers = false,
-                            CanPinMessages = false,
-                            CanSendMediaMessages = false,
-                            CanSendOtherMessages = false,
-                            CanSendPolls = false
-                        });
-
-                    MessageQueueManager.EnqueueMessage(
-                        new ChatMessage
-                        {
-                            Timestamp = DateTime.UtcNow,
-                            Chat = new Chat { Id = chatId, Type = ChatType.Supergroup },
-                            Text = "The group is now closed as per Night Schedule settings."
-                        });
-                    CacheData.NightSchedules[nightSchedule.GroupId].UtcStartDate =
-                        CacheData.NightSchedules[nightSchedule.GroupId].UtcStartDate.Value.AddDays(1);
+                            CacheData.Groups[chatId].State = TelegramGroup.Status.Inactive;
+                        }
+                    }
                 }
             }
         }
@@ -259,6 +312,11 @@ namespace Unifiedban.Terminal.Utils
         {
             foreach (NightSchedule nightSchedule in nightSchedules)
             {
+                var chatId = CacheData.Groups.Values
+                    .Single(x => x.GroupId == nightSchedule.GroupId).TelegramChatId;
+                
+                if(CacheData.Groups[chatId].State != TelegramGroup.Status.Active)
+                    continue;
                 if (CacheData.NightSchedules[nightSchedule.GroupId].State != NightSchedule.Status.Active)
                     continue;
 
@@ -283,49 +341,96 @@ namespace Unifiedban.Terminal.Utils
 
                 if (nightSchedule.UtcEndDate.Value <= DateTime.UtcNow)
                 {
-                    CacheData.NightSchedules[nightSchedule.GroupId].State = NightSchedule.Status.Programmed;
-
-                    long chatId = CacheData.Groups.Values
-                        .Single(x => x.GroupId == nightSchedule.GroupId).TelegramChatId;
-
-                    if (chatPermissionses.ContainsKey(chatId))
+                    try
                     {
-                        Manager.BotClient.SetChatPermissionsAsync(chatId,
-                            chatPermissionses[chatId]);
-                    }
-                    else
-                    {
+                        CacheData.NightSchedules[nightSchedule.GroupId].State = NightSchedule.Status.Programmed;
+
+                        if (chatPermissionses.ContainsKey(chatId))
+                        {
+                            Manager.BotClient.SetChatPermissionsAsync(chatId,
+                                chatPermissionses[chatId]);
+                        }
+                        else
+                        {
+                            MessageQueueManager.EnqueueMessage(
+                                new ChatMessage
+                                {
+                                    Timestamp = DateTime.UtcNow,
+                                    Chat = new Chat {Id = chatId, Type = ChatType.Supergroup},
+                                    Text = "*[Report]*\nImpossible to find previous permissions set.\n" +
+                                           "Using default value (all true except CanChangeInfo)."
+                                });
+                            Manager.BotClient.SetChatPermissionsAsync(chatId,
+                                new ChatPermissions
+                                {
+                                    CanSendMessages = true,
+                                    CanAddWebPagePreviews = true,
+                                    CanChangeInfo = false,
+                                    CanInviteUsers = true,
+                                    CanPinMessages = true,
+                                    CanSendMediaMessages = true,
+                                    CanSendOtherMessages = true,
+                                    CanSendPolls = true
+                                });
+                        }
+
                         MessageQueueManager.EnqueueMessage(
                             new ChatMessage
                             {
                                 Timestamp = DateTime.UtcNow,
-                                Chat = new Chat { Id = chatId, Type = ChatType.Supergroup },
-                                Text = "*[Report]*\nImpossible to find previous permissions set.\n" +
-                                       "Using default value (all true except CanChangeInfo)."
+                                Chat = new Chat {Id = chatId, Type = ChatType.Supergroup},
+                                Text = "The group is now open as per Night Schedule settings."
                             });
-                        Manager.BotClient.SetChatPermissionsAsync(chatId,
-                            new ChatPermissions
-                            {
-                                CanSendMessages = true,
-                                CanAddWebPagePreviews = true,
-                                CanChangeInfo = false,
-                                CanInviteUsers = true,
-                                CanPinMessages = true,
-                                CanSendMediaMessages = true,
-                                CanSendOtherMessages = true,
-                                CanSendPolls = true
-                            });
+                        CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate =
+                            CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate.Value.AddDays(1);
                     }
-
-                    MessageQueueManager.EnqueueMessage(
-                        new ChatMessage
+                    catch (Exception ex)
+                    {
+                        Logging.AddLog(new SystemLog
                         {
-                            Timestamp = DateTime.UtcNow,
-                            Chat = new Chat { Id = chatId, Type = ChatType.Supergroup },
-                            Text = "The group is now open as per Night Schedule settings."
+                            LoggerName = CacheData.LoggerName,
+                            Date = DateTime.Now,
+                            Function = "Utils.ChatTools.OpenGroups",
+                            Level = SystemLog.Levels.Error,
+                            Message = $"Exception on ChatId: {chatId}",
+                            UserId = -2
                         });
-                    CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate =
-                        CacheData.NightSchedules[nightSchedule.GroupId].UtcEndDate.Value.AddDays(1);
+                        Logging.AddLog(new SystemLog
+                        {
+                            LoggerName = CacheData.LoggerName,
+                            Date = DateTime.Now,
+                            Function = "Utils.ChatTools.OpenGroups",
+                            Level = SystemLog.Levels.Error,
+                            Message = $"{ex.Message}\n{ex.InnerException?.Message}",
+                            UserId = -2
+                        });
+                        
+                        if (ex.Message.Contains("chat not found") ||
+                            ex.Message.Contains("chat was deleted") ||
+                            ex.Message.Contains("bot was kicked"))
+                        {
+                            var log = new SystemLog()
+                            {
+                                LoggerName = CacheData.LoggerName,
+                                Date = DateTime.Now,
+                                Function = "Utils.ChatTools.OpenGroups",
+                                Level = SystemLog.Levels.Error,
+                                Message = $"Disabling GroupId: {nightSchedule.GroupId} - {chatId}",
+                                UserId = -1
+                            };
+                            Logging.AddLog(log);
+                            // LogTools.AddSystemLog(log);
+                            LogTools.AddActionLog(new ActionLog
+                            {
+                                ActionTypeId = "autoDisable",
+                                GroupId = nightSchedule.GroupId,
+                                Parameters = ex.Message,
+                                UtcDate = DateTime.UtcNow
+                            });
+                    
+                            CacheData.Groups[chatId].State = TelegramGroup.Status.Inactive;
+                        }
+                    }
                 }
             }
         }

@@ -26,48 +26,40 @@ namespace Unifiedban.Terminal
         public static int CaptchaAutoKickTimer = 1;
 
         // [[ Instance data ]]
-        public static List<Models.SysConfig> SysConfigs = new List<Models.SysConfig>();
-        public static List<Models.Operator> Operators = new List<Models.Operator>();
-        public static Dictionary<string, Models.Translation.Language> Languages = 
-            new Dictionary<string, Models.Translation.Language>();
-        public static Dictionary<string, Dictionary<string, Models.Translation.Entry>> Translations = 
-            new Dictionary<string, Dictionary<string, Models.Translation.Entry>>();
-        public static List<Models.Group.ConfigurationParameter> GroupDefaultConfigs =
-            new List<Models.Group.ConfigurationParameter>();
+        public static List<Models.SysConfig> SysConfigs = new();
+        public static List<Models.Operator> Operators = new();
+        public static Dictionary<string, Models.Translation.Language> Languages = new();
+        public static Dictionary<string, Dictionary<string, Models.Translation.Entry>> Translations = new();
+        public static List<Models.Group.ConfigurationParameter> GroupDefaultConfigs = new();
         public static int HandledMessages { get; private set; }
-        private static object lockHandledMessages = new object();
+        private static object lockHandledMessages = new();
         
-        public static List<UBPlugin> PreCaptchaAndWelcomePlugins = new List<UBPlugin>();
-        public static List<UBPlugin> PostCaptchaAndWelcomePlugins = new List<UBPlugin>();
-        public static List<UBPlugin> PreFiltersPlugins = new List<UBPlugin>();
-        public static List<UBPlugin> PostFiltersPlugins = new List<UBPlugin>();
-        public static List<UBPlugin> PreControlsPlugins = new List<UBPlugin>();
-        public static List<UBPlugin> PostControlsPlugins = new List<UBPlugin>();
+        public static List<UBPlugin> PreCaptchaAndWelcomePlugins = new();
+        public static List<UBPlugin> PostCaptchaAndWelcomePlugins = new();
+        public static List<UBPlugin> PreFiltersPlugins = new();
+        public static List<UBPlugin> PostFiltersPlugins = new();
+        public static List<UBPlugin> PreControlsPlugins = new();
+        public static List<UBPlugin> PostControlsPlugins = new();
 
         // [[ Cache ]]
-        public static Dictionary<long, Models.Group.TelegramGroup> Groups =
-            new Dictionary<long, Models.Group.TelegramGroup>();
-        public static Dictionary<long, List<Models.Group.ConfigurationParameter>> GroupConfigs =
-            new Dictionary<long, List<Models.Group.ConfigurationParameter>>();
-        public static Dictionary<string, Models.Group.NightSchedule> NightSchedules =
-            new Dictionary<string, Models.Group.NightSchedule>();
+        public static Dictionary<long, Models.Group.TelegramGroup> Groups = new();
+        public static Dictionary<long, List<Models.Group.ConfigurationParameter>> GroupConfigs = new();
+        public static Dictionary<string, Models.Group.NightSchedule> NightSchedules = new();
         
-        public static List<Models.User.Banned> BannedUsers = new List<Models.User.Banned>();
-        public static List<Models.Filters.BadWord> BadWords = new List<Models.Filters.BadWord>();
-        public static List<Utils.ImageHash> BannedImagesHash = new List<Utils.ImageHash>();
+        public static List<Models.User.Banned> BannedUsers = new();
+        public static List<Models.Filters.BadWord> BadWords = new();
+        public static List<Utils.ImageHash> BannedImagesHash = new();
         
-        public static Dictionary<long, Models.User.TrustFactor> TrustFactors =
-            new Dictionary<long, Models.User.TrustFactor>();
-        public static Dictionary<string, long> Usernames = new Dictionary<string, long>();
+        public static Dictionary<long, Models.User.TrustFactor> TrustFactors = new();
+        public static Dictionary<string, long> Usernames = new();
 
-        public static List<long> ActiveSupport = new List<long>();
-        public static Dictionary<long, List<long>> CurrentChatAdmins =
-            new Dictionary<long, List<long>>();
+        public static List<long> ActiveSupport = new();
+        public static Dictionary<long, List<long>> CurrentChatAdmins = new();
 
-        public static ConcurrentDictionary<string, Timer> CaptchaAutoKickTimers = new ConcurrentDictionary<string, Timer>();
-        public static Dictionary<long, int> CaptchaStrikes = new Dictionary<long, int>();
+        public static ConcurrentDictionary<string, Timer> CaptchaAutoKickTimers = new();
+        public static Dictionary<long, int> CaptchaStrikes = new();
         
-        public static List<long> BetaAuthChats = new List<long>();
+        public static List<long> BetaAuthChats = new();
 
         public static string GetTranslation(
             string languageId,
@@ -83,13 +75,11 @@ namespace Unifiedban.Terminal
                 {
                     return keyId;
                 }
-                else
-                {
-                    languageId = "en";
-                }
+
+                languageId = "en";
             }
 
-            string value = Translations[languageId][keyId].Translation;
+            var value = Translations[languageId][keyId].Translation;
 
             if (firstCapital)
             {

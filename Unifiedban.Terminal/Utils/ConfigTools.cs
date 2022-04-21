@@ -5,6 +5,7 @@
 using Hangfire;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Threading;
@@ -122,22 +123,24 @@ using Timer = System.Timers.Timer;
 
         internal static void SyncGroupsConfigToDatabase()
         {
-            foreach (long group in CacheData.GroupConfigs.Keys)
+            var temp = new Dictionary<long, List<ConfigurationParameter>>(CacheData.GroupConfigs);
+            foreach (var group in temp.Keys)
                 telegramGroupLogic.UpdateConfiguration(
                     group,
-                    JsonConvert.SerializeObject(CacheData.GroupConfigs[group]),
+                    JsonConvert.SerializeObject(temp[group]),
                     -2);
         }
 
         internal static void SyncWelcomeAndRulesText()
         {
-            foreach (long group in CacheData.Groups.Keys)
+            var temp = new Dictionary<long, TelegramGroup>(CacheData.Groups);
+            foreach (var group in temp.Keys)
             {
                 telegramGroupLogic.UpdateWelcomeText(
-                    group, CacheData.Groups[group].WelcomeText,
+                    group, temp[group].WelcomeText,
                     -2);
                 telegramGroupLogic.UpdateRulesText(
-                    group, CacheData.Groups[group].RulesText,
+                    group, temp[group].RulesText,
                     -2);
             }
         }
@@ -204,7 +207,7 @@ using Timer = System.Timers.Timer;
 
         internal static void SyncNightScheduleToDatabase()
         {
-            foreach (Models.Group.NightSchedule nightSchedule in CacheData.NightSchedules.Values)
+            foreach (var nightSchedule in CacheData.NightSchedules.Values)
             {
                 nsl.Update(nightSchedule, -2);
             }

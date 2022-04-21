@@ -114,8 +114,26 @@ namespace Unifiedban.Terminal.Bot
             }
             catch (Exception ex)
             {
-                // ignored
-                Console.WriteLine(ex.Message);
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Message Receiver",
+                    Level = Models.SystemLog.Levels.Fatal,
+                    Message = ex.Message,
+                    UserId = -2
+                });
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Message Receiver",
+                    Level = Models.SystemLog.Levels.Fatal,
+                    Message = ex.InnerException?.Message,
+                    UserId = -2
+                });
+                
+                Program.DisposeAll();
             }
         }
 
