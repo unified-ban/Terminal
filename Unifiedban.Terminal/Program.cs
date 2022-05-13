@@ -142,7 +142,8 @@ namespace Unifiedban.Terminal
 
         static void InitializeHangfireServer()
         {
-            if (CacheData.FatalError)
+            var useHF = Convert.ToBoolean(CacheData.Configuration["UseHF"] ?? "false");
+            if (CacheData.FatalError || !useHF)
                 return;
 
             var options = new SqlServerStorageOptions

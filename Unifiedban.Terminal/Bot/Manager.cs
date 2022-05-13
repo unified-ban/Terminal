@@ -21,6 +21,7 @@ namespace Unifiedban.Terminal.Bot
         static string APIKEY;
         static string instanceId = "";
         static string currentHostname = "";
+        private static ushort pastHoursToSkip = 12;
         public static long MyId = 0;
         public static string Username { get; private set; }
         public static TelegramBotClient BotClient { get;  private set; }
@@ -48,6 +49,8 @@ namespace Unifiedban.Terminal.Bot
                 CacheData.FatalError = true;
                 return;
             }
+
+            ushort.TryParse(CacheData.Configuration["PastHoursToSkip"], out pastHoursToSkip);
 
             APIKEY = apikey;
             instanceId = Guid.NewGuid().ToString();
@@ -112,6 +115,18 @@ namespace Unifiedban.Terminal.Bot
                         HandleCallbackQuery(update.CallbackQuery);
                 }
             }
+            catch (OperationCanceledException ex)
+            {
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Message Receiver",
+                    Level = Models.SystemLog.Levels.Fatal,
+                    Message = $"CTS Req: {Cts.IsCancellationRequested} - {ex.Message}",
+                    UserId = -2
+                });
+            }
             catch (Exception ex)
             {
                 Data.Utils.Logging.AddLog(new Models.SystemLog()
@@ -132,9 +147,9 @@ namespace Unifiedban.Terminal.Bot
                     Message = ex.InnerException?.Message,
                     UserId = -2
                 });
-                
-                Program.DisposeAll();
             }
+                
+            Program.DisposeAll();
         }
 
         public static void Dispose()
@@ -159,7 +174,7 @@ namespace Unifiedban.Terminal.Bot
         
         private static async Task HandleCallbackQuery(CallbackQuery callbackQuery)
         {
-            if (callbackQuery.Message.Date < DateTime.Now.AddDays(-1))
+            if (callbackQuery.Message.Date < DateTime.Now.AddHours(-pastHoursToSkip))
                 return;
             
             await Task.Run(() => CacheData.IncrementHandledMessages());
@@ -188,7 +203,7 @@ namespace Unifiedban.Terminal.Bot
         
         private static async Task HandleUpdateAsync(Message message)
         {
-            if (message.Date < DateTime.Now.AddDays(-1))
+            if (message.Date < DateTime.Now.AddHours(-pastHoursToSkip))
                 return;
             
             await Task.Run(() => CacheData.IncrementHandledMessages());
