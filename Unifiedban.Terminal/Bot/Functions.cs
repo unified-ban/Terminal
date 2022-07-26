@@ -44,7 +44,11 @@ namespace Unifiedban.Terminal.Bot
             if (registered == null)
                 return false;
 
-            CacheData.Groups.Add(message.Chat.Id, registered);
+            lock (CacheData.GroupsLockObj)
+            {
+                CacheData.Groups.Add(message.Chat.Id, registered);
+            }
+
             CacheData.GroupConfigs.Add(message.Chat.Id, CacheData.GroupDefaultConfigs);
             if (MessageQueueManager.AddGroupIfNotPresent(registered))
             {
@@ -488,8 +492,11 @@ namespace Unifiedban.Terminal.Bot
             var updated = telegramGroupLogic.UpdateChatId(message.Chat.Id, (long)message.MigrateToChatId, -2); // TODO - log operation
             if (updated == null)
                 return;
+            lock (CacheData.GroupsLockObj)
+            {
+                CacheData.Groups.Add(updated.TelegramChatId, updated);
+            }
 
-            CacheData.Groups.Add(updated.TelegramChatId, updated);
             MessageQueueManager.AddGroupIfNotPresent(updated);
             
             //MessageQueueManager.RemoveGroupIfNotPresent(message.Chat.Id);

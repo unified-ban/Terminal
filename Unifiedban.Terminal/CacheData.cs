@@ -42,7 +42,8 @@ namespace Unifiedban.Terminal
         public static List<UBPlugin> PostControlsPlugins = new();
 
         // [[ Cache ]]
-        public static Dictionary<long, Models.Group.TelegramGroup> Groups = new();
+        public static object GroupsLockObj = new ();
+        public static readonly Dictionary<long, Models.Group.TelegramGroup> Groups = new();
         public static Dictionary<long, List<Models.Group.ConfigurationParameter>> GroupConfigs = new();
         public static Dictionary<string, Models.Group.NightSchedule> NightSchedules = new();
         

@@ -590,8 +590,14 @@ namespace Unifiedban.Terminal.Utils
 
         internal static async Task RenewInviteLinks()
         {
-            foreach (var telegramGroup in CacheData.Groups.Values
-                .Where(x => x.State == TelegramGroup.Status.Active && x.InviteAlias != null))
+            var groups = new TelegramGroup[CacheData.Groups.Count];
+            lock (CacheData.GroupsLockObj)
+            {
+                CacheData.Groups.Values.CopyTo(groups, 0);
+            }
+
+            foreach (var telegramGroup in groups
+                         .Where(x => x.State == TelegramGroup.Status.Active && x.InviteAlias != null))
             {
                 try
                 {

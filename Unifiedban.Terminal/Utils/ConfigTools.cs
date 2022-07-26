@@ -115,10 +115,13 @@ using Timer = System.Timers.Timer;
 
         internal static void SyncGroupsToDatabase()
         {
-            foreach (long group in CacheData.Groups.Keys)
-                telegramGroupLogic.Update(
-                    CacheData.Groups[group],
-                    -2);
+            var groups = new TelegramGroup[CacheData.Groups.Count];
+            lock (CacheData.GroupsLockObj)
+            {
+                CacheData.Groups.Values.CopyTo(groups, 0);
+            }
+            foreach (var group in groups)
+                telegramGroupLogic.Update(group, -2);
         }
 
         internal static void SyncGroupsConfigToDatabase()
