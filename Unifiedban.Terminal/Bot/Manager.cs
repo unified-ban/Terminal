@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -22,6 +23,7 @@ namespace Unifiedban.Terminal.Bot
         static string instanceId = "";
         static string currentHostname = "";
         private static ushort pastHoursToSkip = 12;
+        private static bool throwPendingUpdates;
         public static long MyId = 0;
         public static string Username { get; private set; }
         public static TelegramBotClient BotClient { get;  private set; }
@@ -51,6 +53,7 @@ namespace Unifiedban.Terminal.Bot
             }
 
             ushort.TryParse(CacheData.Configuration["PastHoursToSkip"], out pastHoursToSkip);
+            bool.TryParse(CacheData.Configuration["ThrowPendingUpdates"], out throwPendingUpdates);
 
             APIKEY = apikey;
             instanceId = Guid.NewGuid().ToString();
@@ -98,10 +101,42 @@ namespace Unifiedban.Terminal.Bot
                     $"- unified/ban"
 #endif
             );
+
+            var infoUrl = $"https://api.telegram.org/bot{APIKEY}/getWebhookInfo";
+            var infoClient = new HttpClient();
+            var infoRes = await infoClient.GetAsync(infoUrl);
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "StartReceiving",
+                Level = Models.SystemLog.Levels.Warn,
+                Message = infoRes.Content.ReadAsStringAsync().Result,
+                UserId = -2
+            });
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "StartReceiving",
+                Level = Models.SystemLog.Levels.Warn,
+                Message = $"Skipping pending updates older than: {pastHoursToSkip} hour(s)",
+                UserId = -2
+            });
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "StartReceiving",
+                Level = Models.SystemLog.Levels.Warn,
+                Message = $"Throwing pending updates: {throwPendingUpdates}",
+                UserId = -2
+            });
             
             var receiverOptions = new ReceiverOptions
             {
-                AllowedUpdates = { } // receive all update types
+                AllowedUpdates = { }, // receive all update types
+                ThrowPendingUpdates = throwPendingUpdates
             };
 
             _updateReceiver = new QueuedUpdateReceiver(BotClient, receiverOptions);
@@ -175,7 +210,18 @@ namespace Unifiedban.Terminal.Bot
         private static async Task HandleCallbackQuery(CallbackQuery callbackQuery)
         {
             if (callbackQuery.Message.Date < DateTime.Now.AddHours(-pastHoursToSkip))
+            {
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban.Bot.Manager.BotClient_OnCallbackQuery",
+                    Level = Models.SystemLog.Levels.Debug,
+                    Message = $"Skipping callback older than {pastHoursToSkip} hour(s)",
+                    UserId = -1
+                });
                 return;
+            }
             
             await Task.Run(() => CacheData.IncrementHandledMessages());
 
@@ -204,8 +250,19 @@ namespace Unifiedban.Terminal.Bot
         private static async Task HandleUpdateAsync(Message message)
         {
             if (message.Date < DateTime.Now.AddHours(-pastHoursToSkip))
+            {
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban.Bot.Manager.BotClient_OnMessage",
+                    Level = Models.SystemLog.Levels.Debug,
+                    Message = $"Skipping update older than {pastHoursToSkip} hour(s)",
+                    UserId = -1
+                });
                 return;
-            
+            }
+
             await Task.Run(() => CacheData.IncrementHandledMessages());
             
             if(CacheData.Groups.Keys.Contains(message.Chat.Id))
