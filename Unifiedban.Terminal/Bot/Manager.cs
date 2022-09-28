@@ -3,17 +3,15 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
-using Telegram.Bot.Args;
-using Telegram.Bot.Extensions.Polling;
+using Telegram.Bot.Exceptions;
+using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Unifiedban.Terminal.Bot
 {
@@ -37,7 +35,7 @@ namespace Unifiedban.Terminal.Bot
             if (CacheData.FatalError)
                 return;
 
-            if (String.IsNullOrEmpty(apikey))
+            if (string.IsNullOrEmpty(apikey))
             {
                 Data.Utils.Logging.AddLog(new Models.SystemLog()
                 {
@@ -138,8 +136,14 @@ namespace Unifiedban.Terminal.Bot
                 AllowedUpdates = { }, // receive all update types
                 ThrowPendingUpdates = throwPendingUpdates
             };
+            
+            BotClient.StartReceiving(
+                updateHandler: UpdateHandler,
+                pollingErrorHandler: PollingErrorHandler,
+                receiverOptions: receiverOptions,
+                cancellationToken: Cts.Token);
 
-            _updateReceiver = new QueuedUpdateReceiver(BotClient, receiverOptions);
+            /*_updateReceiver = new QueuedUpdateReceiver(BotClient, receiverOptions);
             try
             {
                 await foreach (Update update in _updateReceiver.WithCancellation(Cts.Token))
@@ -182,9 +186,43 @@ namespace Unifiedban.Terminal.Bot
                     Message = ex.InnerException?.Message,
                     UserId = -2
                 });
-            }
+            }*/
                 
-            Program.DisposeAll();
+            // Program.DisposeAll();
+        }
+
+        private static Task PollingErrorHandler(ITelegramBotClient botClient, Exception ex, CancellationToken arg3)
+        {
+            var errMsg = ex switch
+            {
+                ApiRequestException apiRequestException
+                    => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
+                _ => ex.ToString()
+            };
+
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "PollingErrorHandler",
+                Level = Models.SystemLog.Levels.Fatal,
+                Message = $"Polling ERROR: {errMsg}",
+                UserId = -2
+            });
+            return Task.CompletedTask;
+        }
+
+        private static async Task UpdateHandler(ITelegramBotClient botClient, Update update, CancellationToken arg3)
+        {
+            if (update.Message is not null)
+            {
+                await HandleUpdateAsync(update.Message);
+            }
+
+            if (update.CallbackQuery is not null)
+            {
+                await HandleCallbackQuery(update.CallbackQuery);
+            }
         }
 
         public static void Dispose()
@@ -209,7 +247,7 @@ namespace Unifiedban.Terminal.Bot
         
         private static async Task HandleCallbackQuery(CallbackQuery callbackQuery)
         {
-            if (callbackQuery.Message.Date < DateTime.Now.AddHours(-pastHoursToSkip))
+            if (callbackQuery.Message!.Date < DateTime.Now.AddHours(-pastHoursToSkip))
             {
                 Data.Utils.Logging.AddLog(new Models.SystemLog()
                 {
@@ -238,7 +276,7 @@ namespace Unifiedban.Terminal.Bot
                 UserId = -1
             });
 
-            if (!String.IsNullOrEmpty(callbackQuery.Data))
+            if (!string.IsNullOrEmpty(callbackQuery.Data))
             {
                 if (callbackQuery.Data.StartsWith('/'))
                     await Task.Run(() => Command.Parser.Parse(callbackQuery));
@@ -263,7 +301,7 @@ namespace Unifiedban.Terminal.Bot
                 return;
             }
 
-            await Task.Run(() => CacheData.IncrementHandledMessages());
+            await Task.Run(CacheData.IncrementHandledMessages);
             
             if(CacheData.Groups.Keys.Contains(message.Chat.Id))
                 if (CacheData.Groups[message.Chat.Id].State !=
@@ -377,7 +415,7 @@ namespace Unifiedban.Terminal.Bot
                 Functions.UserLeftAction(message);
             }
 
-            if (!String.IsNullOrEmpty(message.MediaGroupId) ||
+            if (!string.IsNullOrEmpty(message.MediaGroupId) ||
                 message.Photo != null ||
                 message.Document != null)
             {
