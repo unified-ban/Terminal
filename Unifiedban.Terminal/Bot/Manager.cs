@@ -271,6 +271,7 @@ namespace Unifiedban.Terminal.Bot
                 var required = reason.Split("(Too Many Requests: retry after ")[1];
                 required = required.Split(")")[0];
                 ushort.TryParse(required, out wait);
+                wait += 2;
             }
             Thread.Sleep(1000 * wait);
 
