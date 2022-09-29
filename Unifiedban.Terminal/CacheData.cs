@@ -46,7 +46,9 @@ namespace Unifiedban.Terminal
         public static readonly Dictionary<long, Models.Group.TelegramGroup> Groups = new();
         public static Dictionary<long, List<Models.Group.ConfigurationParameter>> GroupConfigs = new();
         public static Dictionary<string, Models.Group.NightSchedule> NightSchedules = new();
-        
+
+        public static Dictionary<long, Dictionary<long, UserPrivileges>> ChatAdmins = new();
+
         public static List<Models.User.Banned> BannedUsers = new();
         public static List<Models.Filters.BadWord> BadWords = new();
         public static List<Utils.ImageHash> BannedImagesHash = new();
@@ -55,7 +57,7 @@ namespace Unifiedban.Terminal
         public static Dictionary<string, long> Usernames = new();
 
         public static List<long> ActiveSupport = new();
-        public static Dictionary<long, List<long>> CurrentChatAdmins = new();
+        public static Dictionary<long, List<long>> CurrentChatOperators = new();
 
         public static ConcurrentDictionary<string, Timer> CaptchaAutoKickTimers = new();
         public static Dictionary<long, int> CaptchaStrikes = new();

@@ -517,7 +517,7 @@ namespace Unifiedban.Terminal.Bot
                     .Contains(message.Chat.Id))
                 {
                     CacheData.ActiveSupport.Remove(message.Chat.Id);
-                    CacheData.CurrentChatAdmins.Remove(message.Chat.Id);
+                    CacheData.CurrentChatOperators.Remove(message.Chat.Id);
 
                     Manager.BotClient.SendTextMessageAsync(
                         chatId: message.Chat.Id,

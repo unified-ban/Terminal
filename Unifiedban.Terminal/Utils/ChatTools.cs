@@ -64,23 +64,111 @@ namespace Unifiedban.Terminal.Utils
 
         public static bool IsUserAdmin(long chatId, long userId)
         {
+            if (!CacheData.ChatAdmins.ContainsKey(chatId))
+            {
+                CacheData.ChatAdmins[chatId] = new Dictionary<long, UserPrivileges>();
+            }
+            
+            if (CacheData.ChatAdmins[chatId].ContainsKey(userId))
+                return true;
+            
             try
             {
                 var administrators = Manager.BotClient.GetChatAdministratorsAsync(chatId).Result;
-                foreach (ChatMember member in administrators)
+                
+                foreach (var member in administrators)
                 {
-                    if (member.User.Id == userId)
-                        return true;
+                    if (member is ChatMemberAdministrator admin)
+                    {
+                        UpdateChatAdmin(chatId, userId, admin);
+                    }
                 }
+                
+                return CacheData.ChatAdmins[chatId].ContainsKey(userId);
             }
-            catch
+            catch (Exception ex)
             {
+                if (ex.Message.Contains("chat not found") ||
+                    ex.Message.Contains("chat was deleted") ||
+                    ex.Message.Contains("bot was kicked") ||
+                    ex.Message.Contains("have no rights"))
+                {
+                    var log = new SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Utils.IsUserAdmin",
+                        Level = SystemLog.Levels.Error,
+                        Message = $"Disabling chat id: {chatId}",
+                        UserId = -1
+                    };
+                    Logging.AddLog(log);
+                    LogTools.AddActionLog(new ActionLog
+                    {
+                        ActionTypeId = "autoDisable",
+                        GroupId = CacheData.Groups[chatId].GroupId,
+                        Parameters = ex.Message,
+                        UtcDate = DateTime.UtcNow
+                    });
+                    
+                    CacheData.Groups[chatId].State = TelegramGroup.Status.Inactive;
+                }
+                else
+                {
+                    Logging.AddLog(new SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Utils.IsUserAdmin",
+                        Level = SystemLog.Levels.Error,
+                        Message = $"Can't get IsUserAdmin for {userId} in {chatId}\n{ex.Message}",
+                        UserId = -1
+                    });
+                }
+                
                 return false;
             }
+        }
+        
+        public static void UpdateChatAdmin(long chatId, long userId, ChatMemberAdministrator admin)
+        {
+            if (!CacheData.ChatAdmins.ContainsKey(chatId))
+            {
+                CacheData.ChatAdmins[chatId] = new Dictionary<long, UserPrivileges>();
+            }
 
-            return false;
+            var privileges = new UserPrivileges
+            {
+                CanManageChat = admin.CanManageChat,
+                CanPostMessages = admin.CanPostMessages ?? false,
+                CanEditMessages = admin.CanEditMessages ?? false,
+                CanDeleteMessages = admin.CanDeleteMessages,
+                CanManageVoiceChats = admin.CanManageVideoChats,
+                CanRestrictMembers = admin.CanRestrictMembers,
+                CanPromoteMembers = admin.CanPromoteMembers,
+                CanChangeInfo = admin.CanChangeInfo,
+                CanInviteUsers = admin.CanInviteUsers,
+                CanPinMessages = admin.CanPinMessages ?? false
+            };
+
+            if (CacheData.ChatAdmins[chatId].ContainsKey(userId))
+            {
+                CacheData.ChatAdmins[chatId][userId] = privileges;
+            }
+            else
+            {
+                CacheData.ChatAdmins[chatId].Add(userId, privileges);
+            }
         }
 
+        public static void RemoveChatAdmin(long chatId, long userId)
+        {
+            if (!CacheData.ChatAdmins.ContainsKey(chatId)) return;
+            
+            if (CacheData.ChatAdmins[chatId].ContainsKey(userId))
+                CacheData.ChatAdmins[chatId].Remove(userId, out var admin);
+        }
+        
         public static List<long> GetChatAdminIds(long chatId)
         {
             var admins = new List<long>();
@@ -150,7 +238,7 @@ namespace Unifiedban.Terminal.Utils
                 };
                 MessageQueueManager.EnqueueMessage(newMsg);
                 CacheData.ActiveSupport.Remove(message.Chat.Id);
-                CacheData.CurrentChatAdmins.Remove(message.Chat.Id);
+                CacheData.CurrentChatOperators.Remove(message.Chat.Id);
                 
                 MessageQueueManager.EnqueueLog(new ChatMessage
                 {
@@ -178,7 +266,7 @@ namespace Unifiedban.Terminal.Utils
             SupportSessionLog.SenderType senderType = SupportSessionLog.SenderType.User;
             if (BotTools.IsUserOperator(message.From.Id))
                 senderType = SupportSessionLog.SenderType.Operator;
-            else if (CacheData.CurrentChatAdmins[message.Chat.Id]
+            else if (CacheData.CurrentChatOperators[message.Chat.Id]
                     .Contains(message.From.Id))
                 senderType = SupportSessionLog.SenderType.Admin;
 

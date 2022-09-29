@@ -48,7 +48,7 @@ namespace Unifiedban.Terminal.Bot.Command
             if (!CacheData.ActiveSupport.Contains(message.Chat.Id))
             {
                 CacheData.ActiveSupport.Add(message.Chat.Id);
-                CacheData.CurrentChatAdmins.Add(message.Chat.Id,
+                CacheData.CurrentChatOperators.Add(message.Chat.Id,
                     Utils.ChatTools.GetChatAdminIds(message.Chat.Id));
 
                 Manager.BotClient.SendTextMessageAsync(

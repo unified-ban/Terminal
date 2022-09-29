@@ -227,6 +227,20 @@ namespace Unifiedban.Terminal.Bot
             {
                 await HandleCallbackQuery(update.CallbackQuery);
             }
+
+            if (update.ChatMember is not null)
+            {
+                if (update.ChatMember.NewChatMember is ChatMemberAdministrator admin)
+                {
+                    Utils.ChatTools.UpdateChatAdmin(update.ChatMember.Chat.Id, update.ChatMember.NewChatMember.User.Id,
+                        admin);
+                }
+                
+                if (update.ChatMember.OldChatMember is ChatMemberAdministrator)
+                {
+                    Utils.ChatTools.RemoveChatAdmin(update.ChatMember.Chat.Id, update.ChatMember.NewChatMember.User.Id);
+                }
+            }
         }
 
         public static void Dispose()
@@ -259,6 +273,8 @@ namespace Unifiedban.Terminal.Bot
                 ushort.TryParse(required, out wait);
             }
             Thread.Sleep(1000 * wait);
+
+            if (CacheData.IsDisposing || CacheData.FatalError) return;
             
             BotClient.SendTextMessageAsync(
                 chatId: -1001125553456,
@@ -276,6 +292,7 @@ namespace Unifiedban.Terminal.Bot
             Cts.Dispose();
             
             Thread.Sleep(1000 * 10);
+            if (CacheData.IsDisposing || CacheData.FatalError) return;
             Cts = new();
             StartReceiving();
         }

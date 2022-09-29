@@ -114,7 +114,8 @@ namespace Unifiedban.Terminal
                 
                 if (ex.Message.Contains("chat not found") ||
                     ex.Message.Contains("chat was deleted") ||
-                    ex.Message.Contains("bot was kicked"))
+                    ex.Message.Contains("bot was kicked") ||
+                    ex.Message.Contains("have no rights"))
                 {
                     var log = new SystemLog()
                     {
