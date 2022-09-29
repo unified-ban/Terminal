@@ -34,6 +34,18 @@ namespace Unifiedban.Terminal.Bot.Command
 
             if (message.ReplyToMessage == null)
             {
+                if (!message.Text.Contains(" "))
+                {
+                    MessageQueueManager.EnqueueMessage(
+                        new Models.ChatMessage()
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            Chat = message.Chat,
+                            Text = CacheData.GetTranslation("en", "kick_command_error_invalidUserId")
+                        });
+                    return;
+                }
+                
                 if (message.Text.Split(" ")[1].StartsWith("@"))
                 {
                     if (!CacheData.Usernames.Keys.Contains(message.Text.Split(" ")[1].Remove(0, 1)))

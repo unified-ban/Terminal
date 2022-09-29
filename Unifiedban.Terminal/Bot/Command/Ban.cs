@@ -8,6 +8,8 @@ using System.Text.RegularExpressions;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Unifiedban.Data.Utils;
+using Unifiedban.Models;
 using Unifiedban.Terminal.Utils;
 
 namespace Unifiedban.Terminal.Bot.Command
@@ -18,7 +20,8 @@ namespace Unifiedban.Terminal.Bot.Command
         {
             var sender = message.SenderChat?.Id ?? message.From?.Id ?? 0;
             var isOperator = BotTools.IsUserOperator(sender, Models.Operator.Levels.Basic);
-            if (!isOperator && !ChatTools.IsUserAdmin(message.Chat.Id, sender))
+            var isAdmin = ChatTools.IsUserAdmin(message.Chat.Id, sender);
+            if (!isOperator && !isAdmin)
             {
                 MessageQueueManager.EnqueueMessage(
                     new Models.ChatMessage()
@@ -42,12 +45,11 @@ namespace Unifiedban.Terminal.Bot.Command
                     });
                 return;
             }
-
-            if (Manager.BotClient.GetChatAdministratorsAsync(message.Chat.Id).Result
-                .Single(x => x.User.Id == sender) is ChatMemberAdministrator chatMemberAdministrator && 
-                !isOperator)
+            
+            if (isAdmin)
             {
-                if (!chatMemberAdministrator!.CanRestrictMembers)
+                var adminPermissions = CacheData.ChatAdmins[message.Chat.Id][sender];
+                if (!adminPermissions.CanRestrictMembers)
                 {
                     MessageQueueManager.EnqueueMessage(
                         new Models.ChatMessage()
@@ -59,14 +61,28 @@ namespace Unifiedban.Terminal.Bot.Command
                     return;
                 }
             }
+            // else is at least operator
 
             long userToKick;
 
             if (message.ReplyToMessage == null)
             {
+                if (!message.Text.Contains(" "))
+                {
+                    MessageQueueManager.EnqueueMessage(
+                        new Models.ChatMessage()
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            Chat = message.Chat,
+                            Text = CacheData.GetTranslation("en", "ban_command_error_invalidUserId")
+                        });
+                    return;
+                }
+                
                 if (message.Text.Split(" ")[1].StartsWith("@"))
                 {
-                    if(!CacheData.Usernames.Keys.Contains(message.Text.Split(" ")[1].Remove(0, 1)))
+                    var cleanUsername = message.Text.Split(" ")[1].Remove(0, 1);
+                    if(!CacheData.Usernames.Keys.Contains(cleanUsername))
                     {
                         MessageQueueManager.EnqueueMessage(
                             new Models.ChatMessage()
@@ -77,7 +93,7 @@ namespace Unifiedban.Terminal.Bot.Command
                             });
                         return;
                     }
-                    userToKick = CacheData.Usernames[message.Text.Split(" ")[1].Remove(0, 1)];
+                    userToKick = CacheData.Usernames[cleanUsername];
                 }
                 else
                 {
@@ -97,7 +113,7 @@ namespace Unifiedban.Terminal.Bot.Command
             }
             else
                 userToKick = message.ReplyToMessage!.SenderChat?.Id ?? message.ReplyToMessage.From!.Id;
-            
+           
             if (userToKick == 777000) // Telegram's official updateServiceNotification
             {
                 Manager.BotClient.SendTextMessageAsync(
