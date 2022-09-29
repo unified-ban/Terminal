@@ -61,7 +61,17 @@ namespace Unifiedban.Terminal.Bot.Command
                     return;
                 }
             }
-            // else is at least operator
+            else if (!isOperator)
+            {
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        Text = CacheData.GetTranslation("en", "ban_command_error_adminPrivilege")
+                    });
+                return;
+            }
 
             long userToKick;
 

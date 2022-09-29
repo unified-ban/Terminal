@@ -58,6 +58,17 @@ namespace Unifiedban.Terminal.Bot.Command
                     return;
                 }
             }
+            else if (!isOperator)
+            {
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        Text = CacheData.GetTranslation("en", "ban_command_error_adminPrivilege")
+                    });
+                return;
+            }
 
             if (message.Chat.Type != ChatType.Supergroup)
             {
