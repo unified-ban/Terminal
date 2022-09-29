@@ -26,7 +26,7 @@ namespace Unifiedban.Terminal.Bot
         public static string Username { get; private set; }
         public static TelegramBotClient BotClient { get;  private set; }
 
-        public static readonly CancellationTokenSource Cts = new();
+        public static CancellationTokenSource Cts = new();
 
         private static QueuedUpdateReceiver _updateReceiver;
 
@@ -209,6 +209,10 @@ namespace Unifiedban.Terminal.Bot
                 Message = $"Polling ERROR: {errMsg}",
                 UserId = -2
             });
+
+            if(!Cts.IsCancellationRequested)
+                Restart(ex.Message);
+            
             return Task.CompletedTask;
         }
 
@@ -243,7 +247,38 @@ namespace Unifiedban.Terminal.Bot
             );
         }
 
-        
+        private static void Restart(string reason)
+        {
+            Cts.Cancel();
+            ushort wait = 45;
+
+            if (reason.Contains("(Too Many Requests: retry after"))
+            {
+                var required = reason.Split("(Too Many Requests: retry after ")[1];
+                required = required.Split(")")[0];
+                ushort.TryParse(required, out wait);
+            }
+            Thread.Sleep(1000 * wait);
+            
+            BotClient.SendTextMessageAsync(
+                chatId: -1001125553456,
+                parseMode: ParseMode.Markdown,
+                disableNotification: true,
+                text: $"Restarting instance {instanceId}\n" +
+                      $"Reason: {reason}\n\n" +
+#if DEBUG
+                    $"- unified/ban BETA"
+#else
+                      $"- unified/ban"
+#endif
+            );
+            
+            Cts.Dispose();
+            
+            Thread.Sleep(1000 * 10);
+            Cts = new();
+            StartReceiving();
+        }
         
         private static async Task HandleCallbackQuery(CallbackQuery callbackQuery)
         {
