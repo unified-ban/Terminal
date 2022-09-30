@@ -153,9 +153,16 @@ namespace Unifiedban.Terminal.Utils
 
             if (CacheData.ChatAdmins[chatId].ContainsKey(userId))
             {
-                CacheData.ChatAdmins[chatId][userId] = privileges;
+                if (privileges.CanManageChat)
+                {
+                    CacheData.ChatAdmins[chatId][userId] = privileges;
+                }
+                else
+                {
+                    CacheData.ChatAdmins[chatId].Remove(userId, out var oldPerms);
+                }
             }
-            else
+            else if (privileges.CanManageChat)
             {
                 CacheData.ChatAdmins[chatId].Add(userId, privileges);
             }

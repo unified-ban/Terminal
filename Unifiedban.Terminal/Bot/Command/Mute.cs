@@ -18,8 +18,9 @@ namespace Unifiedban.Terminal.Bot.Command
             Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
 
             var sender = message.SenderChat?.Id ?? message.From?.Id ?? 0;
-            if (!Utils.BotTools.IsUserOperator(sender) &&
-                !Utils.ChatTools.IsUserAdmin(message.Chat.Id, sender))
+            var isOperator = BotTools.IsUserOperator(sender, Models.Operator.Levels.Basic);
+            var isAdmin = ChatTools.IsUserAdmin(message.Chat.Id, sender);
+            if (!isOperator && !isAdmin)
             {
                 MessageQueueManager.EnqueueMessage(
                    new Models.ChatMessage()
@@ -30,6 +31,21 @@ namespace Unifiedban.Terminal.Bot.Command
                        Text = CacheData.GetTranslation("en", "error_not_auth_command")
                    });
                 return;
+            }
+            else if (!isOperator && isAdmin)
+            {
+                var adminPermissions = CacheData.ChatAdmins[message.Chat.Id][sender];
+                if (!adminPermissions.CanRestrictMembers)
+                {
+                    MessageQueueManager.EnqueueMessage(
+                        new Models.ChatMessage()
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            Chat = message.Chat,
+                            Text = CacheData.GetTranslation("en", "error_not_auth_command")
+                        });
+                    return;
+                }
             }
 
             long userId;
