@@ -12,6 +12,9 @@ using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Unifiedban.Data.Utils;
+using Unifiedban.Models;
+using Unifiedban.Models.Group;
 
 namespace Unifiedban.Terminal.Bot
 {
@@ -199,16 +202,6 @@ namespace Unifiedban.Terminal.Bot
                     => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
                 _ => ex.ToString()
             };
-
-            Data.Utils.Logging.AddLog(new Models.SystemLog()
-            {
-                LoggerName = CacheData.LoggerName,
-                Date = DateTime.Now,
-                Function = "PollingErrorHandler",
-                Level = Models.SystemLog.Levels.Fatal,
-                Message = $"Polling ERROR: {errMsg}",
-                UserId = -2
-            });
 
             if(!Cts.IsCancellationRequested)
                 Restart(ex.Message);
@@ -413,24 +406,33 @@ namespace Unifiedban.Terminal.Bot
 
                 try
                 {
-                    await BotClient.SendTextMessageAsync(message.Chat.Id,
+                     await BotClient.SendTextMessageAsync(message.Chat.Id,
                         "We're sorry but an error has occurred while retrieving this chat on our database.\n" +
                         "Please add again the bot if you want to continue to use it.\n" +
                         "For any doubt reach us in our support group @unifiedban_group");
+                     
                 }
-                catch
+                catch (Exception ex)
                 {
-                    Data.Utils.Logging.AddLog(new Models.SystemLog()
+                    Logging.AddLog(new Models.SystemLog()
                     {
                         LoggerName = CacheData.LoggerName,
                         Date = DateTime.Now,
                         Function = "Unifiedban.Bot.Manager.BotClient_OnMessage",
                         Level = Models.SystemLog.Levels.Warn,
-                        Message = "Can't send left notification due to missing permission.",
+                        Message = $"Can't send left notification due to missing permission.\n\n{ex}",
                         UserId = -1
                     });
+
+                    if (!ex.Message.Contains("kicked"))
+                    {
+                        await BotClient.LeaveChatAsync(message.Chat.Id);
+                    }
+                    
+                    return;
                 }
 
+                
                 await BotClient.LeaveChatAsync(message.Chat.Id);
                 return;
             }
