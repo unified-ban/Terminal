@@ -30,23 +30,21 @@ namespace Unifiedban.Terminal.Bot.Command
                 return;
             }
 
-            var me = Manager.BotClient.GetChatMemberAsync(message.Chat.Id, Manager.MyId).Result;
-            if (me is ChatMemberAdministrator { CanRestrictMembers: false })
-            {
-                MessageQueueManager.EnqueueMessage(
-                    new Models.ChatMessage()
-                    {
-                        Timestamp = DateTime.UtcNow,
-                        Chat = message.Chat,
-                        Text = CacheData.GetTranslation("en", "unban_command_error_adminPrivilege")
-                    });
-                return;
-            }
-
             if (isAdmin)
             {
-                var adminPermissions = CacheData.ChatAdmins[message.Chat.Id][sender];
-                if (!adminPermissions.CanRestrictMembers)
+                if (!ChatTools.IsUserAdmin(message.Chat.Id, Manager.MyId))
+                {
+                    MessageQueueManager.EnqueueMessage(
+                        new Models.ChatMessage()
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            Chat = message.Chat,
+                            Text = CacheData.GetTranslation("en", "ban_command_error_adminPrivilege")
+                        });
+                    return;
+                }
+
+                if (!CacheData.ChatAdmins[message.Chat.Id][Manager.MyId].CanRestrictMembers)
                 {
                     MessageQueueManager.EnqueueMessage(
                         new Models.ChatMessage()

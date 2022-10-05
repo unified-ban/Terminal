@@ -697,12 +697,10 @@ namespace Unifiedban.Terminal.Utils
                 try
                 {
                     if (string.IsNullOrEmpty(telegramGroup.InviteAlias)) continue;
-                    var meInChat = await Manager.BotClient.GetChatMemberAsync(telegramGroup.TelegramChatId, Manager.MyId);
-                    if (meInChat is ChatMemberAdministrator { CanInviteUsers: true })
-                    {
-                        CacheData.Groups[telegramGroup.TelegramChatId].InviteLink =
-                            await Manager.BotClient.ExportChatInviteLinkAsync(telegramGroup.TelegramChatId);
-                    }
+                    if (!IsUserAdmin(telegramGroup.TelegramChatId, Manager.MyId)) continue;
+                    if (!CacheData.ChatAdmins[telegramGroup.TelegramChatId][Manager.MyId].CanInviteUsers) continue;
+                    CacheData.Groups[telegramGroup.TelegramChatId].InviteLink =
+                        await Manager.BotClient.ExportChatInviteLinkAsync(telegramGroup.TelegramChatId);
                 }
                 catch (Exception ex)
                 {

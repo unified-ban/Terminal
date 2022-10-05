@@ -150,10 +150,29 @@ namespace Unifiedban.Terminal.Bot
                 if (welcomeMessageConfig.Value.ToLower() == "true")
                     welcomeMessageEnabled = true;
 
-            var canRestrict = false;
-            var me = Manager.BotClient.GetChatMemberAsync(message.Chat.Id, Manager.MyId).Result;
-            if (me is ChatMemberAdministrator botAdministrator)
-                canRestrict = botAdministrator.CanRestrictMembers;
+            if (!ChatTools.IsUserAdmin(message.Chat.Id, Manager.MyId))
+            {
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        Text = CacheData.GetTranslation("en", "ban_command_error_adminPrivilege")
+                    });
+                return;
+            }
+
+            if (!CacheData.ChatAdmins[message.Chat.Id][Manager.MyId].CanRestrictMembers)
+            {
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        Text = CacheData.GetTranslation("en", "ban_command_error_adminPrivilege")
+                    });
+                return;
+            }
 
             foreach (User member in message.NewChatMembers)
             {
@@ -164,7 +183,7 @@ namespace Unifiedban.Terminal.Bot
                     continue;
                 }
 
-                if (blacklistEnabled && canRestrict)
+                if (blacklistEnabled)
                 {
                     if (Utils.UserTools.KickIfIsInBlacklist(message, member))
                     {
@@ -172,7 +191,7 @@ namespace Unifiedban.Terminal.Bot
                     }
                 }
 
-                if (rtlNameCheckEnabled && canRestrict)
+                if (rtlNameCheckEnabled)
                 {
                     Filters.FilterResult rtlCheck = RTLNameFilter.DoCheck(message,
                         member.FirstName + " " + member.LastName);
@@ -309,8 +328,7 @@ namespace Unifiedban.Terminal.Bot
                             );
                         }
                     }
-                    if (captchaEnabled && canRestrict && CacheData.Operators
-                        .SingleOrDefault(x => x.TelegramUserId == member.Id) == null)
+                    if (captchaEnabled && !BotTools.IsUserOperator(member.Id))
                     {
                         Manager.BotClient.RestrictChatMemberAsync(
                                 message.Chat.Id,
