@@ -529,40 +529,45 @@ namespace Unifiedban.Terminal.Bot
 
         public static void UserLeftAction(Message message)
         {
-            if (Utils.BotTools.IsUserOperator(message.LeftChatMember.Id))
+            if (message.LeftChatMember == null) return;
+            ChatTools.RemoveChatAdmin(message.Chat.Id, message.LeftChatMember.Id);
+            if (!BotTools.IsUserOperator(message.LeftChatMember.Id)) return;
+            if (CacheData.ActiveSupport
+                .Contains(message.Chat.Id)) return;
+            
+            if (CacheData.CurrentChatOperators.ContainsKey(message.Chat.Id))
             {
-                if (!CacheData.ActiveSupport
-                    .Contains(message.Chat.Id))
-                {
-                    CacheData.ActiveSupport.Remove(message.Chat.Id);
-                    CacheData.CurrentChatOperators.Remove(message.Chat.Id);
-
-                    Manager.BotClient.SendTextMessageAsync(
-                        chatId: message.Chat.Id,
-                        parseMode: ParseMode.Markdown,
-                        text: String.Format(
-                            "Support session *{0}* ended since operator left the chat.",
-                            message.LeftChatMember.Username)
-                    );
-                    MessageQueueManager.EnqueueLog(new ChatMessage()
-                    {
-                        ParseMode = ParseMode.Markdown,
-                        Text = String.Format(
-                            "*[Log]*" +
-                            "Support session ended since operator *{0}* left the chat." +
-                            "\nChatId: `{1}`" +
-                            "\nChat: `{2}`" +
-                            "\nUserId: `{3}`" +
-                            "\n\n*hash_code:* #UB{4}-{5}",
-                            message.LeftChatMember.Username,
-                            message.Chat.Id,
-                            message.Chat.Title,
-                            message.LeftChatMember.Id,
-                            message.Chat.Id.ToString().Replace("-", ""),
-                            Guid.NewGuid())
-                    });
-                }
+                CacheData.CurrentChatOperators[message.Chat.Id].Remove(message.LeftChatMember.Id);
             }
+
+            if (CacheData.CurrentChatOperators[message.Chat.Id].Count > 0) return;
+                    
+            CacheData.CurrentChatOperators.Remove(message.Chat.Id);
+            CacheData.ActiveSupport.Remove(message.Chat.Id);
+
+            Manager.BotClient.SendTextMessageAsync(
+                chatId: message.Chat.Id,
+                parseMode: ParseMode.Markdown,
+                text: $"Support session ended since " +
+                      $"operator *{message.LeftChatMember.Username}* left the chat."
+            );
+            MessageQueueManager.EnqueueLog(new ChatMessage()
+            {
+                ParseMode = ParseMode.Markdown,
+                Text = string.Format(
+                    "*[Log]*" +
+                    "Support session ended since operator *{0}* left the chat." +
+                    "\nChatId: `{1}`" +
+                    "\nChat: `{2}`" +
+                    "\nUserId: `{3}`" +
+                    "\n\n*hash_code:* #UB{4}-{5}",
+                    message.LeftChatMember.Username,
+                    message.Chat.Id,
+                    message.Chat.Title,
+                    message.LeftChatMember.Id,
+                    message.Chat.Id.ToString().Replace("-", ""),
+                    Guid.NewGuid())
+            });
         }
 
         private static void EnableDashboardForOwnerAndAdder(Chat chat)

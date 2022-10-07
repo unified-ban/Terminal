@@ -3,14 +3,14 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <Version>3.13.10</Version>
+    <Version>3.13.11</Version>
     <Authors>fabricators</Authors>
     <Product>Unifiedban Terminal</Product>
     <Copyright>Fabricators 2022</Copyright>
     <RepositoryUrl>https://github.com/unified-ban/Terminal</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
-    <AssemblyVersion>3.13.10</AssemblyVersion>
-    <FileVersion>3.13.10.1</FileVersion>
+    <AssemblyVersion>3.13.11</AssemblyVersion>
+    <FileVersion>3.13.11.1</FileVersion>
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
