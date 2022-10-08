@@ -40,12 +40,12 @@ namespace Unifiedban.Terminal.Bot
 
             if (string.IsNullOrEmpty(apikey))
             {
-                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                Logging.AddLog(new SystemLog()
                 {
                     LoggerName = CacheData.LoggerName,
                     Date = DateTime.Now,
                     Function = "Unifiedban Terminal Startup",
-                    Level = Models.SystemLog.Levels.Fatal,
+                    Level = SystemLog.Levels.Fatal,
                     Message = "API KEY must be set!",
                     UserId = -1
                 });
@@ -65,24 +65,24 @@ namespace Unifiedban.Terminal.Bot
             var me = BotClient.GetMeAsync().Result;
             Username = me.Username;
             MyId = me.Id;
-            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            Logging.AddLog(new SystemLog()
             {
                 LoggerName = CacheData.LoggerName,
                 Date = DateTime.Now,
                 Function = "Unifiedban Terminal Startup",
-                Level = Models.SystemLog.Levels.Warn,
+                Level = SystemLog.Levels.Warn,
                 Message = $"Hello, World! I am user {me.Id} and my name is {me.FirstName}.",
                 UserId = -1
             });
             
             Console.Title = $"Unifiedban - Username: {me.Username} - Instance ID: {instanceId}";
 
-            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            Logging.AddLog(new SystemLog()
             {
                 LoggerName = CacheData.LoggerName,
                 Date = DateTime.Now,
                 Function = "Unifiedban Terminal Startup",
-                Level = Models.SystemLog.Levels.Info,
+                Level = SystemLog.Levels.Info,
                 Message = "Bot Client initialized",
                 UserId = -2
             });
@@ -106,30 +106,30 @@ namespace Unifiedban.Terminal.Bot
             var infoUrl = $"https://api.telegram.org/bot{APIKEY}/getWebhookInfo";
             var infoClient = new HttpClient();
             var infoRes = await infoClient.GetAsync(infoUrl);
-            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            Logging.AddLog(new SystemLog()
             {
                 LoggerName = CacheData.LoggerName,
                 Date = DateTime.Now,
                 Function = "StartReceiving",
-                Level = Models.SystemLog.Levels.Warn,
+                Level = SystemLog.Levels.Warn,
                 Message = infoRes.Content.ReadAsStringAsync().Result,
                 UserId = -2
             });
-            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            Logging.AddLog(new SystemLog()
             {
                 LoggerName = CacheData.LoggerName,
                 Date = DateTime.Now,
                 Function = "StartReceiving",
-                Level = Models.SystemLog.Levels.Warn,
+                Level = SystemLog.Levels.Warn,
                 Message = $"Skipping pending updates older than: {pastHoursToSkip} hour(s)",
                 UserId = -2
             });
-            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            Logging.AddLog(new SystemLog()
             {
                 LoggerName = CacheData.LoggerName,
                 Date = DateTime.Now,
                 Function = "StartReceiving",
-                Level = Models.SystemLog.Levels.Warn,
+                Level = SystemLog.Levels.Warn,
                 Message = $"Throwing pending updates: {throwPendingUpdates}",
                 UserId = -2
             });
@@ -202,6 +202,16 @@ namespace Unifiedban.Terminal.Bot
                     => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
                 _ => ex.ToString()
             };
+            
+            Logging.AddLog(new SystemLog()
+            {
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "PollingErrorHandler",
+                Level = SystemLog.Levels.Error,
+                Message = errMsg,
+                UserId = -1
+            });
 
             if(!Cts.IsCancellationRequested)
                 Restart(ex.Message);
@@ -295,12 +305,12 @@ namespace Unifiedban.Terminal.Bot
         {
             if (callbackQuery.Message!.Date < DateTime.Now.AddHours(-pastHoursToSkip))
             {
-                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                Logging.AddLog(new SystemLog()
                 {
                     LoggerName = CacheData.LoggerName,
                     Date = DateTime.Now,
                     Function = "Unifiedban.Bot.Manager.BotClient_OnCallbackQuery",
-                    Level = Models.SystemLog.Levels.Debug,
+                    Level = SystemLog.Levels.Debug,
                     Message = $"Skipping callback older than {pastHoursToSkip} hour(s)",
                     UserId = -1
                 });
@@ -310,14 +320,14 @@ namespace Unifiedban.Terminal.Bot
             await Task.Run(() => CacheData.IncrementHandledMessages());
 
             if(CacheData.Groups[callbackQuery.Message.Chat.Id].State != 
-                Models.Group.TelegramGroup.Status.Active) return;
+                TelegramGroup.Status.Active) return;
 
-            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            Logging.AddLog(new SystemLog()
             {
                 LoggerName = CacheData.LoggerName,
                 Date = DateTime.Now,
                 Function = "Unifiedban.Bot.Manager.BotClient_OnCallbackQuery",
-                Level = Models.SystemLog.Levels.Debug,
+                Level = SystemLog.Levels.Debug,
                 Message = "CallbackQuery received",
                 UserId = -1
             });
@@ -335,12 +345,12 @@ namespace Unifiedban.Terminal.Bot
         {
             if (message.Date < DateTime.Now.AddHours(-pastHoursToSkip))
             {
-                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                Logging.AddLog(new SystemLog()
                 {
                     LoggerName = CacheData.LoggerName,
                     Date = DateTime.Now,
                     Function = "Unifiedban.Bot.Manager.BotClient_OnMessage",
-                    Level = Models.SystemLog.Levels.Debug,
+                    Level = SystemLog.Levels.Debug,
                     Message = $"Skipping update older than {pastHoursToSkip} hour(s)",
                     UserId = -1
                 });
@@ -348,24 +358,23 @@ namespace Unifiedban.Terminal.Bot
             }
 
             await Task.Run(CacheData.IncrementHandledMessages);
+            await Task.Run(() => Functions.CacheUsername(message));
             
-            if(CacheData.Groups.Keys.Contains(message.Chat.Id))
-                if (CacheData.Groups[message.Chat.Id].State !=
-                    Models.Group.TelegramGroup.Status.Active &&
-                    message.Text != "/enable") return;
-
-            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            Logging.AddLog(new SystemLog()
             {
                 LoggerName = CacheData.LoggerName,
                 Date = DateTime.Now,
                 Function = "Unifiedban.Bot.Manager.BotClient_OnMessage",
-                Level = Models.SystemLog.Levels.Debug,
+                Level = SystemLog.Levels.Debug,
                 Message = "Message received",
                 UserId = -1
             });
 
-            await Task.Run(() => Functions.CacheUsername(message));
-
+            if(CacheData.Groups.Keys.Contains(message.Chat.Id))
+                if (CacheData.Groups[message.Chat.Id].State !=
+                    TelegramGroup.Status.Active &&
+                    message.Text != "/enable") return;
+            
             if (message.MigrateToChatId is not null)
             {
                 Functions.MigrateToChatId(message);
@@ -398,7 +407,7 @@ namespace Unifiedban.Terminal.Bot
                     message.Chat.Id,
                     message.Chat.Id.ToString().Replace("-", ""),
                     Guid.NewGuid());
-                MessageQueueManager.EnqueueLog(new Models.ChatMessage()
+                MessageQueueManager.EnqueueLog(new ChatMessage()
                 {
                     ParseMode = ParseMode.Markdown,
                     Text = logMessage
@@ -410,16 +419,15 @@ namespace Unifiedban.Terminal.Bot
                         "We're sorry but an error has occurred while retrieving this chat on our database.\n" +
                         "Please add again the bot if you want to continue to use it.\n" +
                         "For any doubt reach us in our support group @unifiedban_group");
-                     
                 }
                 catch (Exception ex)
                 {
-                    Logging.AddLog(new Models.SystemLog()
+                    Logging.AddLog(new SystemLog()
                     {
                         LoggerName = CacheData.LoggerName,
                         Date = DateTime.Now,
                         Function = "Unifiedban.Bot.Manager.BotClient_OnMessage",
-                        Level = Models.SystemLog.Levels.Warn,
+                        Level = SystemLog.Levels.Warn,
                         Message = $"Can't send left notification due to missing permission.\n\n{ex}",
                         UserId = -1
                     });
@@ -461,6 +469,7 @@ namespace Unifiedban.Terminal.Bot
                     Controls.Manager.DoCheck(message);
                 }
             }
+            
             if (message.NewChatMembers != null)
             {
                 Functions.UserJoinedAction(message);
