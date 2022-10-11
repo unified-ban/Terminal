@@ -429,7 +429,7 @@ using Timer = System.Timers.Timer;
             });
             var factory = new ConnectionFactory();
             factory.UserName = "fabs";
-            factory.Password = "***REMOVED***";
+            factory.Password = "";
             factory.VirtualHost = "/";
             factory.HostName = "10.0.0.4";
             factory.Port = 5672;
