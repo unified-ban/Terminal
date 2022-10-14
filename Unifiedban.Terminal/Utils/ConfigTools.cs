@@ -1,4 +1,4 @@
-﻿ /* This Source Code Form is subject to the terms of the Mozilla Public
+ /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -277,9 +277,10 @@ using Timer = System.Timers.Timer;
                 Date = DateTime.Now,
                 Function = "connectToHub()",
                 Level = Models.SystemLog.Levels.Info,
-                Message = "Connecting and autenticating to Hub Server",
+                Message = "Connecting and authenticating to Hub Server",
                 UserId = -1
             });
+            
             _connection.StartAsync().Wait();
             _connection.InvokeAsync("Identification", CacheData.Configuration["HubServerToken"]);
 
@@ -428,11 +429,11 @@ using Timer = System.Timers.Timer;
                 UserId = -1
             });
             var factory = new ConnectionFactory();
-            factory.UserName = "fabs";
-            factory.Password = "";
-            factory.VirtualHost = "/";
-            factory.HostName = "10.0.0.4";
-            factory.Port = 5672;
+            factory.HostName = CacheData.Configuration?["RabbitMQ:HostName"];
+            factory.Port = int.Parse(CacheData.Configuration?["RabbitMQ:Port"] ?? string.Empty);
+            factory.VirtualHost = CacheData.Configuration?["RabbitMQ:VirtualHost"];
+            factory.UserName = CacheData.Configuration?["RabbitMQ:Username"];
+            factory.Password = CacheData.Configuration?["RabbitMQ:Password"];
             factory.DispatchConsumersAsync = true;
             
             Data.Utils.Logging.AddLog(new Models.SystemLog()
