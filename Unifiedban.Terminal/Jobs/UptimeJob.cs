@@ -22,7 +22,22 @@ namespace Unifiedban.Terminal.Jobs
             });
             
             WebClient wc = new();
-            wc.DownloadString(CacheData.Configuration["UptimeMonitor:URL"]);
+            try
+            {
+                wc.DownloadString(CacheData.Configuration["UptimeMonitor:URL"]);
+            }
+            catch (Exception ex)
+            {
+                Data.Utils.Logging.AddLog(new SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "UptimeJob",
+                    Level = SystemLog.Levels.Warn,
+                    Message = $"Can't send heartbeat: \n{ex.Message}",
+                    UserId = -1
+                });
+            }
 
             return Task.CompletedTask;
         }

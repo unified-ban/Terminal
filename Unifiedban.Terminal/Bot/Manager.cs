@@ -1,4 +1,4 @@
-﻿/* This Source Code Form is subject to the terms of the Mozilla Public
+/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
@@ -428,7 +428,7 @@ namespace Unifiedban.Terminal.Bot
                         Date = DateTime.Now,
                         Function = "Unifiedban.Bot.Manager.BotClient_OnMessage",
                         Level = SystemLog.Levels.Warn,
-                        Message = $"Can't send left notification due to missing permission.\n\n{ex}",
+                        Message = $"Can't send left notification in {message.Chat.Id} due to missing permission.\n\n{ex}",
                         UserId = -1
                     });
 
