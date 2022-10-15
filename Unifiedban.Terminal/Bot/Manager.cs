@@ -370,6 +370,21 @@ namespace Unifiedban.Terminal.Bot
                 UserId = -1
             });
 
+            if (CacheData.IgnoredChats.Contains(message.Chat.Id))
+            {
+                Logging.AddLog(new SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban.Bot.Manager.BotClient_OnMessage",
+                    Level = SystemLog.Levels.Debug,
+                    Message = $"Ignoring message of chat {message.Chat.Id}",
+                    UserId = -1
+                });
+                
+                return;
+            }
+
             if(CacheData.Groups.Keys.Contains(message.Chat.Id))
                 if (CacheData.Groups[message.Chat.Id].State !=
                     TelegramGroup.Status.Active &&
@@ -431,6 +446,9 @@ namespace Unifiedban.Terminal.Bot
                         Message = $"Can't send left notification in {message.Chat.Id} due to missing permission.\n\n{ex}",
                         UserId = -1
                     });
+                    
+                    if(!CacheData.IgnoredChats.Contains(message.Chat.Id))
+                        CacheData.IgnoredChats.Add(message.Chat.Id);
 
                     if (!ex.Message.Contains("kicked"))
                     {

@@ -61,7 +61,8 @@ namespace Unifiedban.Terminal
 
         public static ConcurrentDictionary<string, Timer> CaptchaAutoKickTimers = new();
         public static Dictionary<long, int> CaptchaStrikes = new();
-        
+
+        public static List<long> IgnoredChats = new();
         public static List<long> BetaAuthChats = new();
 
         public static string GetTranslation(

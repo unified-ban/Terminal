@@ -442,7 +442,7 @@ using Timer = System.Timers.Timer;
                 Date = DateTime.Now,
                 Function = "ConfigTools.LoadRabbitMQManager",
                 Level = Models.SystemLog.Levels.Info,
-                Message = "Connecting to RabbitMQ server...",
+                Message = $"Connecting to RabbitMQ server... {factory.HostName}:{factory.Port}",
                 UserId = -1
             });
             var conn = factory.CreateConnection();
