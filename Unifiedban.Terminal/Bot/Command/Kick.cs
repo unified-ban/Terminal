@@ -17,7 +17,7 @@ namespace Unifiedban.Terminal.Bot.Command
         {
             Manager.BotClient.DeleteMessageAsync(message.Chat.Id, message.MessageId);
 
-            if (!BotTools.IsUserOperator(message.From.Id) &&
+            if (!BotTools.IsUserOperator(message.From.Id) ||
                 !ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
             {
                 MessageQueueManager.EnqueueMessage(

@@ -430,10 +430,12 @@ namespace Unifiedban.Terminal.Bot
 
                 try
                 {
+                    /*
                      await BotClient.SendTextMessageAsync(message.Chat.Id,
                         "We're sorry but an error has occurred while retrieving this chat on our database.\n" +
                         "Please add again the bot if you want to continue to use it.\n" +
                         "For any doubt reach us in our support group @unifiedban_group");
+                        */
                 }
                 catch (Exception ex)
                 {
@@ -450,7 +452,7 @@ namespace Unifiedban.Terminal.Bot
                     if(!CacheData.IgnoredChats.Contains(message.Chat.Id))
                         CacheData.IgnoredChats.Add(message.Chat.Id);
 
-                    if (!ex.Message.Contains("kicked"))
+                    if (!ex.Message.Contains("kicked") && !ex.Message.Contains("bot is not a member"))
                     {
                         await BotClient.LeaveChatAsync(message.Chat.Id);
                     }
@@ -458,8 +460,24 @@ namespace Unifiedban.Terminal.Bot
                     return;
                 }
 
-                
-                await BotClient.LeaveChatAsync(message.Chat.Id);
+
+                try
+                {
+                    await BotClient.LeaveChatAsync(message.Chat.Id);
+                }
+                catch (Exception ex)
+                {
+                    Logging.AddLog(new SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Unifiedban.Bot.Manager.BotClient_OnMessage",
+                        Level = SystemLog.Levels.Warn,
+                        Message = ex.ToString(),
+                        UserId = -1
+                    });
+                }
+
                 return;
             }
 

@@ -21,7 +21,7 @@ namespace Unifiedban.Terminal.Bot.Command
             var sender = message.SenderChat?.Id ?? message.From?.Id ?? 0;
             var isOperator = BotTools.IsUserOperator(sender, Models.Operator.Levels.Basic);
             var isAdmin = ChatTools.IsUserAdmin(message.Chat.Id, sender);
-            if (!isOperator && !isAdmin)
+            if (!isOperator || !isAdmin)
             {
                 MessageQueueManager.EnqueueMessage(
                     new Models.ChatMessage()

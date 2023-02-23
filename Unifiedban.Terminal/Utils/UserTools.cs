@@ -142,7 +142,8 @@ namespace Unifiedban.Terminal.Utils
         public static bool KickIfInBlacklist(Message message)
         {
             if (message.Chat.Type == ChatType.Private ||
-                message.Chat.Type == ChatType.Channel)
+                message.Chat.Type == ChatType.Channel ||
+                !CacheData.GroupConfigs.ContainsKey(message.Chat.Id))
             {
                 return false;
             }
