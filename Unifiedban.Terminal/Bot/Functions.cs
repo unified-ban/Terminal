@@ -531,16 +531,15 @@ namespace Unifiedban.Terminal.Bot
             if (message.LeftChatMember == null) return;
             ChatTools.RemoveChatAdmin(message.Chat.Id, message.LeftChatMember.Id);
             if (!BotTools.IsUserOperator(message.LeftChatMember.Id)) return;
-            if (CacheData.ActiveSupport
+            if (!CacheData.ActiveSupport
                 .Contains(message.Chat.Id)) return;
             
             if (CacheData.CurrentChatOperators.ContainsKey(message.Chat.Id))
             {
                 CacheData.CurrentChatOperators[message.Chat.Id].Remove(message.LeftChatMember.Id);
+                if (CacheData.CurrentChatOperators[message.Chat.Id].Count > 0) return;
             }
-
-            if (CacheData.CurrentChatOperators[message.Chat.Id].Count > 0) return;
-                    
+            
             CacheData.CurrentChatOperators.Remove(message.Chat.Id);
             CacheData.ActiveSupport.Remove(message.Chat.Id);
 
