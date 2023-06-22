@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Unifiedban.Terminal.Utils;
 
 namespace Unifiedban.Terminal.Bot.Command
 {
@@ -15,8 +16,10 @@ namespace Unifiedban.Terminal.Bot.Command
     {
         public void Execute(Message message)
         {
-            if (!Utils.BotTools.IsUserOperator(message.From.Id) &&
-                !Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
+            var sender = message.SenderChat?.Id ?? message.From?.Id ?? 0;
+            var isOperator = BotTools.IsUserOperator(sender, Models.Operator.Levels.Basic);
+            var isAdmin = ChatTools.IsUserAdmin(message.Chat.Id, sender);
+            if (!isOperator && !isAdmin)
             {
                 MessageQueueManager.EnqueueMessage(
                    new Models.ChatMessage()
@@ -29,10 +32,10 @@ namespace Unifiedban.Terminal.Bot.Command
                 return;
             }
 
-            string command = message.Text.Split(" ")[0].Remove(0, 1);
+            string command = message.Text!.Split(" ")[0].Remove(0, 1);
             if (command.Contains("@"))
             {
-                if (!String.Equals(command.Split("@")[1],
+                if (!string.Equals(command.Split("@")[1],
                     Manager.Username, StringComparison.CurrentCultureIgnoreCase))
                     return;
                 command = command.Split("@")[0];

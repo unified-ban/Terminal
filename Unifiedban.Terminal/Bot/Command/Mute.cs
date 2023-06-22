@@ -32,9 +32,35 @@ namespace Unifiedban.Terminal.Bot.Command
                    });
                 return;
             }
-            else if (!isOperator && isAdmin)
+            
+            if (!ChatTools.IsUserAdmin(message.Chat.Id, Manager.MyId))
             {
-                if (!ChatTools.IsUserAdmin(message.Chat.Id, Manager.MyId))
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        Text = CacheData.GetTranslation("en", "ban_command_error_adminPrivilege")
+                    });
+                return;
+            }
+            
+            if (!CacheData.ChatAdmins[message.Chat.Id][Manager.MyId].CanRestrictMembers)
+            {
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        Text = CacheData.GetTranslation("en", "ban_command_error_adminPrivilege")
+                    });
+                return;
+            }
+            
+            if (isAdmin)
+            {
+                var adminPermissions = CacheData.ChatAdmins[message.Chat.Id][sender];
+                if (!adminPermissions.CanRestrictMembers)
                 {
                     MessageQueueManager.EnqueueMessage(
                         new Models.ChatMessage()
@@ -45,18 +71,17 @@ namespace Unifiedban.Terminal.Bot.Command
                         });
                     return;
                 }
-
-                if (!CacheData.ChatAdmins[message.Chat.Id][Manager.MyId].CanRestrictMembers)
-                {
-                    MessageQueueManager.EnqueueMessage(
-                        new Models.ChatMessage()
-                        {
-                            Timestamp = DateTime.UtcNow,
-                            Chat = message.Chat,
-                            Text = CacheData.GetTranslation("en", "ban_command_error_adminPrivilege")
-                        });
-                    return;
-                }
+            }
+            else if (!isOperator)
+            {
+                MessageQueueManager.EnqueueMessage(
+                    new Models.ChatMessage()
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        Chat = message.Chat,
+                        Text = CacheData.GetTranslation("en", "ban_command_error_adminPrivilege")
+                    });
+                return;
             }
 
             long userId;
@@ -77,7 +102,8 @@ namespace Unifiedban.Terminal.Bot.Command
                 
                 if (message.Text.Split(" ")[1].StartsWith("@"))
                 {
-                    if (!CacheData.Usernames.Keys.Contains(message.Text.Split(" ")[1].Remove(0, 1)))
+                    var cleanUsername = message.Text.Split(" ")[1].Remove(0, 1);
+                    if(!CacheData.Usernames.Keys.Contains(cleanUsername))
                     {
                         MessageQueueManager.EnqueueMessage(
                             new Models.ChatMessage()
@@ -88,7 +114,7 @@ namespace Unifiedban.Terminal.Bot.Command
                             });
                         return;
                     }
-                    userId = CacheData.Usernames[message.Text.Split(" ")[1].Remove(0, 1)];
+                    userId = CacheData.Usernames[cleanUsername];
                 }
                 else
                 {
@@ -107,7 +133,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 }
             }
             else
-                userId = message.ReplyToMessage.From.Id;
+                userId = message.ReplyToMessage!.SenderChat?.Id ?? message.ReplyToMessage.From!.Id;
             
             if (BotTools.IsUserOperator(userId))
             {
