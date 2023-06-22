@@ -26,7 +26,8 @@ namespace Unifiedban.Terminal.Bot.Command
                     });
                 return;
             }
-            else if (!isOperator && isAdmin)
+            
+            if (!isOperator && isAdmin)
             {
                 var adminPermissions = CacheData.ChatAdmins[message.Chat.Id][sender];
                 if (!adminPermissions.CanRestrictMembers)

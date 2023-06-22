@@ -64,26 +64,42 @@ namespace Unifiedban.Terminal.Utils
 
         public static bool IsUserAdmin(long chatId, long userId)
         {
-            if (!CacheData.ChatAdmins.ContainsKey(chatId))
+            if (CacheData.ChatAdmins.TryGetValue(chatId, out var chatAdmin)) 
+                return chatAdmin.ContainsKey(userId);
+         
+            var actionGuid = Guid.NewGuid().ToString();   
+            Logging.AddLog(new SystemLog()
             {
-                CacheData.ChatAdmins[chatId] = new Dictionary<long, UserPrivileges>();
-            }
-            
-            if (CacheData.ChatAdmins[chatId].ContainsKey(userId))
-                return true;
+                LoggerName = CacheData.LoggerName,
+                Date = DateTime.Now,
+                Function = "Utils.ChatTools.IsUserAdmin",
+                Level = SystemLog.Levels.Warn,
+                Message = $"({actionGuid}) privileges of {chatId} not cached yet",
+                UserId = -1,
+            });
+            CacheData.ChatAdmins[chatId] = new Dictionary<long, UserPrivileges>();
             
             try
             {
                 var administrators = Manager.BotClient.GetChatAdministratorsAsync(chatId).Result;
-                
+                Logging.AddLog(new SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Utils.ChatTools.IsUserAdmin",
+                    Level = SystemLog.Levels.Debug,
+                    Message = $"({actionGuid}) received admins of {chatId}",
+                    UserId = -1,
+                });
+
                 foreach (var member in administrators)
                 {
                     if (member is ChatMemberAdministrator admin)
                     {
-                        UpdateChatAdmin(chatId, userId, admin);
+                        UpdateChatAdmin(chatId, member.User.Id, admin);
                     }
                 }
-                
+
                 return CacheData.ChatAdmins[chatId].ContainsKey(userId);
             }
             catch (Exception ex)
@@ -110,7 +126,7 @@ namespace Unifiedban.Terminal.Utils
                         Parameters = ex.Message,
                         UtcDate = DateTime.UtcNow
                     });
-                    
+
                     CacheData.Groups[chatId].State = TelegramGroup.Status.Inactive;
                 }
                 else
@@ -125,15 +141,25 @@ namespace Unifiedban.Terminal.Utils
                         UserId = -1
                     });
                 }
-                
+
                 return false;
             }
         }
         
         public static void UpdateChatAdmin(long chatId, long userId, ChatMemberAdministrator admin)
         {
+            var actionGuid = Guid.NewGuid().ToString();
             if (!CacheData.ChatAdmins.ContainsKey(chatId))
             {
+                Logging.AddLog(new SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Utils.ChatTools.UpdateChatAdmin",
+                    Level = SystemLog.Levels.Debug,
+                    Message = $"({actionGuid}) Updating privileges of {userId} for chat {chatId}. Chat not cached yet",
+                    UserId = -1,
+                });
                 CacheData.ChatAdmins[chatId] = new Dictionary<long, UserPrivileges>();
             }
 
@@ -153,17 +179,53 @@ namespace Unifiedban.Terminal.Utils
 
             if (CacheData.ChatAdmins[chatId].ContainsKey(userId))
             {
+                Logging.AddLog(new SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Utils.ChatTools.UpdateChatAdmin",
+                    Level = SystemLog.Levels.Debug,
+                    Message = $"({actionGuid}) User {userId} is known to be admin of {chatId}",
+                    UserId = -1,
+                });
+                
                 if (privileges.CanManageChat)
                 {
+                    Logging.AddLog(new SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Utils.ChatTools.UpdateChatAdmin",
+                        Level = SystemLog.Levels.Debug,
+                        Message = $"({actionGuid}) User {userId} is still admin of {chatId}",
+                        UserId = -1,
+                    });
                     CacheData.ChatAdmins[chatId][userId] = privileges;
                 }
                 else
                 {
+                    Logging.AddLog(new SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Utils.ChatTools.UpdateChatAdmin",
+                        Level = SystemLog.Levels.Debug,
+                        Message = $"({actionGuid}) User {userId} is not anymore admin of {chatId}",
+                        UserId = -1,
+                    });
                     CacheData.ChatAdmins[chatId].Remove(userId, out var oldPerms);
                 }
             }
             else if (privileges.CanManageChat)
-            {
+            {Logging.AddLog(new SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Utils.ChatTools.UpdateChatAdmin",
+                    Level = SystemLog.Levels.Debug,
+                    Message = $"({actionGuid}) User {userId} is new admin of {chatId}",
+                    UserId = -1,
+                });
                 CacheData.ChatAdmins[chatId].Add(userId, privileges);
             }
         }

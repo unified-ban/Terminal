@@ -47,7 +47,18 @@ namespace Unifiedban.Terminal
         public static Dictionary<long, List<Models.Group.ConfigurationParameter>> GroupConfigs = new();
         public static Dictionary<string, Models.Group.NightSchedule> NightSchedules = new();
 
-        public static Dictionary<long, Dictionary<long, UserPrivileges>> ChatAdmins = new();
+        public static Dictionary<long, Dictionary<long, UserPrivileges>> ChatAdmins
+        {
+            get
+            {
+                lock (chatAdminsLockObj)
+                {
+                    return chatAdmins;
+                }
+            }
+        }
+        private static object chatAdminsLockObj = new();
+        private static Dictionary<long, Dictionary<long, UserPrivileges>> chatAdmins = new();
 
         public static List<Models.User.Banned> BannedUsers = new();
         public static List<Models.Filters.BadWord> BadWords = new();

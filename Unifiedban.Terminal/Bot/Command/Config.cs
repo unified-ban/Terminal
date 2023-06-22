@@ -16,6 +16,7 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using Unifiedban.BusinessLogic.Group;
 using Unifiedban.Models.Group;
+using Unifiedban.Terminal.Utils;
 
 namespace Unifiedban.Terminal.Bot.Command
 {
@@ -32,12 +33,12 @@ namespace Unifiedban.Terminal.Bot.Command
             Execute(message, false);
         }
 
-        public void Execute(Message message, bool isUpdate = false)
+        private void Execute(Message message, bool isUpdate = false)
         {
-            
-            bool isOperator = Utils.BotTools.IsUserOperator(message.From.Id);
-            if (!isOperator &&
-                !Utils.ChatTools.IsUserAdmin(message.Chat.Id, message.From.Id))
+            var sender = message.SenderChat?.Id ?? message.From?.Id ?? 0;
+            var isOperator = BotTools.IsUserOperator(sender, Models.Operator.Levels.Basic);
+            var isAdmin = ChatTools.IsUserAdmin(message.Chat.Id, sender);
+            if (!isOperator && !isAdmin)
             {
                 return;
             }
