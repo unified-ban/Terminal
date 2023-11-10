@@ -157,7 +157,7 @@ namespace Unifiedban.Terminal.Bot
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
-                        Text = CacheData.GetTranslation("en", "ban_command_error_adminPrivilege")
+                        Text = CacheData.GetTranslation("en", "added_to_group_not_admin")
                     });
                 return;
             }
@@ -169,7 +169,7 @@ namespace Unifiedban.Terminal.Bot
                     {
                         Timestamp = DateTime.UtcNow,
                         Chat = message.Chat,
-                        Text = CacheData.GetTranslation("en", "ban_command_error_adminPrivilege")
+                        Text = CacheData.GetTranslation("en", "added_to_group_not_adminPrivilege")
                     });
                 return;
             }

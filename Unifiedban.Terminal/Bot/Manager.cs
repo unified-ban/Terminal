@@ -244,6 +244,44 @@ namespace Unifiedban.Terminal.Bot
                     Utils.ChatTools.RemoveChatAdmin(update.ChatMember.Chat.Id, update.ChatMember.NewChatMember.User.Id);
                 }
             }
+
+            if (update.MyChatMember is not null)
+            {
+                if (update.MyChatMember.NewChatMember is ChatMemberAdministrator)
+                {
+                    Logging.AddLog(new SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Task UpdateHandler",
+                        Level = SystemLog.Levels.Info,
+                        Message = $"I have been set as admin of chat {update.MyChatMember.Chat.Id}",
+                        UserId = -1
+                    });
+                    
+                    if (CacheData.ChatAdmins.ContainsKey(update.MyChatMember.Chat.Id))
+                    {
+                        CacheData.ChatAdmins.Remove(update.MyChatMember.Chat.Id);
+                    }
+                    
+                    Utils.ChatTools.IsUserAdmin(update.MyChatMember.Chat.Id, update.MyChatMember.NewChatMember.User.Id);
+                }
+                
+                if (update.MyChatMember.OldChatMember is ChatMemberAdministrator)
+                {
+                    Logging.AddLog(new SystemLog()
+                    {
+                        LoggerName = CacheData.LoggerName,
+                        Date = DateTime.Now,
+                        Function = "Task UpdateHandler",
+                        Level = SystemLog.Levels.Warn,
+                        Message = $"I have been REMOVED as admin of chat {update.MyChatMember.Chat.Id}",
+                        UserId = -1
+                    });
+                    
+                    Utils.ChatTools.RemoveChatAdmin(update.MyChatMember.Chat.Id, update.MyChatMember.NewChatMember.User.Id);
+                }
+            }
         }
 
         public static void Dispose()
