@@ -11,18 +11,17 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Quartz;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 using Unifiedban.Data.Utils;
 using Unifiedban.Models;
 using Unifiedban.Models.Group;
 using Unifiedban.Terminal.Bot;
 using Unifiedban.Terminal.Jobs;
+using Color = System.Drawing.Color;
 
 namespace Unifiedban.Terminal.Utils
 {
@@ -97,6 +96,24 @@ namespace Unifiedban.Terminal.Utils
                     if (member is ChatMemberAdministrator admin)
                     {
                         UpdateChatAdmin(chatId, member.User.Id, admin);
+                    }
+                    if (member is ChatMemberOwner)
+                    {
+                        UpdateChatAdmin(chatId, member.User.Id, new ChatMemberAdministrator
+                        {
+                            User = member.User,
+                            CanBeEdited = false,
+                            CanManageChat = true,
+                            CanPostMessages = true,
+                            CanEditMessages = true,
+                            CanDeleteMessages = true,
+                            CanManageVideoChats = true,
+                            CanRestrictMembers = true,
+                            CanPromoteMembers = true,
+                            CanChangeInfo = true,
+                            CanInviteUsers = true,
+                            CanPinMessages = true
+                        });
                     }
                 }
 
@@ -395,13 +412,19 @@ namespace Unifiedban.Terminal.Utils
                             new ChatPermissions
                             {
                                 CanSendMessages = false,
+                                CanSendAudios = false,
+                                CanSendDocuments = false,
+                                CanSendPhotos = false,
+                                CanSendVideos = false,
+                                CanSendVideoNotes = false,
+                                CanSendVoiceNotes = false,
+                                CanSendPolls = false,
+                                CanSendOtherMessages = false,
                                 CanAddWebPagePreviews = false,
                                 CanChangeInfo = false,
                                 CanInviteUsers = false,
                                 CanPinMessages = false,
-                                CanSendMediaMessages = false,
-                                CanSendOtherMessages = false,
-                                CanSendPolls = false
+                                CanManageTopics = false
                             });
 
                         MessageQueueManager.EnqueueMessage(
@@ -521,13 +544,19 @@ namespace Unifiedban.Terminal.Utils
                                 new ChatPermissions
                                 {
                                     CanSendMessages = true,
+                                    CanSendAudios = true,
+                                    CanSendDocuments = true,
+                                    CanSendPhotos = true,
+                                    CanSendVideos = true,
+                                    CanSendVideoNotes = true,
+                                    CanSendVoiceNotes = true,
+                                    CanSendPolls = true,
+                                    CanSendOtherMessages = true,
                                     CanAddWebPagePreviews = true,
-                                    CanChangeInfo = false,
+                                    CanChangeInfo = true,
                                     CanInviteUsers = true,
                                     CanPinMessages = true,
-                                    CanSendMediaMessages = true,
-                                    CanSendOtherMessages = true,
-                                    CanSendPolls = true
+                                    CanManageTopics = true
                                 });
                         }
 
@@ -624,7 +653,7 @@ namespace Unifiedban.Terminal.Utils
                 ms.Position = 0;
                 try
                 {
-                    return Manager.BotClient.SendPhotoAsync(chatId, new InputOnlineFile(ms),
+                    return Manager.BotClient.SendPhotoAsync(chatId, new InputFileStream(ms),
                         caption: CacheData.GetTranslation(CacheData.Groups[chatId.Identifier ?? 0].SettingsLanguage,
                             "captcha_iamhuman_img", true).Replace("{{name}}", name),
                         parseMode: ParseMode.Markdown,

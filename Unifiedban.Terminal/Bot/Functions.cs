@@ -82,7 +82,7 @@ namespace Unifiedban.Terminal.Bot
 
         public static void UserJoinedAction(Message message)
         {
-            if(message.NewChatMembers.SingleOrDefault(x => x.Id == Manager.MyId) != null &&
+            if(message.NewChatMembers?.SingleOrDefault(x => x.Id == Manager.MyId) != null &&
                         (message.Chat.Type == ChatType.Group ||
                          message.Chat.Type == ChatType.Supergroup))
             {
@@ -123,28 +123,28 @@ namespace Unifiedban.Terminal.Bot
                 return;
 
             bool blacklistEnabled = false;
-            ConfigurationParameter blacklistConfig = CacheData.GroupConfigs[message.Chat.Id]
+            ConfigurationParameter? blacklistConfig = CacheData.GroupConfigs[message.Chat.Id]
                 .FirstOrDefault(x => x.ConfigurationParameterId == "Blacklist");
             if (blacklistConfig != null)
                 if (blacklistConfig.Value.ToLower() == "true")
                     blacklistEnabled = true;
             
             bool rtlNameCheckEnabled = false;
-            ConfigurationParameter rtlNameCheckConfig = CacheData.GroupConfigs[message.Chat.Id]
+            ConfigurationParameter? rtlNameCheckConfig = CacheData.GroupConfigs[message.Chat.Id]
                 .FirstOrDefault(x => x.ConfigurationParameterId == "RTLNameFilter");
             if (rtlNameCheckConfig != null)
                 if (rtlNameCheckConfig.Value.ToLower() == "true")
                     rtlNameCheckEnabled = true;
 
             bool captchaEnabled = false;
-            ConfigurationParameter captchaConfig = CacheData.GroupConfigs[message.Chat.Id]
+            ConfigurationParameter? captchaConfig = CacheData.GroupConfigs[message.Chat.Id]
                 .FirstOrDefault(x => x.ConfigurationParameterId == "Captcha");
             if (captchaConfig != null)
                 if (captchaConfig.Value.ToLower() == "true")
                     captchaEnabled = true;
 
             bool welcomeMessageEnabled = false;
-            ConfigurationParameter welcomeMessageConfig = CacheData.GroupConfigs[message.Chat.Id]
+            ConfigurationParameter? welcomeMessageConfig = CacheData.GroupConfigs[message.Chat.Id]
                 .FirstOrDefault(x => x.ConfigurationParameterId == "WelcomeMessage");
             if (welcomeMessageConfig != null)
                 if (welcomeMessageConfig.Value.ToLower() == "true")
@@ -174,7 +174,7 @@ namespace Unifiedban.Terminal.Bot
                 return;
             }
 
-            foreach (User member in message.NewChatMembers)
+            foreach (User member in message.NewChatMembers) 
             {
                 if (member.Id == Manager.MyId ||
                     member.Id == 777000 || // Telegram's official updateServiceNotification
@@ -202,16 +202,22 @@ namespace Unifiedban.Terminal.Bot
                             Manager.BotClient.RestrictChatMemberAsync(
                                 message.Chat.Id,
                                 member.Id,
-                                new ChatPermissions()
+                                new ChatPermissions
                                 {
                                     CanSendMessages = false,
+                                    CanSendAudios = false,
+                                    CanSendDocuments = false,
+                                    CanSendPhotos = false,
+                                    CanSendVideos = false,
+                                    CanSendVideoNotes = false,
+                                    CanSendVoiceNotes = false,
+                                    CanSendPolls = false,
+                                    CanSendOtherMessages = false,
                                     CanAddWebPagePreviews = false,
                                     CanChangeInfo = false,
                                     CanInviteUsers = false,
                                     CanPinMessages = false,
-                                    CanSendMediaMessages = false,
-                                    CanSendOtherMessages = false,
-                                    CanSendPolls = false
+                                    CanManageTopics = false
                                 }
                             );
                         }
@@ -256,7 +262,7 @@ namespace Unifiedban.Terminal.Bot
                             try
                             {
                                 Thread.Sleep(300);
-                                Manager.BotClient.KickChatMemberAsync(message.Chat.Id, member.Id);
+                                Manager.BotClient.BanChatMemberAsync(message.Chat.Id, member.Id);
                                 if (message.Chat.Type == ChatType.Supergroup)
                                 {
                                     Thread.Sleep(500);
@@ -336,12 +342,19 @@ namespace Unifiedban.Terminal.Bot
                                 new ChatPermissions()
                                 {
                                     CanSendMessages = false,
+                                    CanSendAudios = false,
+                                    CanSendDocuments = false,
+                                    CanSendPhotos = false,
+                                    CanSendVideos = false,
+                                    CanSendVideoNotes = false,
+                                    CanSendVoiceNotes = false,
+                                    CanSendPolls = false,
+                                    CanSendOtherMessages = false,
+                                    CanAddWebPagePreviews = false,
                                     CanChangeInfo = false,
                                     CanInviteUsers = false,
                                     CanPinMessages = false,
-                                    CanSendMediaMessages = false,
-                                    CanSendOtherMessages = false,
-                                    CanSendPolls = false
+                                    CanManageTopics = false
                                 }
                             ).Wait();
                         
@@ -377,7 +390,7 @@ namespace Unifiedban.Terminal.Bot
                         };
                         timer.Elapsed += delegate(object sender, ElapsedEventArgs args)
                         {
-                            Manager.BotClient.KickChatMemberAsync(message.Chat, member.Id);
+                            Manager.BotClient.BanChatMemberAsync(message.Chat, member.Id);
                             if (message.Chat.Type == ChatType.Supergroup)
                             {
                                 Thread.Sleep(500);
@@ -459,7 +472,7 @@ namespace Unifiedban.Terminal.Bot
                     {
                         if (!plugin.Execute(message, member, MessageQueueManager.EnqueueMessage))
                         {
-                            Manager.BotClient.KickChatMemberAsync(message.Chat.Id, member.Id);
+                            Manager.BotClient.BanChatMemberAsync(message.Chat.Id, member.Id);
                             if (message.Chat.Type == ChatType.Supergroup)
                             {
                                 Thread.Sleep(500);

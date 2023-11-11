@@ -132,7 +132,7 @@ namespace Unifiedban.Terminal.Bot.Command
             
             try
             {
-                Manager.BotClient.KickChatMemberAsync(message.Chat.Id, userToKick);
+                Manager.BotClient.BanChatMemberAsync(message.Chat.Id, userToKick);
                 if (message.Chat.Type == ChatType.Supergroup)
                 {
                     System.Threading.Thread.Sleep(200);

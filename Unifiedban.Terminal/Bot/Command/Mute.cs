@@ -156,13 +156,19 @@ namespace Unifiedban.Terminal.Bot.Command
                     new ChatPermissions()
                     {
                         CanSendMessages = false,
+                        CanSendAudios = false,
+                        CanSendDocuments = false,
+                        CanSendPhotos = false,
+                        CanSendVideos = false,
+                        CanSendVideoNotes = false,
+                        CanSendVoiceNotes = false,
+                        CanSendPolls = false,
+                        CanSendOtherMessages = false,
                         CanAddWebPagePreviews = false,
                         CanChangeInfo = false,
                         CanInviteUsers = false,
                         CanPinMessages = false,
-                        CanSendMediaMessages = false,
-                        CanSendOtherMessages = false,
-                        CanSendPolls = false
+                        CanManageTopics = false
                     });
 
                 MessageQueueManager.EnqueueMessage(

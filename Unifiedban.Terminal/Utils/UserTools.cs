@@ -176,16 +176,22 @@ namespace Unifiedban.Terminal.Utils
                         new ChatPermissions()
                         {
                             CanSendMessages = false,
+                            CanSendAudios = false,
+                            CanSendDocuments = false,
+                            CanSendPhotos = false,
+                            CanSendVideos = false,
+                            CanSendVideoNotes = false,
+                            CanSendVoiceNotes = false,
+                            CanSendPolls = false,
+                            CanSendOtherMessages = false,
                             CanAddWebPagePreviews = false,
                             CanChangeInfo = false,
                             CanInviteUsers = false,
                             CanPinMessages = false,
-                            CanSendMediaMessages = false,
-                            CanSendOtherMessages = false,
-                            CanSendPolls = false
+                            CanManageTopics = false
                         }
                     );
-                    Bot.Manager.BotClient.KickChatMemberAsync(message.Chat.Id, message.From.Id);
+                    Bot.Manager.BotClient.BanChatMemberAsync(message.Chat.Id, message.From.Id);
 
                     Bot.Manager.BotClient.SendTextMessageAsync(
                         chatId: CacheData.ControlChatId,
@@ -272,16 +278,22 @@ namespace Unifiedban.Terminal.Utils
                                     new ChatPermissions()
                                     {
                                         CanSendMessages = false,
+                                        CanSendAudios = false,
+                                        CanSendDocuments = false,
+                                        CanSendPhotos = false,
+                                        CanSendVideos = false,
+                                        CanSendVideoNotes = false,
+                                        CanSendVoiceNotes = false,
+                                        CanSendPolls = false,
+                                        CanSendOtherMessages = false,
                                         CanAddWebPagePreviews = false,
                                         CanChangeInfo = false,
                                         CanInviteUsers = false,
                                         CanPinMessages = false,
-                                        CanSendMediaMessages = false,
-                                        CanSendOtherMessages = false,
-                                        CanSendPolls = false
+                                        CanManageTopics = false
                                     }
                                 );
-                            Manager.BotClient.KickChatMemberAsync(message.Chat.Id, member.Id,
+                            Manager.BotClient.BanChatMemberAsync(message.Chat.Id, member.Id,
                                 DateTime.UtcNow.AddMinutes(-5));
                             
                             Manager.BotClient.SendTextMessageAsync(
@@ -446,7 +458,7 @@ namespace Unifiedban.Terminal.Utils
                         Guid.NewGuid())
                 );
                 
-                Manager.BotClient.KickChatMemberAsync(message.Chat.Id, userToBan);
+                Manager.BotClient.BanChatMemberAsync(message.Chat.Id, userToBan);
             }
             catch
             {

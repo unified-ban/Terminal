@@ -282,15 +282,21 @@ namespace Unifiedban.Terminal.Controls
                 new ChatPermissions()
                 {
                     CanSendMessages = false,
+                    CanSendAudios = false,
+                    CanSendDocuments = false,
+                    CanSendPhotos = false,
+                    CanSendVideos = false,
+                    CanSendVideoNotes = false,
+                    CanSendVoiceNotes = false,
+                    CanSendPolls = false,
+                    CanSendOtherMessages = false,
                     CanAddWebPagePreviews = false,
                     CanChangeInfo = false,
                     CanInviteUsers = false,
                     CanPinMessages = false,
-                    CanSendMediaMessages = false,
-                    CanSendOtherMessages = false,
-                    CanSendPolls = false
+                    CanManageTopics = false
                 },
-                DateTime.UtcNow.AddMinutes(limitTime));
+                untilDate: DateTime.UtcNow.AddMinutes(limitTime));
             
             string author = message.From.Username == null
                 ? message.From.FirstName + " " + message.From.LastName
@@ -342,15 +348,21 @@ namespace Unifiedban.Terminal.Controls
                 new ChatPermissions()
                 {
                     CanSendMessages = false,
+                    CanSendAudios = false,
+                    CanSendDocuments = false,
+                    CanSendPhotos = false,
+                    CanSendVideos = false,
+                    CanSendVideoNotes = false,
+                    CanSendVoiceNotes = false,
+                    CanSendPolls = false,
+                    CanSendOtherMessages = false,
                     CanAddWebPagePreviews = false,
                     CanChangeInfo = false,
                     CanInviteUsers = false,
                     CanPinMessages = false,
-                    CanSendMediaMessages = false,
-                    CanSendOtherMessages = false,
-                    CanSendPolls = false
+                    CanManageTopics = false
                 },
-                DateTime.UtcNow.AddMinutes(limitTime));
+                untilDate: DateTime.UtcNow.AddMinutes(limitTime));
             
             string author = message.From.Username == null
                 ? message.From.FirstName + " " + message.From.LastName
@@ -397,7 +409,7 @@ namespace Unifiedban.Terminal.Controls
             }
             RemoveMessageForPositiveControl(message, result);
             
-            Bot.Manager.BotClient.KickChatMemberAsync(message.Chat.Id, message.From.Id,
+            Bot.Manager.BotClient.BanChatMemberAsync(message.Chat.Id, message.From.Id,
                 DateTime.UtcNow.AddMinutes(-5));
             
             UserTools.AddPenalty(message.Chat.Id, message.From.Id,
@@ -439,21 +451,20 @@ namespace Unifiedban.Terminal.Controls
         {
             
             int limitTime = 3;
-            Models.Group.ConfigurationParameter configValue = CacheData.GroupConfigs[message.Chat.Id]
-                .Where(x => x.ConfigurationParameterId == "SpamActionLimitTime")
-                .SingleOrDefault();
+            Models.Group.ConfigurationParameter? configValue = CacheData.GroupConfigs[message.Chat.Id]
+                .SingleOrDefault(x => x.ConfigurationParameterId == "SpamActionLimitTime");
             if (configValue != null)
             {
                 int.TryParse(configValue.Value, out limitTime);
             }
             RemoveMessageForPositiveFilter(message, result);
             
-            Bot.Manager.BotClient.KickChatMemberAsync(message.Chat.Id, message.From.Id,
+            Bot.Manager.BotClient.BanChatMemberAsync(message.Chat.Id, message.From.Id,
                 DateTime.UtcNow.AddMinutes(-5));
             UserTools.AddPenalty(message.Chat.Id, message.From.Id,
                 Models.TrustFactorLog.TrustFactorAction.ban, Bot.Manager.MyId);
             
-            Bot.Manager.BotClient.KickChatMemberAsync(message.Chat.Id, message.From.Id,
+            Bot.Manager.BotClient.BanChatMemberAsync(message.Chat.Id, message.From.Id,
                 DateTime.UtcNow.AddMinutes(-5));
             
             UserTools.AddPenalty(message.Chat.Id, message.From.Id,

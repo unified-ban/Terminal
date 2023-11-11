@@ -96,6 +96,22 @@ namespace Unifiedban.Terminal
             BusinessLogic.SysConfigLogic sysConfigLogic = new BusinessLogic.SysConfigLogic();
             CacheData.SysConfigs = new List<Models.SysConfig>(sysConfigLogic.Get());
 
+            if (CacheData.SysConfigs.Count == 0)
+            {
+                Data.Utils.Logging.AddLog(new Models.SystemLog()
+                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "Unifiedban Terminal Startup",
+                    Level = Models.SystemLog.Levels.Fatal,
+                    Message = "Can't load sys config from DB. Aborting startup.",
+                    UserId = -2
+                });
+
+                Environment.Exit(-1);
+                return;
+            }
+
             BusinessLogic.OperatorLogic operatorLogic = new BusinessLogic.OperatorLogic();
             CacheData.Operators = new List<Models.Operator>(operatorLogic.Get());
 
@@ -284,8 +300,8 @@ namespace Unifiedban.Terminal
             });
 
             CacheData.ControlChatId = Convert.ToInt64(CacheData.SysConfigs
-                .Single(x => x.SysConfigId == "ControlChatId")
-                .Value);
+                .SingleOrDefault(x => x.SysConfigId == "ControlChatId")?
+                .Value ?? "-1001394662229");
 
             if (!InitializeTranslations())
             {
@@ -487,7 +503,7 @@ namespace Unifiedban.Terminal
                             ConstructorInfo? cWithString = type.GetConstructor(new[] { typeof(string), typeof(string) });
                             if (cWithAll != null)
                             {
-                                ParameterInfo parameter = cWithAll.GetParameters()
+                                ParameterInfo? parameter = cWithAll.GetParameters()
                                     .SingleOrDefault(x => x.Name == "databaseConnectionString");
                                 if (parameter != null)
                                 {
@@ -502,7 +518,7 @@ namespace Unifiedban.Terminal
                             }
                             else if (cWithAll != null)
                             {
-                                ParameterInfo parameter = cWithAll.GetParameters()
+                                ParameterInfo? parameter = cWithAll.GetParameters()
                                     .SingleOrDefault(x => x.Name == "hubServerAddress");
                                 if (parameter != null)
                                 {
@@ -524,8 +540,7 @@ namespace Unifiedban.Terminal
                                 o = Activator.CreateInstance(type);
                             }
 
-                            UBPlugin plugin = (o as UBPlugin);
-                            if (plugin == null)
+                            if (o is not UBPlugin plugin)
                             {
                                 Data.Utils.Logging.AddLog(new Models.SystemLog()
                                 {
@@ -641,6 +656,16 @@ namespace Unifiedban.Terminal
                 UserId = -1
             });
 
+            Data.Utils.Logging.AddLog(new Models.SystemLog()
+            {
+                LoggerName = "Unifiedban-Terminal",
+                Date = DateTime.Now,
+                Function = "Unifiedban Terminal",
+                Level = Models.SystemLog.Levels.Fatal,
+                Message = "UNHANDLED EXCEPTION:" + ex.StackTrace,
+                UserId = -1
+            });
+            
             if (ex.InnerException != null)
             {
                 Data.Utils.Logging.AddLog(new Models.SystemLog()

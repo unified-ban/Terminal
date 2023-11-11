@@ -40,7 +40,7 @@ namespace Unifiedban.Terminal.Bot.Command
                 
                 try
                 {
-                    Manager.BotClient.KickChatMemberAsync(callbackQuery.Message.Chat.Id, callbackQuery.From.Id);
+                    Manager.BotClient.BanChatMemberAsync(callbackQuery.Message.Chat.Id, callbackQuery.From.Id);
                     if (callbackQuery.Message.Chat.Type == ChatType.Supergroup)
                         Manager.BotClient.UnbanChatMemberAsync(callbackQuery.Message.Chat.Id, callbackQuery.From.Id);
                 }

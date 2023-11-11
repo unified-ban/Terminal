@@ -36,13 +36,19 @@ namespace Unifiedban.Terminal.Bot.Command
                     new ChatPermissions()
                     {
                         CanSendMessages = true,
+                        CanSendAudios = true,
+                        CanSendDocuments = true,
+                        CanSendPhotos = true,
+                        CanSendVideos = true,
+                        CanSendVideoNotes = true,
+                        CanSendVoiceNotes = true,
+                        CanSendPolls = true,
+                        CanSendOtherMessages = true,
                         CanAddWebPagePreviews = true,
                         CanChangeInfo = true,
                         CanInviteUsers = true,
                         CanPinMessages = true,
-                        CanSendMediaMessages = true,
-                        CanSendOtherMessages = true,
-                        CanSendPolls = true
+                        CanManageTopics = true
                     });
         }
     }

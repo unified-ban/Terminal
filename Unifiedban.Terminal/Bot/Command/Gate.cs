@@ -66,7 +66,7 @@ namespace Unifiedban.Terminal.Bot.Command
 
         public static void ToggleGate(Message message, bool newStatus)
         {
-            Models.Group.ConfigurationParameter config = CacheData.GroupConfigs[message.Chat.Id]
+            Models.Group.ConfigurationParameter? config = CacheData.GroupConfigs[message.Chat.Id]
                 .SingleOrDefault(x => x.ConfigurationParameterId == "Gate");
             if (config == null)
                 return;
@@ -77,16 +77,22 @@ namespace Unifiedban.Terminal.Bot.Command
                 .Value = newStatus ? "true" : "false";
 
             Manager.BotClient.SetChatPermissionsAsync(message.Chat.Id,
-                new ChatPermissions()
+                new ChatPermissions
                 {
                     CanSendMessages = newStatus,
+                    CanSendAudios = newStatus,
+                    CanSendDocuments = newStatus,
+                    CanSendPhotos = newStatus,
+                    CanSendVideos = newStatus,
+                    CanSendVideoNotes = newStatus,
+                    CanSendVoiceNotes = newStatus,
+                    CanSendPolls = newStatus,
+                    CanSendOtherMessages = newStatus,
                     CanAddWebPagePreviews = newStatus,
                     CanChangeInfo = newStatus,
                     CanInviteUsers = newStatus,
                     CanPinMessages = newStatus,
-                    CanSendMediaMessages = newStatus,
-                    CanSendOtherMessages = newStatus,
-                    CanSendPolls = newStatus
+                    CanManageTopics = newStatus
                 });
 
             string status = newStatus ? "open" : "closed";
