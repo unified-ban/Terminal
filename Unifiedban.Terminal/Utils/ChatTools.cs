@@ -12,6 +12,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Quartz;
+using SkiaSharp;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -646,43 +647,39 @@ namespace Unifiedban.Terminal.Utils
 
             var correctPosition = rnd.Next(1, 4);
             var result = GetResult(num1, num2, symbol);
-            var img = ConvertTextToImage(text, "Indie Flower", 60, Color.AntiqueWhite, Color.Black, 512, 256);
-            using (MemoryStream ms = new MemoryStream())
+            var img = ConvertTextToImageSK(text, "Indie Flower", 60, SKColors.AntiqueWhite, SKColors.Black, 512, 256);
+            var skData = img.Encode(SKEncodedImageFormat.Png, 100);
+            try
             {
-                img.Save(ms, ImageFormat.Png);
-                ms.Position = 0;
-                try
+                return Manager.BotClient.SendPhotoAsync(chatId, new InputFileStream(skData.AsStream()),
+                    caption: CacheData.GetTranslation(CacheData.Groups[chatId.Identifier ?? 0].SettingsLanguage,
+                        "captcha_iamhuman_img", true).Replace("{{name}}", name),
+                    parseMode: ParseMode.Markdown,
+                    disableNotification: true,
+                    replyMarkup: BuildCaptchaButtons(result, memberId, timerKey)).Result.MessageId;
+            }
+            catch (Exception ex)
+            {
+                Logging.AddLog(new SystemLog
                 {
-                    return Manager.BotClient.SendPhotoAsync(chatId, new InputFileStream(ms),
-                        caption: CacheData.GetTranslation(CacheData.Groups[chatId.Identifier ?? 0].SettingsLanguage,
-                            "captcha_iamhuman_img", true).Replace("{{name}}", name),
-                        parseMode: ParseMode.Markdown,
-                        disableNotification: true,
-                        replyMarkup: BuildCaptchaButtons(result, memberId, timerKey)).Result.MessageId;
-                }
-                catch (Exception ex)
-                {
+                    LoggerName = CacheData.LoggerName,
+                    Date = DateTime.Now,
+                    Function = "ChatTools.SendCaptchaImage",
+                    Level = SystemLog.Levels.Error,
+                    Message = ex.Message,
+                    UserId = -1
+                });
+                if (ex.InnerException != null)
                     Logging.AddLog(new SystemLog
                     {
                         LoggerName = CacheData.LoggerName,
                         Date = DateTime.Now,
                         Function = "ChatTools.SendCaptchaImage",
                         Level = SystemLog.Levels.Error,
-                        Message = ex.Message,
+                        Message = ex.InnerException.Message,
                         UserId = -1
                     });
-                    if(ex.InnerException != null)
-                        Logging.AddLog(new SystemLog
-                        {
-                            LoggerName = CacheData.LoggerName,
-                            Date = DateTime.Now,
-                            Function = "ChatTools.SendCaptchaImage",
-                            Level = SystemLog.Levels.Error,
-                            Message = ex.InnerException.Message,
-                            UserId = -1
-                        });
-                    return -1;
-                }
+                return -1;
             }
         }
         
@@ -698,6 +695,29 @@ namespace Unifiedban.Terminal.Utils
                 graphics.Flush();
                 font.Dispose();
                 graphics.Dispose();
+            }
+            return bmp;
+        }
+        
+        private static SKBitmap ConvertTextToImageSK(string txt, string fontname, int fontsize, SKColor bgcolor, SKColor fcolor, int width, int height)
+        {
+            SKBitmap bmp = new SKBitmap(width, height);
+            using (SKCanvas canvas = new SKCanvas(bmp))
+            {
+                using (SKPaint paint = new SKPaint())
+                {
+                    paint.Color = bgcolor;
+                    canvas.DrawRect(0, 0, bmp.Width, bmp.Height, paint);
+
+                    paint.Color = fcolor;
+                    paint.TextSize = fontsize;
+                    paint.IsAntialias = true;
+                    using (SKTypeface typeface = SKTypeface.FromFamilyName(fontname))
+                    {
+                        paint.Typeface = typeface;
+                        canvas.DrawText(txt, 150, (bmp.Height / 2) - 60, paint);
+                    }
+                }
             }
             return bmp;
         }

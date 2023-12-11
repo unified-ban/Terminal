@@ -3,14 +3,14 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
-    <Version>3.14.0</Version>
+    <Version>3.14.1</Version>
     <Authors>fabricators</Authors>
     <Product>Unifiedban Terminal</Product>
     <Copyright>Fabricators 2022</Copyright>
     <RepositoryUrl>https://github.com/unified-ban/Terminal</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
-    <AssemblyVersion>3.14.0</AssemblyVersion>
-    <FileVersion>3.14.0.3</FileVersion>
+    <AssemblyVersion>3.14.1</AssemblyVersion>
+    <FileVersion>3.14.1.1</FileVersion>
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -30,6 +30,8 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Quartz" Version="3.5.0" />
+    <PackageReference Include="SkiaSharp" Version="2.88.6" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.6" />
     <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
     <PackageReference Include="Telegram.Bot" Version="19.0.0" />
     <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
